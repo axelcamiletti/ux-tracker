@@ -4,7 +4,6 @@ import { isPlatformBrowser } from '@angular/common';
 import { Firestore, collection, addDoc, getDocs, query, where, doc, updateDoc, getDoc, deleteDoc } from '@angular/fire/firestore';
 import { Study } from '../models/study.model';
 import { StudyResponse } from '../models/study-response.model';
-import { AngularFirestore } from '@angular/fire/compat/firestore';
 import { environment } from '../../../../environments/environment';
 
 @Injectable({
@@ -19,7 +18,6 @@ export class StudyService {
   constructor(
     @Inject(PLATFORM_ID) platformId: Object,
     private firestore: Firestore,
-    private angularFirestore: AngularFirestore
   ) {
     this.isBrowser = isPlatformBrowser(platformId);
     if (this.isBrowser) {
