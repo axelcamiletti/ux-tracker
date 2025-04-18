@@ -1,0 +1,44 @@
+<div class="header border-b border-gray-200 flex items-center gap-3 px-8 py-4 mb-4">
+  <div class="icon rounded-lg bg-black text-white flex justify-center items-center h-10 w-10">
+    <mat-icon>sunny</mat-icon>
+  </div>
+  <h2 class="text-xl font-bold">Welcome screen</h2>
+  <mat-icon matTooltip="This is the first screen of your maze—your time to shine! Set a title, write a welcome message, and upload your logo. Note: custom messages will not be translated into other languages." class="opacity-50">info</mat-icon>
+  <button mat-icon-button class="ml-auto" [matMenuTriggerFor]="menu">
+    <mat-icon>more_horiz</mat-icon>
+  </button>
+</div>
+
+<div class="form p-8">
+  <label class="label">Title *</label>
+  <mat-form-field appearance="outline" class="w-full">
+    <input
+      id="question"
+      matInput
+      placeholder="Type your question here"
+      required
+      [ngModel]="formData.title"
+      (ngModelChange)="onTitleChange($event)"
+      type="text" />
+    <mat-error>A title is required to create this block.</mat-error>
+  </mat-form-field>
+
+  <label class="label">Message</label>
+  <mat-form-field appearance="outline" class="w-full">
+    <textarea
+      matInput
+      placeholder="Type extra details here. This is optional."
+      [ngModel]="formData.subtitle"
+      (ngModelChange)="onSubtitleChange($event)"
+    ></textarea>
+  </mat-form-field>
+
+
+  <p><b>Image</b></p>
+  <p>Upload you logo or custom image</p>
+</div>
+
+
+<mat-menu #menu="matMenu">
+  <button mat-menu-item>Add comment</button>
+</mat-menu>

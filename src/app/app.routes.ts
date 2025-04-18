@@ -1,3 +1,31 @@
 import { Routes } from '@angular/router';
+import { HomeComponent } from './features/home/home.component';
+import { StudyCreationPageComponent } from './features/study/pages/study-creation-page/study-creation-page.component';
+import { StudyPublicPageComponent } from './features/study/pages/study-public-page/study-public-page.component';
+import { StudyAnalyticsPageComponent } from './features/study/pages/study-analytics-page/study-analytics-page.component';
+import { ProjectsComponent } from './features/projects/pages/projects-page/projects.component';
+import { ProjectPageComponent } from './features/projects/pages/project-page/project-page.component';
+import { StudyLayoutComponent } from './features/study/components/study-layout/study-layout.component';
 
-export const routes: Routes = [];
+export const routes: Routes = [
+  {
+    path: '',
+    component: HomeComponent,
+    children: [
+      { path: '', component: ProjectsComponent },
+      { path: 'projects', component: ProjectsComponent },
+      { path: 'projects/:id', component: ProjectPageComponent },
+    ]
+  },
+  {
+    path: 'study/:id',
+    component: StudyLayoutComponent,
+    children: [
+      { path: '', redirectTo: 'creation', pathMatch: 'full' },
+      { path: 'creation', component: StudyCreationPageComponent },
+      { path: 'analytics', component: StudyAnalyticsPageComponent }
+    ]
+  },
+  { path: 'study-public', component: StudyPublicPageComponent },
+  { redirectTo: 'projects', pathMatch: 'full', path: '**' }, // Redirect to home for any other paths
+];

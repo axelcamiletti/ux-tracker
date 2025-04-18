@@ -1,0 +1,53 @@
+<div class="main-sidebar w-68 min-w-68 bg-white border-r border-gray-300 h-full flex flex-col transition-all ease-out duration-300" [ngClass]="{'w-16! min-w-16!': isCollapsed}">
+    
+    <button class="btn-link h-16" matTooltip="Switch team" matTooltipPosition="right" [matTooltipDisabled]="!isCollapsed">
+        <div class="icon bg-black w-9 h-9 flex justify-center items-center text-white rounded-lg text-md font-bold">AC</div>
+        <div *ngIf="!isCollapsed" class="texts text-left whitespace-nowrap text-ellipsis overflow-hidden">
+            <p class="text-md font-bold text-gray-900">Axel Camiletti</p>
+            <p class="text-sm text-gray-600">Owner</p>
+        </div>
+    </button>
+
+    <a  [routerLink]="[link.path]"
+        routerLinkActive="btn-link-active" 
+        *ngFor="let link of sidebarLinks" 
+        matTooltip="{{ link.label }}"
+        matTooltipPosition="right"
+        [matTooltipDisabled]="!isCollapsed"
+        class="btn-link">
+        <mat-icon>{{link.icon}}</mat-icon>
+        <span *ngIf="!isCollapsed">{{ link.label }}</span>
+    </a>
+
+    <mat-divider class="mt-auto! border-gray-300! mb-2!"></mat-divider>
+
+    <a  [routerLink]="['/settings']"
+        routerLinkActive="btn-link-active" 
+        matTooltip="Support"
+        matTooltipPosition="right"
+        [matTooltipDisabled]="!isCollapsed"
+        class="btn-link">
+        <mat-icon>support</mat-icon>
+        <span *ngIf="!isCollapsed">support</span>
+    </a>
+
+    <a  [routerLink]="['/settings']"
+        routerLinkActive="btn-link-active" 
+        matTooltip="Settings"
+        matTooltipPosition="right"
+        [matTooltipDisabled]="!isCollapsed"
+        class="btn-link">
+        <mat-icon>settings</mat-icon>
+        <span *ngIf="!isCollapsed">Settings</span>
+    </a>
+
+    <div class="flex justify-between items-center p-3">
+        <div class="logo min-w-28 w-28 mr-auto transition-all ease-out duration-300" [ngClass]="{'min-w-0! w-0!': isCollapsed}">
+            <img class="object-contain" src="/assets/img/logos/logo-horiz-black-color.svg" alt="TOTS Logo" />
+        </div>
+        <button mat-icon-button matTooltip="Collapse" matTooltipPosition="right" (click)="isCollapsed = !isCollapsed">
+            <mat-icon *ngIf="isCollapsed">menu_open</mat-icon>
+            <mat-icon *ngIf="!isCollapsed">menu</mat-icon>
+        </button>
+    </div>
+</div>

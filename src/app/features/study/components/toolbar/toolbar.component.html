@@ -1,0 +1,38 @@
+<div class="toolbar">
+  <div class="p-4 border-b border-gray-300 flex gap-4 items-center">
+    <button mat-icon-button (click)="navigateToProjects()" matTooltip="Volver al proyecto">
+      <mat-icon class="text-gray-600">arrow_back</mat-icon>
+    </button>
+    
+    <h1 class="text-xl font-bold cursor-pointer hover:text-primary" (click)="openEditNameModal()">
+      {{ studyName }}
+    </h1>
+
+    <div class="stepper mx-auto flex items-center">
+      <a [routerLink]="['/study', studyId, 'creation']" routerLinkActive="bg-blue-50! text-blue-600!" mat-button>Construcción</a>
+      <mat-icon class="opacity-25">chevron_right</mat-icon>
+      <button mat-button>Compartir <mat-icon>share</mat-icon></button>
+      <mat-icon class="opacity-25">chevron_right</mat-icon>
+      <a [routerLink]="['/study', studyId, 'analytics']" routerLinkActive="bg-blue-50! text-blue-600!" mat-button>Resultados</a>
+    </div>
+
+    <!-- <div class="flex items-center gap-4">
+      <span *ngIf="saving" class="text-gray-600 flex items-center gap-2">
+        <mat-spinner diameter="20"></mat-spinner>
+        Guardando cambios...
+      </span>
+      <span *ngIf="lastSaved && !saving" class="text-gray-600">
+        Último guardado: {{ lastSaved | date:'medium' }}
+      </span>
+      <button mat-raised-button color="primary" (click)="saveStudy()" [disabled]="saving">
+        <mat-icon>save</mat-icon>
+        Guardar
+      </button>
+    </div> -->
+
+    <button mat-icon-button matTooltip="Configuración del prototipo"><mat-icon>home</mat-icon></button>
+
+    <a mat-stroked-button [routerLink]="['/study', studyId, 'preview']">Vista previa</a>
+    <button mat-flat-button color="primary" (click)="publishStudy()">Comenzar prueba</button>
+  </div>
+</div>

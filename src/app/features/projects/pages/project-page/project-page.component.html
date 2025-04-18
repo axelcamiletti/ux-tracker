@@ -1,0 +1,92 @@
+<div class="project-page p-8">
+  <div class="container w-5xl mx-auto">
+    <div class="header flex gap-4 items-center mb-8">
+      <!-- Botón de back -->
+      <button mat-icon-button [routerLink]="['/projects']" class="mb-4">
+        <mat-icon class="text-gray-600">arrow_back</mat-icon>
+      </button>
+      <div *ngIf="project">
+        <h1 class="text-2xl font-bold">{{ project.name }}</h1>
+        <p class="text-gray-600">{{ studies.length }} estudios en este proyecto</p>
+      </div>
+      <button mat-flat-button color="primary" class="!rounded-full ml-auto" (click)="createNewStudy()">
+        <mat-icon>add</mat-icon>
+        Nuevo estudio
+      </button>
+    </div>
+
+    <!-- Sección de Estudios -->
+    <div class="studies-section mb-8" *ngIf="project">
+      <h2 class="text-xl font-bold mb-4">Estudios</h2>
+      
+      <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+        <table class="w-full">
+          <thead>
+            <tr class="bg-gray-50">
+              <th class="py-3 px-4 text-left">Nombre del estudio</th>
+              <th class="py-3 px-4 text-left">Estado</th>
+              <th class="py-3 px-4 text-left">Respuestas</th>
+              <th class="py-3 px-4 text-left">Creado por</th>
+              <th class="py-3 px-4 text-left">Creado el</th>
+              <th class="py-3 px-4 text-left">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let study of studies" class="border-t border-gray-200 hover:bg-gray-50">
+              <!-- NOMBRE DEL ESTUDIO -->
+              <td class="py-4 px-4">
+                <div class="flex items-center gap-3">
+                  <div class="icon w-10 h-10 bg-indigo-100 rounded-xl p-2 text-indigo-400">
+                    <mat-icon>view_agenda</mat-icon>
+                  </div>
+                  <div>
+                    <p class="font-medium">{{ study.name }}</p>
+                    <p class="text-sm text-gray-500">Última edición {{ study.updatedAt | firebaseDate }}</p>
+                  </div>
+                </div>
+              </td>
+              <!-- ESTADO -->
+              <td class="py-4">
+                <span class="px-2 py-1 bg-gray-100 rounded text-sm">{{ study.status }}</span>
+              </td>
+              <!-- RESPUESTAS -->
+              <td class="py-4">{{ study.responses?.length || 0 }}</td>
+              <!-- CREADO POR -->
+              <td class="py-4">
+                <img src="https://imgs.search.brave.com/DowMKJ3Yz93ulPZfTzXd2gvYDqcLsZisoVsBpko4feU/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly93YWxs/cGFwZXJzLmNvbS9p/bWFnZXMvaGQvYXZh/dGFyLWZhY2UtY2xv/c2V1cC1wbmctbnl5/LWN2amZ1NW1nbHBo/eW8yeGUucG5n" class="w-8 h-8 rounded-full" alt="Avatar de usuario">
+              </td>
+              <!-- CREADO EL -->
+              <td class="py-4">{{ study.createdAt | firebaseDate }}</td>
+              <!-- ACCIONES -->
+              <td class="py-4">
+                <button mat-icon-button [routerLink]="['/study', study.id, 'creation']" matTooltip="Editar estudio">
+                  <mat-icon>edit</mat-icon>
+                </button>
+                <button mat-icon-button (click)="editStudyName(study)" matTooltip="Editar nombre">
+                  <mat-icon>edit</mat-icon>
+                </button>
+                <button mat-icon-button [routerLink]="['/study', study.id, 'analytics']" matTooltip="Ver estadísticas">
+                  <mat-icon>analytics</mat-icon>
+                </button>
+                <button mat-icon-button (click)="confirmDelete(study)" matTooltip="Eliminar estudio">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div *ngIf="!project && !loading" class="empty-screen text-center p-5">
+      <img class="w-20 object-contain mx-auto" src="https://app.maze.co/_next/static/media/add-item.6e55b070.png" alt="" />
+      <h3 class="text-lg"><b>Proyecto no encontrado</b></h3>
+      <p class="text-gray-600">El proyecto que buscas no existe o ha sido eliminado.</p>
+    </div>
+
+    <div *ngIf="loading" class="loading-container flex flex-col items-center justify-center p-5">
+      <mat-spinner diameter="50"></mat-spinner>
+      <p class="mt-4">Cargando proyecto...</p>
+    </div>
+  </div>
+</div>

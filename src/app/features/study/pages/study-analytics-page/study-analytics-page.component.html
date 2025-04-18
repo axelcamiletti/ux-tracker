@@ -1,0 +1,114 @@
+<div class="min-h-screen bg-gray-100 p-6">
+    <div class="max-w-6xl mx-auto">
+      <!-- Loading y Error states -->
+      <div *ngIf="loading" class="flex justify-center items-center h-64">
+        <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+      </div>
+  
+      <div *ngIf="error" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+        {{ error }}
+      </div>
+  
+      <!-- Contenido principal -->
+      <div *ngIf="!loading && !error && analytics" class="space-y-6">
+        <!-- Resumen general -->
+        <div class="">
+          <h1 class="text-4xl font-bold mb-2">[Study_name]</h1>
+          <p class="text-lg text-gray-600">[Project_name]</p>
+          <div class="flex justify-around gap-4 mt-5 text-center">
+            <div class="bg-white p-5 rounded-lg w-1/4">
+              <div class="text-gray-600">Respuestas Totales</div>
+              <div class="text-3xl font-bold text-blue-600">{{ analytics.totalResponses }}</div>
+            </div>
+            <div class="bg-white p-5 rounded-lg w-1/4">
+              <div class="text-gray-600"># of blocks</div>
+              <div class="text-3xl font-bold text-green-600">[número de secciones]</div>
+            </div>
+            <div class="bg-white p-5 rounded-lg w-1/4">
+              <div class="text-gray-600">Tasa de Finalización</div>
+              <div class="text-3xl font-bold text-green-600">{{ analytics.completionRate | number:'1.0-0' }}%</div>
+            </div>
+            <div class="bg-white p-5 rounded-lg w-1/4">
+              <div class="text-gray-600">Tiempo Promedio</div>
+              <div class="text-3xl font-bold text-purple-600">{{ formatTimeSpent(analytics.averageTimeSpent) }}</div>
+            </div>
+          </div>
+        </div>
+  
+        <!-- Analíticas por sección -->
+        <div class="space-y-4">
+          <h2 class="text-2xl font-bold mb-4">Analíticas por Sección</h2>
+  
+          <div *ngFor="let section of sections" class="bg-white p-5 rounded-lg shadow-xl">
+            <div class="row flex gap-4">
+              <div class="icon rounded-lg flex items-center justify-center w-10 h-10 text-white"
+                [ngClass]="{
+                  'bg-indigo-300': section.type == 'open-question',
+                  'bg-orange-300': section.type == 'yes-no',
+                  'bg-emerald-400': section.type == 'multiple-choice',
+                  'bg-red-400': section.type == 'prototype-test',
+                }">
+                <mat-icon *ngIf="section.type == 'open-question'">help</mat-icon>
+                <mat-icon *ngIf="section.type == 'yes-no'">check_circle</mat-icon>
+                <mat-icon *ngIf="section.type == 'multiple-choice'">list</mat-icon>
+                <mat-icon *ngIf="section.type == 'prototype-test'">design_services</mat-icon>
+              </div>
+              <div class="texts">
+                <h3 class="text-xl font-bold">{{ getSectionTitle(section.id) }}</h3>
+                <p class="text-gray-600">{{ section.type | titlecase }}</p>
+              </div>
+              <div class="responses ml-auto text-center bg-gray-100 p-2 rounded-lg flex items-center gap-2">
+                <p class="text-lg font-medium text-gray-600">{{ analytics && analytics.sectionAnalytics && analytics.sectionAnalytics[section.id] ? analytics.sectionAnalytics[section.id].totalResponses : 0 }}</p>
+                <p class="text-sm text-gray-600">Responses</p>
+              </div>
+            </div>
+  
+            <div class="mt-5">
+              <!-- Distribución de respuestas según el tipo -->
+              <ng-container [ngSwitch]="section.type">
+                <!-- Sí/No -->
+                <div *ngSwitchCase="'yes-no'">
+                  <div *ngIf="getResponseDistribution(section.id) as dist" class="flex gap-4">
+                    <div class="bg-green-100 p-4 rounded-lg text-center w-1/2">
+                      <div class="text-2xl font-bold text-green-700">{{ dist.yes }}</div>
+                      <div class="text-green-600">Sí</div>
+                    </div>
+                    <div class="bg-red-100 p-4 rounded-lg text-center w-1/2">
+                      <div class="text-2xl font-bold text-red-700">{{ dist.no }}</div>
+                      <div class="text-red-600">No</div>
+                    </div>
+                  </div>
+                </div>
+  
+                <!-- Opción múltiple -->
+                <div *ngSwitchCase="'multiple-choice'" class="space-y-4">
+                  <div *ngFor="let option of getResponseDistribution(section.id)" class="relative">
+                    <div class="flex justify-between mb-1">
+                      <span>{{ option.label }}</span>
+                      <span>{{ option.count }} ({{ option.percentage | number:'1.0-0' }}%)</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2">
+                      <div class="bg-blue-600 h-2 rounded-full" [style.width]="option.percentage + '%'"></div>
+                    </div>
+                  </div>
+                </div>
+  
+                <!-- Pregunta abierta -->
+                <div *ngSwitchCase="'open-question'" class="grid grid-cols-2 gap-4">
+                  <div *ngIf="getResponseDistribution(section.id) as keywords">
+                    <h3 class="font-bold mb-2">Palabras más comunes:</h3>
+                    <div class="space-y-2">
+                      <div *ngFor="let keyword of keywords" class="flex justify-between border-t border-gray-200 pt-2">
+                        <span>{{ keyword.word }}</span>
+                        <span class="text-gray-600">{{ keyword.count }} veces</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </ng-container>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div> 

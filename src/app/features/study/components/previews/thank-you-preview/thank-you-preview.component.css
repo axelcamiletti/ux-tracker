@@ -1,0 +1,52 @@
+.confetti-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.confetti {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background-color: #f0f;
+  animation: confetti-fall 3s linear infinite;
+}
+
+.confetti:nth-child(2n) {
+  background-color: #0ff;
+  animation-delay: 0.5s;
+  left: 25%;
+}
+
+.confetti:nth-child(3n) {
+  background-color: #ff0;
+  animation-delay: 1s;
+  left: 50%;
+}
+
+.confetti:nth-child(4n) {
+  background-color: #f00;
+  animation-delay: 1.5s;
+  left: 75%;
+}
+
+.confetti:nth-child(5n) {
+  background-color: #0f0;
+  animation-delay: 2s;
+  left: 90%;
+}
+
+@keyframes confetti-fall {
+  0% {
+    transform: translateY(-100%) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100vh) rotate(360deg);
+    opacity: 0;
+  }
+}

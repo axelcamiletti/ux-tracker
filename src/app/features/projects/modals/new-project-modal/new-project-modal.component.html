@@ -1,0 +1,25 @@
+<h2 mat-dialog-title class="text-xl font-bold mb-4">Create new project folder</h2>
+
+<mat-dialog-content>
+  <form [formGroup]="newProjectForm" (ngSubmit)="onSubmit()">
+    <mat-form-field class="w-full">
+      <mat-label>Project name</mat-label>
+
+      <input matInput formControlName="name" placeholder="Enter project name">
+
+      <mat-error *ngIf="newProjectForm.get('name')?.hasError('required')">
+        Project name is required
+      </mat-error>
+
+      <mat-error *ngIf="newProjectForm.get('name')?.hasError('minlength')">
+        Project name must be at least 3 characters
+      </mat-error>
+      
+    </mat-form-field>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onCancel()">Cancel</button>
+  <button mat-flat-button color="primary" (click)="onSubmit()" [disabled]="!newProjectForm.valid">Create</button>
+</mat-dialog-actions>

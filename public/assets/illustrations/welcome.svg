@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="200px" height="200px" viewBox="0 0 200 200" version="1.1" xmlns="http://www.w3.org/2000/svg">
+    <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <!-- Fondo decorativo -->
+        <circle fill="#E3F2FD" cx="100" cy="100" r="100"/>
+        
+        <!-- Elementos decorativos -->
+        <circle fill="#90CAF9" cx="160" cy="40" r="15"/>
+        <circle fill="#42A5F5" cx="30" cy="150" r="10"/>
+        <circle fill="#1E88E5" cx="170" cy="170" r="8"/>
+        
+        <!-- Forma principal -->
+        <path d="M100,60 C130,60 155,85 155,115 C155,145 130,170 100,170 C70,170 45,145 45,115 C45,85 70,60 100,60" fill="#2196F3"/>
+        
+        <!-- Detalles -->
+        <circle fill="#FFFFFF" cx="85" cy="105" r="8"/>
+        <circle fill="#FFFFFF" cx="115" cy="105" r="8"/>
+        <path d="M80,135 C80,135 90,145 100,145 C110,145 120,135 120,135" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round"/>
+    </g>
+</svg> 

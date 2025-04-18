@@ -1,0 +1,31 @@
+<div class="yes-no-preview">
+
+  <h1 class="text-2xl mt-4 mb-2"><b> {{ previewData.title || 'No se ha ingresado la pregunta' }} </b></h1>
+
+  <p class="text-md text-gray-600"> {{ previewData.subtitle }} </p>
+
+  <div class="mt-6 flex gap-4">
+    <button mat-stroked-button
+            class="w-1/2 flex flex-col !h-auto !py-4 !rounded-2xl"
+            [ngClass]="{'!bg-green-500 !border-green-500 !text-white !hover:bg-green-600': selectedOption === 'yes'}"
+            (click)="selectOption('yes')">
+      <div class="circle rounded-full bg-gray-900/10 w-16 h-16 mb-2 flex justify-center items-center">
+        <mat-icon class="!m-0 scale-160 !h-6">check_circle</mat-icon>
+      </div>
+      <span class="text-2xl font-bold">Sí</span>
+    </button>
+    
+    <button mat-stroked-button
+            class="w-1/2 flex flex-col !h-auto !py-4 !rounded-2xl"
+            [ngClass]="{'!bg-red-500 !border-red-500 !text-white !hover:bg-red-600': selectedOption === 'no'}"
+            (click)="selectOption('no')">
+      <div class="circle rounded-full bg-gray-900/10 w-16 h-16 mb-2 flex justify-center items-center">
+        <mat-icon class="!m-0 scale-160 !h-6">close</mat-icon>
+      </div>
+      <span class="text-2xl font-bold">No</span>
+    </button>
+  </div>
+
+  <br>
+  Option selected: {{ selectedOption }}
+</div>

@@ -1,0 +1,106 @@
+<div class="study-public flex h-screen">
+    <div class="forms bg-white box-shadow-lg w-1/3 p-10 flex flex-col">
+      <!-- Stepper -->
+      <div class="stepper mb-8 relative">
+        <div class="flex items-center justify-between">
+          <div class="progress-bar w-full bg-gray-200 h-1 absolute">
+            <div class="bg-blue-500 h-1 transition-all duration-300" 
+                 [style.width]="(currentSectionIndex / (sections.length - 1)) * 100 + '%'">
+            </div>
+          </div>
+          <div class="flex justify-between w-full relative">
+            <ng-container *ngFor="let section of sections; let i = index">
+              <div class="z-10 flex flex-col items-center"
+                   [class.text-blue-500]="i <= currentSectionIndex">
+                <div class="w-4 h-4 rounded-full mb-2"
+                     [ngClass]="{
+                        'bg-blue-500': i < currentSectionIndex,
+                        'bg-blue-500 ring-2 ring-blue-200': i === currentSectionIndex,
+                        'bg-gray-300': i > currentSectionIndex
+                     }">
+                </div>
+                <span class="text-xs" *ngIf="i === 0">Start</span>
+                <span class="text-xs" *ngIf="i === sections.length - 1">End</span>
+              </div>
+            </ng-container>
+          </div>
+        </div>
+      </div>
+  
+      <!-- Contenido de la sección actual -->
+      <div class="section-content h-full flex flex-col">
+        <!-- Welcome Screen -->
+        <app-welcome-screen-preview
+          *ngIf="getCurrentSection()?.type === 'welcome-screen'"
+          [section]="getCurrentSection()!"
+                  class="my-auto">
+        </app-welcome-screen-preview>
+  
+        <!-- Open Question -->
+        <app-open-question-preview
+          *ngIf="getCurrentSection()?.type === 'open-question'"
+          [section]="getCurrentSection()!"
+          (responseChange)="onResponse($event)">
+        </app-open-question-preview>
+  
+        <!-- Multiple Choice -->
+        <app-multiple-choice-preview
+          *ngIf="getCurrentSection()?.type === 'multiple-choice'"
+          [section]="getCurrentSection()!"
+          (responseChange)="onResponse($event)">
+        </app-multiple-choice-preview>
+  
+        <!-- Yes/No -->
+        <app-yes-no-preview
+          *ngIf="getCurrentSection()?.type === 'yes-no'"
+          [section]="getCurrentSection()!"
+          (responseChange)="onResponse($event)">
+        </app-yes-no-preview>
+  
+        <!-- Prototype Test -->
+        <app-prototype-test-preview
+          *ngIf="getCurrentSection()?.type === 'prototype-test'"
+          [section]="getCurrentSection()!"
+          (responseChange)="onResponse($event)">
+        </app-prototype-test-preview>
+  
+        <!-- Thank You -->
+        <app-thank-you-preview
+          *ngIf="getCurrentSection()?.type === 'thank-you'"
+          [section]="getCurrentSection()!"
+                  class="my-auto">
+        </app-thank-you-preview>
+  
+        <!-- Navigation Footer -->
+        <div class="footer border-t border-gray-300 py-5 mt-auto flex justify-center gap-4 items-center">
+          <button mat-stroked-button 
+              *ngIf="currentSectionIndex > 0"
+                          class="mr-auto"
+              (click)="previousSection()">
+              <mat-icon>arrow_back</mat-icon>
+              Previous
+          </button>
+                  
+          <button mat-flat-button color="primary" 
+              (click)="nextSection()">
+              {{currentSectionIndex === sections.length - 1 ? 'Finish' : 'Next'}}
+              <mat-icon *ngIf="currentSectionIndex < sections.length - 1">arrow_forward</mat-icon>
+          </button>
+        </div>
+      </div>
+    </div>
+  
+    <div class="bg-gray-100 w-2/3 flex items-center justify-center">
+      <!-- Ilustración de bienvenida -->
+      <img *ngIf="getCurrentSection()?.type === 'welcome-screen'"
+           src="assets/illustrations/welcome.svg" 
+           alt="Bienvenida" 
+           class="w-96 h-96 transition-opacity duration-300 ease-in-out">
+  
+      <!-- Ilustración de agradecimiento -->
+      <img *ngIf="getCurrentSection()?.type === 'thank-you'"
+           src="assets/illustrations/thank-you.svg" 
+           alt="Gracias" 
+           class="w-96 h-96 transition-opacity duration-300 ease-in-out">
+    </div>
+  </div>

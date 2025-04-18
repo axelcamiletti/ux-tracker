@@ -1,0 +1,40 @@
+<div class="header border-b border-gray-200 flex items-center gap-3 px-8 py-4 mb-4">
+  <div class="icon rounded-lg bg-indigo-300 text-white flex justify-center items-center h-10 w-10">
+    <mat-icon>help</mat-icon>
+  </div>
+  <h2 class="text-xl font-bold">Open Question</h2>
+  <mat-icon matTooltip="Ask exploratory questions, enable AI Follow-Ups for in-depth feedback and make sense of it all by using AI to perform sentiment and theme analysis." class="opacity-50">info</mat-icon>
+  <button mat-icon-button class="ml-auto" [matMenuTriggerFor]="menu">
+    <mat-icon>more_horiz</mat-icon>
+  </button>
+</div>
+
+<div class="form p-8">
+  <label class="label">Question *</label>
+  <mat-form-field appearance="outline" class="w-full">
+    <input
+      id="question"
+      matInput
+      placeholder="Type your question here"
+      required
+      [ngModel]="formData.title"
+      (ngModelChange)="onTitleChange($event)"
+      type="text" />
+    <mat-error>A title is required to create this block.</mat-error>
+  </mat-form-field>
+
+  <label class="label">Message</label>
+  <mat-form-field appearance="outline" class="w-full">
+    <textarea
+      matInput
+      placeholder="Type extra details here. This is optional."
+      [ngModel]="formData.subtitle"
+      (ngModelChange)="onSubtitleChange($event)"
+    ></textarea>
+  </mat-form-field>
+</div>
+
+<mat-menu #menu="matMenu">
+  <button mat-menu-item>Add comment</button>
+</mat-menu>
+

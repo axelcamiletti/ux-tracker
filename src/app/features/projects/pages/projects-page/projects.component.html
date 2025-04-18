@@ -1,0 +1,38 @@
+<div class="projects-page relative">
+  <div class="background bg-indigo-50 w-full h-48 absolute top-0 left-0 z-0"></div>
+  <div class="container w-5xl mx-auto p-5 relative z-10">
+
+    <div class="flex justify-between mb-5 mt-10">
+      <h1 class="text-2xl font-bold">Projects</h1>
+      <button mat-flat-button color="primary" (click)="openNewProjectModal()" [disabled]="creatingProject">
+        New project <mat-icon>add</mat-icon>
+      </button>
+    </div>
+
+    <div class="loading-container" *ngIf="loading">
+      <mat-spinner diameter="50"></mat-spinner>
+      <p>Cargando proyectos...</p>
+    </div>
+
+    <div class="projects-created flex gap-4 pb-10" *ngIf="!loading">
+      <a [routerLink]="['/projects', project.id]" *ngFor="let project of projects" class="project box border border-gray-300 shadow-lg min-h-40 w-60 rounded-2xl p-4 flex flex-col justify-between hover:border-blue-500 hover:shadow-xl transition duration-300 ease-in-out hover:scale-105 cursor-pointer bg-gray-50 relative">
+        <button class="absolute top-2 right-2" mat-icon-button color="warn" (click)="deleteProject(project.id, $event)" [disabled]="deletingProject">
+          <mat-icon>delete</mat-icon>
+        </button>
+        <h3 class="text-lg font-bold mt-auto">{{ project.name }}</h3>
+        <p class="text-sm">
+          {{ project.studies.length }}
+          <span *ngIf="project.studies.length === 1"> study</span>
+          <span *ngIf="project.studies.length !== 1"> studies</span>
+        </p>
+      </a>
+    </div>
+
+    <div *ngIf="projects.length === 0" class="empty-screen text-center p-5">
+      <img class="w-20 object-contain mx-auto" src="https://app.maze.co/_next/static/media/add-item.6e55b070.png" alt="" />
+      <h3 class="text-lg"><b>Nothing to show here</b></h3>
+      <p class="text-gray-600">Not working on a project anymore? Archive it to help keep your workspace clear.</p>
+    </div>
+
+  </div>
+</div>

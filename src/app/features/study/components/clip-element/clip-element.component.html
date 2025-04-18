@@ -1,0 +1,46 @@
+<div class="box cursor-pointer flex items-center gap-3 bg-white p-3 border border-gray-300 rounded-xl mb-4 hover:ring-3 hover:ring-blue-300 transition-all duration-300 ease-out"
+     [ngClass]="{'!border-blue-500 !bg-blue-50':isActive == true}">
+  
+  <div class="icon bg-black text-white w-10 h-10 rounded-lg flex items-center justify-center"
+    [ngClass]="{
+      'bg-indigo-300': type == 'open-question',
+      'bg-orange-300': type == 'yes-no',
+      'bg-emerald-400': type == 'multiple-choice',
+      'bg-red-400': type == 'prototype-test',
+      'bg-black': type == 'welcome-screen' || type == 'thank-you',
+    }">
+    <mat-icon *ngIf="type == 'welcome-screen'">waving_hand</mat-icon>
+    <mat-icon *ngIf="type == 'open-question'">help</mat-icon>
+    <mat-icon *ngIf="type == 'yes-no'">check_circle</mat-icon>
+    <mat-icon *ngIf="type == 'multiple-choice'">list</mat-icon>
+    <mat-icon *ngIf="type == 'prototype-test'">design_services</mat-icon>
+    <mat-icon *ngIf="type == 'thank-you'">celebration</mat-icon>
+  </div>
+
+  <div class="texts">
+    <p class="text-md font-medium">
+      <ng-container> {{ title }} </ng-container>
+    </p>
+
+    <p class="text-sm text-gray-600">
+      <ng-container *ngIf="type == 'welcome-screen'">Welcome screen</ng-container>
+      <ng-container *ngIf="type == 'open-question'">Open question</ng-container>
+      <ng-container *ngIf="type == 'yes-no'">Yes/No</ng-container>
+      <ng-container *ngIf="type == 'multiple-choice'">Multiple Choice</ng-container>
+      <ng-container *ngIf="type == 'prototype-test'">Prototype test</ng-container>
+      <ng-container *ngIf="type == 'thank-you'">Thank you screen</ng-container>
+    </p>
+  </div>
+
+  <button mat-icon-button class="ml-auto" [matMenuTriggerFor]="menu" (click)="$event.stopPropagation()"
+    *ngIf="type == 'open-question' || type == 'yes-no' || type == 'multiple-choice' || type == 'prototype-test'">
+    <mat-icon>more_vert</mat-icon>
+  </button>
+
+  <mat-menu #menu="matMenu">
+    <button mat-menu-item (click)="onDelete($event)">
+      <mat-icon color="warn">delete</mat-icon>
+      <span>Eliminar</span>
+    </button>
+  </mat-menu>
+</div>

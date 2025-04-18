@@ -1,0 +1,75 @@
+<div class="header border-b border-gray-200 flex items-center gap-3 px-8 py-4 mb-4">
+  <div class="icon rounded-lg bg-pink-700 text-white flex justify-center items-center h-10 w-10">
+    <mat-icon>edit</mat-icon>
+  </div>
+  <h2 class="text-xl font-bold">Prototype Test</h2>
+  <mat-icon class="opacity-50" matTooltip="A mission is a task for testers to complete. Create your mission by setting the title, description, and expected path to success. Add multiple expected paths if your task has different valid ways to be completed.">info</mat-icon>
+  <button mat-icon-button class="ml-auto" [matMenuTriggerFor]="menu">
+    <mat-icon>more_horiz</mat-icon>
+  </button>
+</div>
+
+<div class="form p-8">
+  <label class="label">Task *</label>
+  <mat-form-field appearance="outline" class="w-full">
+    <input matInput placeholder="Write a short sentence that summarizes the task" required [(ngModel)]="title" (ngModelChange)="updateTitle($event)" type="text" />
+    <mat-error>A title is required to create this block.</mat-error>
+  </mat-form-field>
+
+  <label class="label">Description</label>
+  <mat-form-field appearance="outline" class="w-full">
+    <textarea matInput placeholder="Give tester details to complete the mission" [(ngModel)]="subtitle" (ngModelChange)="updateSubtitle($event)"></textarea>
+  </mat-form-field>
+
+  <p class="mt-4"><b>Prototype *</b></p>
+  <div class="flex my-2">
+    <input type="text" [(ngModel)]="fileId" placeholder="Pega tu link de Figma" class="border border-gray-300 px-2 w-full">
+    <button class="btn-primary text-nowrap" (click)="extractFramesAsImages()" [disabled]="isLoading">ADD PROTOTYPE</button>
+  </div>
+  <p class="text-xs text-gray-600">This prototype will be linked to all mission blocks in this maze</p>
+
+  <mat-progress-bar *ngIf="isLoading" mode="indeterminate" class="mt-2"></mat-progress-bar>
+
+  <div *ngIf="!selectedImage && !isLoading">
+    <div class="flex flex-wrap gap-2 mt-4">
+      <div *ngFor="let image of exportedImages" (click)="selectImage(image)" class="image-item w-40 border border-gray-300 rounded-lg overflow-hidden">
+        <div class="image-container h-32 overflow-hidden">
+          <img src="{{image.imageUrl}}" alt="Exported frame" class="object-cover" />
+        </div>
+        <div class="body p-2 text-sm font-medium">{{ image.name }}</div>
+      </div>
+    </div>
+  </div>
+
+  <ng-template #noImages>
+    <p>No hay imágenes para mostrar.</p>
+  </ng-template>
+
+  <div *ngIf="selectedImage">
+    <h3>Pantalla objetivo seleccionada:</h3>
+    <div class="image-container h-32 overflow-hidden">
+      <img src="{{selectedImage.imageUrl}}" alt="Exported frame" class="object-cover" />
+    </div>
+    <div class="body p-2 text-sm font-medium">{{ selectedImage.name }}</div>
+  </div>
+
+  <p class="mt-4"><b>Goal-based</b></p>
+  <p class="text-sm text-gray-600">Success criteria: Reach a specific screen</p>
+
+  <div class="btn-icon border border-gray-300 rounded-lg flex items-center gap-3 p-3 mt-2">
+    <div class="image-container border border-gray-300 overflow-hidden rounded-md h-16 w-16 flex justify-center items-center">
+      <img *ngIf="false" src="https://cdn-icons-png.flaticon.com/512/25/25694.png" alt=""/>
+      <mat-icon>add</mat-icon>
+    </div>
+    <div class="texts">
+      <p class="text-lg">Goal</p>
+      <p class="text-md text-gray-600">Select a screen</p>
+      <p *ngIf="false" class="text-lg font-medium">[name_screen]</p>
+    </div>
+    <button mat-icon-button class="ml-auto"><mat-icon>edit</mat-icon></button>
+  </div>
+</div>
+
+<mat-menu #menu="matMenu">
+  <button mat-menu-item (click)="onDelete()">Delete</button>
+</mat-menu>
