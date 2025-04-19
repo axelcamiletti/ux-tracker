@@ -1,0 +1,34 @@
+<div class="share-study-modal">
+    <div class="header bg-blue-900 text-white p-10">
+        <div class="flex gap-8 items-center">
+            <img class="w-20 object-contain" src="https://app.maze.co/_next/static/media/maze-share-url.f064d024.png" alt="">
+            <div class="texts">
+                <h2 class="text-2xl font-bold">Your study lives in this link</h2>
+                <p>Invite testers via your own channels</p>
+            </div>
+        </div>
+
+        <div class="flex gap-2 mt-4">
+            <mat-form-field class="w-full">
+              <input matInput [value]="studyUrl" readonly type="text">
+              <button matSuffix mat-flat-button color="primary" (click)="copyToClipboard()">
+                <mat-icon>content_copy</mat-icon>
+                Copy link
+              </button>
+            </mat-form-field>
+          </div>
+    
+        <button class="absolute! top-2 right-2 text-white!" mat-icon-button (click)="close()"><mat-icon>close</mat-icon></button>
+    </div>
+
+    <div class="content p-10">
+        <p class="text-sm font-bold mb-5">LINK OPTIONS</p>
+        <mat-slide-toggle>
+            <div class="flex items-center gap-2">
+                <span class="text-lg underline font-bold ml-4">Unique session</span>
+                <mat-icon>refresh</mat-icon>
+            </div>
+        </mat-slide-toggle>
+        <p class="mt-2">Allow only one unique session per tester device.</p>
+    </div>
+</div>

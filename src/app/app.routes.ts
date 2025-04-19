@@ -6,6 +6,7 @@ import { StudyAnalyticsPageComponent } from './features/study/pages/study-analyt
 import { ProjectsComponent } from './features/projects/pages/projects-page/projects.component';
 import { ProjectPageComponent } from './features/projects/pages/project-page/project-page.component';
 import { StudyLayoutComponent } from './features/study/components/study-layout/study-layout.component';
+import { StudySharePageComponent } from './features/study/pages/study-share-page/study-share-page.component';
 
 export const routes: Routes = [
   {
@@ -23,6 +24,7 @@ export const routes: Routes = [
     children: [
       { path: '', redirectTo: 'creation', pathMatch: 'full' },
       { path: 'creation', component: StudyCreationPageComponent },
+      { path: 'share', component: StudySharePageComponent },
       { path: 'analytics', component: StudyAnalyticsPageComponent }
     ]
   },

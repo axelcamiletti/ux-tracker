@@ -1,0 +1,45 @@
+<div class="study-share-page">
+    <div class="header bg-gray-50">
+        <div class="container w-6xl mx-auto p-10">
+            <h2 class="text-2xl font-bold mb-8">Share your study with testers</h2>
+            <div class="flex gap-4">
+                <div *ngFor="let item of settings" 
+                     (click)="item.action?.()"
+                     class="card w-1/4 p-5 border border-gray-200 rounded-lg bg-white shadow-md hover:border-blue-300! cursor-pointer transition-all duration-300 ease-out">
+                    <img class="w-12 mb-6 object-contain" [src]="item.icon" [alt]="item.title">
+                    <h3 class="text-base font-bold">{{ item.title }}</h3>
+                    <p class="text-sm text-gray-600">{{ item.description }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Performance section -->
+    <!-- <div class="container w-6xl mx-auto p-10">
+        <div class="performance-table mb-8">
+            <h2 class="text-2xl font-bold mb-8">Performance</h2>
+            
+            <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+            <table class="w-full">
+                <thead>
+                <tr class="bg-gray-50">
+                    <th class="py-3 px-4 text-left">NAME</th>
+                    <th class="py-3 px-4 text-left">SENT</th>
+                    <th class="py-3 px-4 text-left">STARTED</th>
+                    <th class="py-3 px-4 text-left">COMPLETED</th>
+                </tr>
+                </thead>
+    
+                <tbody>
+                <tr>
+                    <div class="empty-screen text-center p-10">
+                        <img class="w-12 mx-auto" src="https://app.maze.co/_next/static/media/NoCollectionMethods.ba0611cc.png" alt="">
+                        <p class="text-base text-gray-600">Choose from the methods above to start collecting insights.</p>
+                    </div>
+                </tr>
+                </tbody>
+            </table>
+            </div>
+        </div>
+    </div> -->
+</div>

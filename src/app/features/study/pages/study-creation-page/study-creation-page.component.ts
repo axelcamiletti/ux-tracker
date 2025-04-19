@@ -35,9 +35,7 @@ import { ClipElementComponent } from "../../components/clip-element/clip-element
 // Modelos
 import { Section } from '../../models/section.model';
 import { StudyService } from '../../services/study.service';
-import { Study } from '../../models/study.model';
 import { StudyStateService } from '../../services/study-state.service';
-import { ToolbarComponent } from "../../components/toolbar/toolbar.component";
 
 @Component({
   selector: 'app-study-creation-page',
@@ -70,7 +68,6 @@ import { ToolbarComponent } from "../../components/toolbar/toolbar.component";
     ThankYouPreviewComponent,
     // Componentes personalizados
     ClipElementComponent,
-    ToolbarComponent
 ],
   templateUrl: './study-creation-page.component.html',
   styleUrl: './study-creation-page.component.css'

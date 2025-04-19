@@ -11,7 +11,7 @@
     <div class="stepper mx-auto flex items-center">
       <a [routerLink]="['/study', studyId, 'creation']" routerLinkActive="bg-blue-50! text-blue-600!" mat-button>Construcción</a>
       <mat-icon class="opacity-25">chevron_right</mat-icon>
-      <button mat-button>Compartir <mat-icon>share</mat-icon></button>
+      <a [routerLink]="['/study', studyId, 'share']" routerLinkActive="bg-blue-50! text-blue-600!" mat-button><mat-icon>share</mat-icon> Share</a>
       <mat-icon class="opacity-25">chevron_right</mat-icon>
       <a [routerLink]="['/study', studyId, 'analytics']" routerLinkActive="bg-blue-50! text-blue-600!" mat-button>Resultados</a>
     </div>
