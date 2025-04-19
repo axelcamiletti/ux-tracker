@@ -1,41 +1,35 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
+import { Section } from '../../../models/section.model';
+import { ParticipantResult } from '../../../models/participant-result.model';
 
 @Component({
   selector: 'app-multiple-choice-result',
+  standalone: true,
   imports: [MatIconModule, CommonModule],
   templateUrl: './multiple-choice-result.component.html',
   styleUrl: './multiple-choice-result.component.css'
 })
 export class MultipleChoiceResultComponent {
-  @Input() title: string = 'Yes/no example';
+  @Input() section!: Section;
+  @Input() title: string = '';
+  @Input() participants: ParticipantResult[] = [];
 
   options = [
     { name: 'Lagarto' },
     { name: 'Perrito faldero' },
     { name: 'Gatito chato' }
-  ]
+  ];
 
-  responses = [
-    {
-      id: 1,
-      name: 'Participant 1',
-      response: 'Lagarto',
-      respondedAt: '2024-01-01 12:00:00'
-    },
-    {
-      id: 2,
-      name: 'Participant 2',
-      response: 'Perrito faldero',
-      respondedAt: '2024-01-01 11:00:00'
-    },
-    {
-      id: 3,
-      name: 'Participant 3',
-      response: 'Gatito chato',
-      respondedAt: '2024-01-01 10:00:00'
-    },
-    
-  ]
+  getResponsesForSection(sectionId: string): ParticipantResult[] {
+    return this.participants.filter(participant => 
+      participant.responses.some(response => response.sectionId === sectionId)
+    );
+  }
+
+  getParticipantResponse(participant: ParticipantResult, sectionId: string): string {
+    const response = participant.responses.find(r => r.sectionId === sectionId);
+    return response?.answer || '';
+  }
 }

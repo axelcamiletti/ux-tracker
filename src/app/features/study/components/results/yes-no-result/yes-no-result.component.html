@@ -49,9 +49,9 @@
     
                 <tbody>
                 <tr *ngFor="let response of responses" class="tr-pointer">
-                    <td class="td-cell">{{ response.name }}</td>
-                    <td class="td-cell">{{ response.response }}</td>
-                    <td class="td-cell">{{ response.respondedAt }}</td>
+                    <td class="td-cell">{{ response.participantId }}</td>
+                    <td class="td-cell">{{ response.responses[0].answer }}</td>
+                    <td class="td-cell">{{ response.completedAt }}</td>
                 </tr>
                 </tbody>
             </table>

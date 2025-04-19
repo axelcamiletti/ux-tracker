@@ -10,7 +10,7 @@
         </div>
     
         <div class="response text-gray-600 text-center bg-gray-200 rounded-lg p-3">
-            <p class="text-xl font-bold">{{ responses.length }}</p>
+            <p class="text-xl font-bold">{{ getResponsesForSection(section.id).length }}</p>
             <p class="text-sm">Responses</p>
         </div>
     </div>
@@ -25,7 +25,6 @@
                 <mat-icon class="scale-80 z-10">person</mat-icon>
             </div>
         </div>
-
     </div>
 
     <div class="responses mt-5">
@@ -44,10 +43,10 @@
                 </thead>
     
                 <tbody>
-                <tr *ngFor="let response of responses" class="tr-pointer">
-                    <td class="td-cell">{{ response.name }}</td>
-                    <td class="td-cell">{{ response.response }}</td>
-                    <td class="td-cell">{{ response.respondedAt }}</td>
+                <tr *ngFor="let participant of getResponsesForSection(section.id)" class="tr-pointer">
+                    <td class="td-cell">{{ participant.participantId }}</td>
+                    <td class="td-cell">{{ getParticipantResponse(participant, section.id) }}</td>
+                    <td class="td-cell">{{ participant.completedAt | date:'medium' }}</td>
                 </tr>
                 </tbody>
             </table>

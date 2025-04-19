@@ -1,6 +1,6 @@
 <div class="study-results-page flex h-full">
     <div class="sidebar flex flex-col w-sm min-w-sm h-full overflow-y-auto p-5">
-        <mat-button-toggle-group name="section" [value]="activeView" (change)="onViewChange($event.value)" aria-label="Section" class="mb-5">
+        <mat-button-toggle-group name="section" [value]="activeView" (change)="onViewChange($event)" aria-label="Section" class="mb-5">
             <mat-button-toggle class="w-1/2" value="results"><mat-icon>home</mat-icon> Results</mat-button-toggle>
             <mat-button-toggle class="w-1/2" value="participants"><mat-icon>refresh</mat-icon> Participants</mat-button-toggle>
         </mat-button-toggle-group>
@@ -8,17 +8,18 @@
         <div *ngIf="activeView === 'results'" class="confidence-box bg-gray-100 text-gray-600 py-3 px-5 rounded-xl mb-3">
             <div class="flex font-bold text-sm gap-1 items-center">
                 <p class="mr-auto">CONFIDENCE</p>
-                <p>1</p>
-                <mat-icon>home</mat-icon>
+                <p>{{ participants.length }}</p>
+                <mat-icon>people</mat-icon>
             </div>
         </div>
 
         <!-- Sección de Clips (visible solo en vista de resultados) -->
         <div class="clips" *ngIf="activeView === 'results'">
-            <ng-container *ngFor="let section of sections">
+            <ng-container *ngFor="let section of getFilteredSections()">
                 <app-clip-element
                     (click)="selectSection(section)"
                     [isActive]="selectedSection?.id === section.id"
+                    [type]="section.type"
                     [title]="section.data.title">
                 </app-clip-element>
             </ng-container>
@@ -30,16 +31,29 @@
                 *ngFor="let participant of participants"
                 (click)="selectParticipant(participant)"
                 [isActive]="selectedParticipant?.id === participant.id"
-                [title]="'Participant ' + participant.id"
-                [avatar]="participant.avatar"
-                [subtitle]="'Anonymous session - URL Link'">
+                [title]="'Participant ' + participant.participantId"
+                [subtitle]="'Completed: ' + (participant.completedAt | date:'medium')">
             </app-participant-card>
         </div>
     </div>
 
     <div class="content bg-gray-100 w-full h-full p-10">
-        <app-open-question-result *ngIf="false"></app-open-question-result>
-        <app-yes-no-result *ngIf="false"></app-yes-no-result>
-        <app-multiple-choice-result *ngIf="true"></app-multiple-choice-result>
+        <!-- Previsualizaciones dinámicas -->
+        <ng-container *ngFor="let section of getFilteredSections()">
+            <app-open-question-result
+              *ngIf="section.type === 'open-question' && selectedSection?.id === section.id"
+              [section]="section">
+            </app-open-question-result>
+      
+            <app-yes-no-result
+              *ngIf="section.type === 'yes-no' && selectedSection?.id === section.id"
+              [section]="section">
+            </app-yes-no-result>
+      
+            <app-multiple-choice-result
+              *ngIf="section.type === 'multiple-choice' && selectedSection?.id === section.id"
+              [section]="section">
+            </app-multiple-choice-result>
+          </ng-container>
     </div>
 </div>

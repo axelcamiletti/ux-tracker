@@ -20,13 +20,13 @@
         <p class="text-sm text-gray-600">Click a participant's row to view full session</p>
 
         <div class="box my-5">
-            <div class="response mb-4 bg-white rounded-lg p-5" *ngFor="let response of responses">
+            <div class="response mb-4 bg-white rounded-lg p-5" *ngFor="let response of getResponsesForSection(section.id)">
 
-                <p class="text-base text-gray-900">{{ response.response }}</p>
+                <p class="text-base text-gray-900">{{ response.responses[0].answer }}</p>
                 
                 <div class="flex gap-1 items-center text-gray-600">
                     <mat-icon class="scale-80">person</mat-icon>
-                    <p class="text-sm cursor-pointer hover:text-blue-600 hover:underline">{{ response.name }}</p>
+                    <p class="text-sm cursor-pointer hover:text-blue-600 hover:underline">{{ response.participantId }}</p>
                 </div>
             </div>
         </div>

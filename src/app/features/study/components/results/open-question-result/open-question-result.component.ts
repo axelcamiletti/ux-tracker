@@ -1,27 +1,29 @@
-import { CommonModule } from '@angular/common';
 import { Component, Input } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Section } from '../../../models/section.model';
+import { ParticipantResult } from '../../../models/participant-result.model';
 import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'app-open-question-result',
-  imports: [MatIconModule, CommonModule],
+  standalone: true,
+  imports: [CommonModule, MatIconModule],
   templateUrl: './open-question-result.component.html',
   styleUrl: './open-question-result.component.css'
 })
 export class OpenQuestionResultComponent {
-  @Input() title: string = 'asdasd';
+  @Input() section!: Section;
+  @Input() title: string = '';
+  @Input() participants: ParticipantResult[] = [];
 
-  responses = [
-    {
-      id: 1,
-      name: 'Participant 1',
-      response: 'Lorem ipsum dolor sit amet consectetur.'
-    },
-    {
-      id: 2,
-      name: 'Participant 2',
-      response: 'Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quos.'
-    },
-    
-  ]
+  getResponsesForSection(sectionId: string): ParticipantResult[] {
+    return this.participants.filter(participant => 
+      participant.responses.some(response => response.sectionId === sectionId)
+    );
+  }
+
+  getParticipantResponse(participant: ParticipantResult, sectionId: string): string {
+    const response = participant.responses.find(r => r.sectionId === sectionId);
+    return response?.answer || '';
+  }
 }
