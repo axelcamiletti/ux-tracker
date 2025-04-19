@@ -1,0 +1,57 @@
+<div class="multiple-choice-result">
+    <div class="flex items-center gap-4 mb-4">
+        <div class="icon text-white w-10 h-10 rounded-lg flex items-center justify-center bg-emerald-400">
+            <mat-icon>list</mat-icon>
+        </div>
+    
+        <div class="texts mr-auto">
+            <p class="text-2xl font-bold text-gray-900">{{ title }}</p>
+            <p class="text-sm font-medium text-gray-600">Multiple Choice</p>
+        </div>
+    
+        <div class="response text-gray-600 text-center bg-gray-200 rounded-lg p-3">
+            <p class="text-xl font-bold">{{ responses.length }}</p>
+            <p class="text-sm">Responses</p>
+        </div>
+    </div>
+
+    <div class="result bg-white rounded-xl p-10">
+        <div class="option mb-2" *ngFor="let option of options">
+            <p class="mb-2 font-medium">{{ option.name }}</p>
+            <div class="relative overflow-hidden flex items-center gap-1 font-medium bg-gray-100 rounded-lg px-5 py-3">
+                <div class="fill bg-blue-600 w-[50%] absolute left-0 top-0 h-full z-0 rounded-lg"></div>
+                <p class="mr-auto z-10">50%</p>
+                <p class="z-10">1</p>
+                <mat-icon class="scale-80 z-10">person</mat-icon>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="responses mt-5">
+        <h2 class="text-xl font-bold text-gray-900">Responses</h2>
+        <p class="text-sm text-gray-600">Click a participant's row to view full session</p>
+
+        <div class="table-container mt-4">
+            <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+            <table class="w-full">
+                <thead>
+                <tr class="bg-gray-50">
+                    <th class="td-header-cell">PARTICIPANT</th>
+                    <th class="td-header-cell">RESPONSE</th>
+                    <th class="td-header-cell">RESPONDED AT</th>
+                </tr>
+                </thead>
+    
+                <tbody>
+                <tr *ngFor="let response of responses" class="tr-pointer">
+                    <td class="td-cell">{{ response.name }}</td>
+                    <td class="td-cell">{{ response.response }}</td>
+                    <td class="td-cell">{{ response.respondedAt }}</td>
+                </tr>
+                </tbody>
+            </table>
+            </div>
+        </div>
+    </div>
+</div>

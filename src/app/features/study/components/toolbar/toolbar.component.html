@@ -9,11 +9,13 @@
     </h1>
 
     <div class="stepper mx-auto flex items-center">
-      <a [routerLink]="['/study', studyId, 'creation']" routerLinkActive="bg-blue-50! text-blue-600!" mat-button>Construcción</a>
+      <a [routerLink]="['/study', studyId, 'creation']" routerLinkActive="bg-blue-50! text-blue-600!" mat-button>Build</a>
       <mat-icon class="opacity-25">chevron_right</mat-icon>
       <a [routerLink]="['/study', studyId, 'share']" routerLinkActive="bg-blue-50! text-blue-600!" mat-button><mat-icon>share</mat-icon> Share</a>
       <mat-icon class="opacity-25">chevron_right</mat-icon>
-      <a [routerLink]="['/study', studyId, 'analytics']" routerLinkActive="bg-blue-50! text-blue-600!" mat-button>Resultados</a>
+      <a [routerLink]="['/study', studyId, 'results']" routerLinkActive="bg-blue-50! text-blue-600!" mat-button>Results</a>
+      <mat-icon class="opacity-25">chevron_right</mat-icon>
+      <a [routerLink]="['/study', studyId, 'analytics']" routerLinkActive="bg-blue-50! text-blue-600!" mat-button>Analytics</a>
     </div>
 
     <!-- <div class="flex items-center gap-4">
