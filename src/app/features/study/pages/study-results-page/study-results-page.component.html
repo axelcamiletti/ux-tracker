@@ -30,9 +30,8 @@
             <app-participant-card
                 *ngFor="let participant of participants"
                 (click)="selectParticipant(participant)"
-                [isActive]="selectedParticipant?.id === participant.id"
-                [title]="'Participant ' + participant.participantId"
-                [subtitle]="'Completed: ' + (participant.completedAt | date:'medium')">
+                [participant]="participant"
+                [isActive]="selectedParticipant?.id === participant.id">
             </app-participant-card>
         </div>
     </div>
@@ -42,18 +41,21 @@
         <ng-container *ngFor="let section of getFilteredSections()">
             <app-open-question-result
               *ngIf="section.type === 'open-question' && selectedSection?.id === section.id"
-              [section]="section">
+              [section]="section"
+              [participants]="participants">
             </app-open-question-result>
-      
+
             <app-yes-no-result
               *ngIf="section.type === 'yes-no' && selectedSection?.id === section.id"
-              [section]="section">
+              [section]="section"
+              [participants]="participants">
             </app-yes-no-result>
-      
+
             <app-multiple-choice-result
               *ngIf="section.type === 'multiple-choice' && selectedSection?.id === section.id"
-              [section]="section">
+              [section]="section"
+              [participants]="participants">
             </app-multiple-choice-result>
-          </ng-container>
+        </ng-container>
     </div>
 </div>

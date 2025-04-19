@@ -30,6 +30,6 @@ export const routes: Routes = [
       { path: 'analytics', component: StudyAnalyticsPageComponent }
     ]
   },
-  { path: 'study-public', component: StudyPublicPageComponent },
-  { redirectTo: 'projects', pathMatch: 'full', path: '**' }, // Redirect to home for any other paths
+  { path: 'study-public/:id', component: StudyPublicPageComponent },
+  { path: '**', redirectTo: 'projects', pathMatch: 'full' } // Redirect to home for any other paths
 ];

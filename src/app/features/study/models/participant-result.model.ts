@@ -1,3 +1,4 @@
+/** @deprecated Use StudyResponse instead. This interface will be removed in a future version. */
 export interface ParticipantResult {
   id: string;
   studyId: string;
@@ -10,4 +11,4 @@ export interface ParticipantResult {
   }[];
   startedAt: Date;
   completedAt: Date;
-} 
+}

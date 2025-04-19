@@ -1,6 +1,5 @@
 export interface StudyResponse {
-  sectionId: string;
-  id?: string;
+  id: string;  // Ya no es opcional
   studyId: string;
   userId: string;
   responses: SectionResponse[];
@@ -42,4 +41,4 @@ export interface SectionAnalytics {
     word: string;
     count: number;
   }[];
-} 
+}

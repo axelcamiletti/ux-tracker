@@ -1,7 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Section } from '../../../models/section.model';
-import { ParticipantResult } from '../../../models/participant-result.model';
+import { StudyResponse } from '../../../models/study-response.model';
 import { MatIconModule } from '@angular/material/icon';
 
 @Component({
@@ -14,16 +14,16 @@ import { MatIconModule } from '@angular/material/icon';
 export class OpenQuestionResultComponent {
   @Input() section!: Section;
   @Input() title: string = '';
-  @Input() participants: ParticipantResult[] = [];
+  @Input() participants: StudyResponse[] = [];
 
-  getResponsesForSection(sectionId: string): ParticipantResult[] {
-    return this.participants.filter(participant => 
+  getResponsesForSection(sectionId: string): StudyResponse[] {
+    return this.participants.filter(participant =>
       participant.responses.some(response => response.sectionId === sectionId)
     );
   }
 
-  getParticipantResponse(participant: ParticipantResult, sectionId: string): string {
+  getParticipantResponse(participant: StudyResponse, sectionId: string): string {
     const response = participant.responses.find(r => r.sectionId === sectionId);
-    return response?.answer || '';
+    return response?.response || '';
   }
 }

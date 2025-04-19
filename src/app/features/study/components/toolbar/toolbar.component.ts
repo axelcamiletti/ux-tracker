@@ -10,6 +10,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { EditStudyNameModalComponent } from '../../modals/edit-study-name-modal/edit-study-name-modal.component';
+import { ShareStudyModalComponent } from '../../modals/share-study-modal/share-study-modal.component';
 
 @Component({
   selector: 'app-toolbar',
@@ -83,12 +84,18 @@ export class ToolbarComponent implements OnInit {
     if (!this.studyId) return;
 
     try {
-      
-      // Luego publicamos el estudio
+      // Publicar el estudio y generar la URL pública
       await this.studyService.publishStudy(this.studyId);
-      
+
+      // Abrir el modal de compartir con la URL pública
+      const publicUrl = `${window.location.origin}/study-public/${this.studyId}`;
+      this.dialog.open(ShareStudyModalComponent, {
+        data: { studyUrl: publicUrl },
+        width: '500px'
+      });
+
       this.snackBar.open('¡Estudio publicado con éxito!', 'Cerrar', { duration: 3000 });
-      
+
       // Redirigir a la página de estadísticas
       this.router.navigate(['/study', this.studyId, 'analytics']);
     } catch (error) {

@@ -2,5 +2,5 @@ export interface Participant {
   id: string;
   avatar: string;
   name?: string;
-  response?: any;
+  studyResponseId?: string;  // Referencia al StudyResponse asociado
 }

@@ -10,25 +10,33 @@
 
         <div class="flex gap-2 mt-4">
             <mat-form-field class="w-full">
-              <input matInput [value]="studyUrl" readonly type="text">
-              <button matSuffix mat-flat-button color="primary" (click)="copyToClipboard()">
-                <mat-icon>content_copy</mat-icon>
-                Copy link
-              </button>
+                <input matInput [value]="studyUrl" readonly type="text" #urlInput>
+                <button matSuffix mat-flat-button color="primary" (click)="copyToClipboard(urlInput)">
+                    <mat-icon>content_copy</mat-icon>
+                    Copy link
+                </button>
             </mat-form-field>
-          </div>
-    
-        <button class="absolute! top-2 right-2 text-white!" mat-icon-button (click)="close()"><mat-icon>close</mat-icon></button>
+        </div>
+
+        <button class="absolute! top-2 right-2 text-white!" mat-icon-button (click)="close()">
+            <mat-icon>close</mat-icon>
+        </button>
     </div>
 
     <div class="content p-10">
-        <p class="text-sm font-bold mb-5">LINK OPTIONS</p>
-        <mat-slide-toggle>
+        <p class="text-sm font-bold mb-5">OPCIONES DE ESTUDIO</p>
+        <mat-slide-toggle [formControl]="allowMultipleResponses">
             <div class="flex items-center gap-2">
-                <span class="text-lg underline font-bold ml-4">Unique session</span>
+                <span class="text-lg underline font-bold ml-4">Permitir múltiples respuestas</span>
                 <mat-icon>refresh</mat-icon>
             </div>
         </mat-slide-toggle>
-        <p class="mt-2">Allow only one unique session per tester device.</p>
+        <p class="mt-2 text-gray-600">Permite que un mismo usuario pueda enviar múltiples respuestas.</p>
+    </div>
+
+    <div class="footer border-t border-gray-200 p-6 flex justify-end">
+        <button mat-flat-button color="primary" (click)="saveAndClose()">
+            Guardar y cerrar
+        </button>
     </div>
 </div>

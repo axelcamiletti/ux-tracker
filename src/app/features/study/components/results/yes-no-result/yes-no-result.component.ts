@@ -2,7 +2,7 @@ import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { Section } from '../../../models/section.model';
-import { ParticipantResult } from '../../../models/participant-result.model';
+import { StudyResponse } from '../../../models/study-response.model';
 
 @Component({
   selector: 'app-yes-no-result',
@@ -13,6 +13,16 @@ import { ParticipantResult } from '../../../models/participant-result.model';
 })
 export class YesNoResultComponent {
   @Input() section!: Section;
-  @Input() title: string = '';
-  @Input() responses: ParticipantResult[] = [];
+  @Input() participants: StudyResponse[] = [];
+
+  getResponsesForSection(sectionId: string): StudyResponse[] {
+    return this.participants.filter(participant =>
+      participant.responses.some(response => response.sectionId === sectionId)
+    );
+  }
+
+  getParticipantResponse(participant: StudyResponse, sectionId: string): string {
+    const response = participant.responses.find(r => r.sectionId === sectionId);
+    return response?.response || '';
+  }
 }

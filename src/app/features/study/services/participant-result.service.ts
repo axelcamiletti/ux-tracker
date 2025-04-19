@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { AngularFirestore } from '@angular/fire/compat/firestore';
+import { Firestore, collection, addDoc, query, where, collectionData } from '@angular/fire/firestore';
 import { ParticipantResult } from '../models/participant-result.model';
 import { Observable } from 'rxjs';
 
@@ -9,25 +9,23 @@ import { Observable } from 'rxjs';
 export class ParticipantResultService {
   private readonly COLLECTION = 'participant-results';
 
-  constructor(private firestore: AngularFirestore) {}
+  constructor(private firestore: Firestore) {}
 
-  saveResult(result: Omit<ParticipantResult, 'id'>): Promise<string> {
-    const id = this.firestore.createId();
-    return this.firestore.collection(this.COLLECTION)
-      .doc(id)
-      .set({ ...result, id })
-      .then(() => id);
+  async saveResult(result: Omit<ParticipantResult, 'id'>): Promise<string> {
+    const collectionRef = collection(this.firestore, this.COLLECTION);
+    const docRef = await addDoc(collectionRef, result);
+    return docRef.id;
   }
 
   getResultsByStudyId(studyId: string): Observable<ParticipantResult[]> {
-    return this.firestore.collection<ParticipantResult>(this.COLLECTION, ref =>
-      ref.where('studyId', '==', studyId)
-    ).valueChanges();
+    const collectionRef = collection(this.firestore, this.COLLECTION);
+    const q = query(collectionRef, where('studyId', '==', studyId));
+    return collectionData(q) as Observable<ParticipantResult[]>;
   }
 
   getResultsByParticipantId(participantId: string): Observable<ParticipantResult[]> {
-    return this.firestore.collection<ParticipantResult>(this.COLLECTION, ref =>
-      ref.where('participantId', '==', participantId)
-    ).valueChanges();
+    const collectionRef = collection(this.firestore, this.COLLECTION);
+    const q = query(collectionRef, where('participantId', '==', participantId));
+    return collectionData(q) as Observable<ParticipantResult[]>;
   }
-} 
+}

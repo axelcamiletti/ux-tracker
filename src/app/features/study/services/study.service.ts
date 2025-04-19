@@ -53,7 +53,7 @@ export class StudyService {
   getStudiesByProjectId(projectId: string): Observable<Study[]> {
     const studiesRef = collection(this.firestore, this.collectionName);
     const q = query(studiesRef, where('projectId', '==', projectId));
-    
+
     return from(getDocs(q)).pipe(
       map(snapshot => {
         return snapshot.docs.map(doc => ({
@@ -94,7 +94,7 @@ export class StudyService {
 
   // Obtener respuestas por sección
   getResponsesBySection(sectionId: string): StudyResponse[] {
-    return this.responses.value.filter(r => r.sectionId === sectionId);
+    return this.responses.value.filter(r => r.id === sectionId);
   }
 
   // Persistencia en localStorage
@@ -134,14 +134,16 @@ export class StudyService {
     return deleteDoc(studyRef);
   }
 
+  // Publicar un estudio y generar URL pública
   async publishStudy(studyId: string): Promise<void> {
-    const publicUrl = `${environment.baseUrl}/study-public/${studyId}`;
     const studyRef = doc(this.firestore, this.collectionName, studyId);
-    
+    const publicUrl = `${environment.baseUrl}/study-public/${studyId}`;
+
     await updateDoc(studyRef, {
       status: 'published',
       publicUrl: publicUrl,
+      publishedAt: new Date(),
       updatedAt: new Date()
     });
   }
-} 
+}

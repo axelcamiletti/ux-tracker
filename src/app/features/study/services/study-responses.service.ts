@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
-import { Firestore, collection, addDoc, updateDoc, doc, query, where, getDocs, DocumentData } from '@angular/fire/firestore';
+import { Firestore, collection, addDoc, updateDoc, doc, query, where, getDocs, getDoc, DocumentData, arrayUnion } from '@angular/fire/firestore';
 import { Observable, from, map } from 'rxjs';
-import { SectionAnalytics, StudyAnalytics, StudyResponse } from '../models/study-response.model';
+import { SectionAnalytics, StudyAnalytics, StudyResponse, SectionResponse } from '../models/study-response.model';
+import { Study } from '../models/study.model';
 
 @Injectable({
   providedIn: 'root'
@@ -10,13 +11,13 @@ export class StudyResponsesService {
   constructor(private firestore: Firestore) {}
 
   // Crear una nueva respuesta de estudio
-  async createStudyResponse(studyId: string, userId: string): Promise<string> {
+  async createStudyResponse(studyId: string): Promise<string> {
     const studyResponse: StudyResponse = {
       studyId,
-      userId,
+      userId: crypto.randomUUID(), // Generamos un ID único para el participante
       responses: [],
       startedAt: new Date(),
-      sectionId: '', // Added missing required property
+      sectionId: '',
       status: 'in-progress'
     };
 
@@ -25,20 +26,43 @@ export class StudyResponsesService {
   }
 
   // Actualizar una respuesta de sección
-  async updateSectionResponse(responseId: string, sectionResponse: any): Promise<void> {
+  async updateSectionResponse(responseId: string, sectionId: string, response: any): Promise<void> {
     const docRef = doc(this.firestore, 'study-responses', responseId);
+    const sectionResponse: SectionResponse = {
+      sectionId,
+      type: response.type,
+      response: response.value,
+      timestamp: new Date()
+    };
+
     await updateDoc(docRef, {
-      responses: sectionResponse,
+      responses: arrayUnion(sectionResponse),
       lastUpdated: new Date()
     });
   }
 
-  // Finalizar un estudio
+  // Finalizar un estudio y actualizar el contador de respuestas
   async completeStudy(responseId: string): Promise<void> {
-    const docRef = doc(this.firestore, 'study-responses', responseId);
-    await updateDoc(docRef, {
+    // 1. Obtener la respuesta actual
+    const responseRef = doc(this.firestore, 'study-responses', responseId);
+    const responseDoc = await getDoc(responseRef);
+    const response = responseDoc.data() as StudyResponse;
+
+    // 2. Marcar la respuesta como completada
+    await updateDoc(responseRef, {
       status: 'completed',
       completedAt: new Date()
+    });
+
+    // 3. Obtener el estudio y actualizar el contador de respuestas
+    const studyRef = doc(this.firestore, 'studies', response.studyId);
+    const studyDoc = await getDoc(studyRef);
+    const study = studyDoc.data() as Study;
+
+    // 4. Incrementar el contador de respuestas
+    await updateDoc(studyRef, {
+      totalResponses: (study.totalResponses || 0) + 1,
+      updatedAt: new Date()
     });
   }
 
@@ -65,7 +89,7 @@ export class StudyResponsesService {
 
     const analytics: StudyAnalytics = {
       totalResponses,
-      completionRate: (completedResponses / totalResponses) * 100,
+      completionRate: totalResponses > 0 ? (completedResponses / totalResponses) * 100 : 0,
       averageTimeSpent: this.calculateAverageTimeSpent(responses),
       sectionAnalytics: this.calculateSectionAnalytics(responses)
     };
@@ -103,7 +127,6 @@ export class StudyResponsesService {
         section.totalResponses++;
         section.responses.push(sectionResponse.response);
 
-        // Calcular distribuciones específicas según el tipo
         switch (sectionResponse.type) {
           case 'yes-no':
             this.updateYesNoDistribution(section, sectionResponse.response);
@@ -161,4 +184,4 @@ export class StudyResponsesService {
     section.commonKeywords.sort((a, b) => b.count - a.count);
     section.commonKeywords = section.commonKeywords.slice(0, 10);
   }
-} 
+}

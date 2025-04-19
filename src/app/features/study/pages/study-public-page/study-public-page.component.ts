@@ -2,10 +2,11 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { Section } from '../../models/section.model';
 import { ActivatedRoute, Router } from '@angular/router';
-/* import { StudyService, StudyResponse, Study } from '../../services/study.service'; */
 import { trigger, transition, style, animate } from '@angular/animations';
+import { firstValueFrom } from 'rxjs';
 
 // Importar los componentes de preview
 import { WelcomeScreenPreviewComponent } from '../../components/previews/welcome-screen-preview/welcome-screen-preview.component';
@@ -14,9 +15,8 @@ import { YesNoPreviewComponent } from '../../components/previews/yes-no-preview/
 import { MultipleChoicePreviewComponent } from '../../components/previews/multiple-choice-preview/multiple-choice-preview.component';
 import { PrototypeTestPreviewComponent } from '../../components/previews/prototype-test-preview/prototype-test-preview.component';
 import { ThankYouPreviewComponent } from '../../components/previews/thank-you-preview/thank-you-preview.component';
-import { Study } from '../../models/study.model';
 import { StudyService } from '../../services/study.service';
-import { StudyResponse } from '../../models/study-response.model';
+import { StudyResponsesService } from '../../services/study-responses.service';
 
 @Component({
   selector: 'app-study-public-page',
@@ -49,123 +49,52 @@ import { StudyResponse } from '../../models/study-response.model';
 export class StudyPublicPageComponent implements OnInit {
   currentSectionIndex = 0;
   studyId: string = '';
-  sections: Section[] = [
-    {
-      id: 'welcome',
-      type: 'welcome-screen',
-      data: {
-        title: '¡Bienvenido a nuestro estudio de UX!',
-        subtitle: 'Tu opinión es muy importante para nosotros. Por favor, tómate unos minutos para responder las siguientes preguntas.'
-      }
-    },
-    {
-      id: 'question1',
-      type: 'open-question',
-      data: {
-        title: 'Primera impresión',
-        subtitle: '¿Cuál fue tu primera impresión al ver la interfaz?'
-      }
-    },
-    {
-      id: 'question2',
-      type: 'multiple-choice',
-      data: {
-        title: 'Frecuencia de uso',
-        subtitle: '¿Con qué frecuencia usarías esta funcionalidad?',
-        selectionType: 'single',
-        options: [
-          { id: 1, label: 'Diariamente' },
-          { id: 2, label: 'Semanalmente' },
-          { id: 3, label: 'Mensualmente' },
-          { id: 4, label: 'Raramente' }
-        ]
-      }
-    },
-    {
-      id: 'question3',
-      type: 'yes-no',
-      data: {
-        title: 'Facilidad de uso',
-        subtitle: '¿Te resultó fácil encontrar la información que buscabas?'
-      }
-    },
-    {
-      id: 'question4',
-      type: 'prototype-test',
-      data: {
-        title: 'Prueba de prototipo',
-        subtitle: 'Por favor, completa las siguientes tareas:',
-        prototypeUrl: 'https://example.com/prototype.png',
-        tasks: [
-          'Encuentra el menú de configuración',
-          'Cambia tu foto de perfil',
-          'Busca un contacto específico'
-        ]
-      }
-    },
-    {
-      id: 'question5',
-      type: 'multiple-choice',
-      data: {
-        title: 'Características importantes',
-        subtitle: '¿Qué características consideras más importantes? (Puedes seleccionar varias)',
-        selectionType: 'multiple',
-        options: [
-          { id: 1, label: 'Diseño moderno' },
-          { id: 2, label: 'Velocidad de carga' },
-          { id: 3, label: 'Facilidad de uso' },
-          { id: 4, label: 'Funcionalidades avanzadas' }
-        ]
-      }
-    },
-    {
-      id: 'thanks',
-      type: 'thank-you',
-      data: {
-        title: '¡Gracias por tu participación!',
-        subtitle: 'Tu feedback es invaluable para nosotros. Con tu ayuda, podremos mejorar la experiencia de usuario.'
-      }
-    }
-  ];
+  responseId: string = '';
+  sections: Section[] = [];
   responses: { [key: string]: any } = {};
 
   constructor(
     private studyService: StudyService,
+    private studyResponsesService: StudyResponsesService,
     private route: ActivatedRoute,
-    private router: Router
+    private router: Router,
+    private snackBar: MatSnackBar
   ) {}
 
-  ngOnInit() {
+  async ngOnInit() {
     // Obtener el ID del estudio de la URL
     this.studyId = this.route.snapshot.params['id'];
-    
-    // Crear un estudio mock con las secciones
-    const mockStudy: Study = {
-      id: this.studyId || 'mock-study',
-      name: 'Estudio de UX',
-      sections: this.sections,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      projectId: '',
-      status: 'draft'
-    };
 
-    // Establecer el estudio actual
-    this.studyService.setCurrentStudy(mockStudy);
+    if (!this.studyId) {
+      this.snackBar.open('Error: No se encontró el ID del estudio', 'Cerrar', { duration: 3000 });
+      return;
+    }
 
-    // Suscribirse a las respuestas guardadas
-    this.studyService.getResponses().subscribe(responses => {
-      // Actualizar las respuestas locales con las guardadas
-      responses.forEach(response => {
-        this.responses[response.sectionId] = response.responses;
-        
-        // Actualizar la sección correspondiente con la respuesta
-        const section = this.sections.find(s => s.id === response.sectionId);
-        if (section) {
-          section.response = response.responses;
-        }
-      });
-    });
+    try {
+      // Cargar el estudio
+      const study = await firstValueFrom(this.studyService.getStudyById(this.studyId));
+
+      if (study.status !== 'published') {
+        this.snackBar.open('Este estudio no está disponible', 'Cerrar', { duration: 3000 });
+        return;
+      }
+
+      // Verificar si el usuario ya completó el estudio y no se permiten múltiples respuestas
+      const hasCompleted = localStorage.getItem(`study_${this.studyId}_completed`);
+      if (hasCompleted && !study.allowMultipleResponses) {
+        this.snackBar.open('Ya has completado este estudio', 'Cerrar', { duration: 3000 });
+        return;
+      }
+
+      this.sections = study.sections;
+
+      // Crear una nueva respuesta de estudio
+      this.responseId = await this.studyResponsesService.createStudyResponse(this.studyId);
+
+    } catch (error) {
+      console.error('Error loading study:', error);
+      this.snackBar.open('Error al cargar el estudio', 'Cerrar', { duration: 3000 });
+    }
   }
 
   nextSection() {
@@ -197,18 +126,22 @@ export class StudyPublicPageComponent implements OnInit {
   }
 
   // Guardar la respuesta de la sección actual
-  private saveCurrentResponse() {
+  private async saveCurrentResponse() {
     const currentSection = this.getCurrentSection();
     if (currentSection && this.responses[currentSection.id]) {
-      const response: StudyResponse = {
-        sectionId: currentSection.id,
-        studyId: this.studyId,
-        userId: 'current-user', // TODO: Reemplazar con el ID del usuario actual
-        responses: this.responses[currentSection.id],
-        startedAt: new Date(),
-        status: 'in-progress'
-      };
-      this.studyService.saveResponse(response);
+      try {
+        await this.studyResponsesService.updateSectionResponse(
+          this.responseId,
+          currentSection.id,
+          {
+            type: currentSection.type,
+            value: this.responses[currentSection.id]
+          }
+        );
+      } catch (error) {
+        console.error('Error saving response:', error);
+        this.snackBar.open('Error al guardar la respuesta', 'Cerrar', { duration: 3000 });
+      }
     }
   }
 
@@ -222,9 +155,19 @@ export class StudyPublicPageComponent implements OnInit {
   }
 
   // Finalizar el estudio
-  private finishStudy() {
-    this.saveCurrentResponse();
-    // Aquí podrías agregar lógica adicional al finalizar el estudio
-    this.router.navigate(['/study-completed']);
+  private async finishStudy() {
+    try {
+      await this.saveCurrentResponse();
+      await this.studyResponsesService.completeStudy(this.responseId);
+
+      // Marcar el estudio como completado en localStorage
+      localStorage.setItem(`study_${this.studyId}_completed`, 'true');
+
+      this.snackBar.open('¡Gracias por completar el estudio!', 'Cerrar', { duration: 3000 });
+      this.router.navigate(['/']);
+    } catch (error) {
+      console.error('Error completing study:', error);
+      this.snackBar.open('Error al finalizar el estudio', 'Cerrar', { duration: 3000 });
+    }
   }
 }

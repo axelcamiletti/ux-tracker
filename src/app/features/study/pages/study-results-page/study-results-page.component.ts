@@ -4,15 +4,17 @@ import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatIconModule } from '@angular/material/icon';
 import { FormsModule } from '@angular/forms';
 import { StudyService } from '../../services/study.service';
-import { ParticipantResultService } from '../../services/participant-result.service';
+import { StudyResponsesService } from '../../services/study-responses.service';
 import { Section } from '../../models/section.model';
-import { ParticipantResult } from '../../models/participant-result.model';
+import { StudyResponse } from '../../models/study-response.model';
 import { ClipElementComponent } from "../../components/clip-element/clip-element.component";
 import { ParticipantCardComponent } from "../../components/participant-card/participant-card.component";
 import { OpenQuestionResultComponent } from "../../components/results/open-question-result/open-question-result.component";
 import { YesNoResultComponent } from "../../components/results/yes-no-result/yes-no-result.component";
 import { MultipleChoiceResultComponent } from "../../components/results/multiple-choice-result/multiple-choice-result.component";
 import { MatButtonToggleChange } from '@angular/material/button-toggle';
+import { ActivatedRoute } from '@angular/router';
+import { Firestore, collection, query, where, getDocs } from '@angular/fire/firestore';
 
 @Component({
   selector: 'app-study-results-page',
@@ -25,18 +27,25 @@ export class StudyResultsPageComponent implements OnInit {
   activeView: 'results' | 'participants' = 'results';
   sections: Section[] = [];
   selectedSection: Section | null = null;
-  selectedParticipant: ParticipantResult | null = null;
-  participants: ParticipantResult[] = [];
+  selectedParticipant: StudyResponse | null = null;
+  participants: StudyResponse[] = [];
   studyId: string = '';
 
   constructor(
     private studyService: StudyService,
-    private participantResultService: ParticipantResultService,
+    private studyResponsesService: StudyResponsesService,
+    private route: ActivatedRoute,
+    private firestore: Firestore
   ) {}
 
   ngOnInit() {
-    this.loadSections();
-    this.loadParticipants();
+    this.studyId = this.route.parent?.snapshot.paramMap.get('id') || '';
+    if (this.studyId) {
+      this.loadSections();
+      this.loadParticipants();
+    } else {
+      console.error('No se encontró el ID del estudio en la URL');
+    }
   }
 
   loadSections() {
@@ -54,15 +63,23 @@ export class StudyResultsPageComponent implements OnInit {
     });
   }
 
-  loadParticipants() {
-    this.participantResultService.getResultsByStudyId(this.studyId).subscribe({
-      next: (results) => {
-        this.participants = results;
-      },
-      error: (error) => {
-        console.error('Error al cargar los participantes:', error);
-      }
-    });
+  async loadParticipants() {
+    try {
+      const analytics = await this.studyResponsesService.getStudyAnalytics(this.studyId);
+      const q = query(
+        collection(this.firestore, 'study-responses'),
+        where('studyId', '==', this.studyId),
+        where('status', '==', 'completed')
+      );
+
+      const querySnapshot = await getDocs(q);
+      this.participants = querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      } as StudyResponse));
+    } catch (error) {
+      console.error('Error al cargar los participantes:', error);
+    }
   }
 
   getFilteredSections(): Section[] {
@@ -81,11 +98,11 @@ export class StudyResultsPageComponent implements OnInit {
     this.selectedSection = this.selectedSection?.id === section.id ? null : section;
   }
 
-  selectParticipant(participant: ParticipantResult): void {
+  selectParticipant(participant: StudyResponse): void {
     this.selectedParticipant = this.selectedParticipant?.id === participant.id ? null : participant;
   }
 
-  getParticipantResponses(sectionId: string): ParticipantResult['responses'] {
+  getParticipantResponses(sectionId: string): StudyResponse['responses'] {
     if (!this.selectedParticipant) return [];
     return this.selectedParticipant.responses.filter(response => response.sectionId === sectionId);
   }
