@@ -10,33 +10,65 @@
 </div>
 
 <div class="form p-8">
-  <label class="label">Question *</label>
-  <mat-form-field appearance="outline" class="w-full">
-    <input
-      id="question"
-      matInput
-      placeholder="Type your question here"
-      required
-      [ngModel]="formData.title"
-      (ngModelChange)="onTitleChange($event)"
-      type="text" />
-    <mat-error>A title is required to create this block.</mat-error>
-  </mat-form-field>
+  <div class="p-4">
+    <!-- Title -->
+    <mat-form-field class="w-full">
+      <mat-label>Question</mat-label>
+      <input matInput [(ngModel)]="formData.title" (ngModelChange)="onTitleChange($event)" placeholder="Enter your question">
+    </mat-form-field>
 
-  <label class="label">Message</label>
-  <mat-form-field appearance="outline" class="w-full">
-    <textarea
-      matInput
-      placeholder="Type extra details here. This is optional."
-      [ngModel]="formData.description"
-      (ngModelChange)="onSubtitleChange($event)"
-    ></textarea>
-  </mat-form-field>
+    <!-- Description -->
+    <mat-form-field class="w-full mt-2">
+      <mat-label>Description (optional)</mat-label>
+      <textarea matInput [(ngModel)]="formData.description" (ngModelChange)="onSubtitleChange($event)" placeholder="Add a description"></textarea>
+    </mat-form-field>
 
-  <p><b>Image</b></p>
-  <p>Upload you logo or custom image</p>
+    <!-- Yes/No Labels -->
+    <div class="flex gap-4 mt-4">
+      <mat-form-field class="flex-1">
+        <mat-label>Yes Label</mat-label>
+        <input matInput [(ngModel)]="formData.yesLabel" (ngModelChange)="onLabelChange('yes', $event)" placeholder="Yes">
+      </mat-form-field>
+
+      <mat-form-field class="flex-1">
+        <mat-label>No Label</mat-label>
+        <input matInput [(ngModel)]="formData.noLabel" (ngModelChange)="onLabelChange('no', $event)" placeholder="No">
+      </mat-form-field>
+    </div>
+
+    <!-- Yes/No Descriptions -->
+    <div class="flex gap-4 mt-2">
+      <mat-form-field class="flex-1">
+        <mat-label>Yes Description (optional)</mat-label>
+        <textarea matInput [(ngModel)]="formData.yesDescription" (ngModelChange)="onDescriptionChange('yes', $event)" placeholder="Add description for Yes option"></textarea>
+      </mat-form-field>
+
+      <mat-form-field class="flex-1">
+        <mat-label>No Description (optional)</mat-label>
+        <textarea matInput [(ngModel)]="formData.noDescription" (ngModelChange)="onDescriptionChange('no', $event)" placeholder="Add description for No option"></textarea>
+      </mat-form-field>
+    </div>
+
+    <!-- Button Style Selection -->
+    <div class="mt-4">
+      <h3 class="text-sm font-medium mb-2">Button Style</h3>
+      <div class="flex gap-2">
+        <button mat-stroked-button [class.selected]="formData.buttonStyle === 'default'" (click)="onButtonStyleChange('default')">
+          <mat-icon>check_circle</mat-icon>
+          Default
+        </button>
+        <button mat-stroked-button [class.selected]="formData.buttonStyle === 'emoji'" (click)="onButtonStyleChange('emoji')">
+          <mat-icon>emoji_emotions</mat-icon>
+          Emoji
+        </button>
+        <button mat-stroked-button [class.selected]="formData.buttonStyle === 'thumbs'" (click)="onButtonStyleChange('thumbs')">
+          <mat-icon>thumb_up</mat-icon>
+          Thumbs
+        </button>
+      </div>
+    </div>
+  </div>
 </div>
-
 
 <mat-menu #menu="matMenu">
   <button mat-menu-item>Add comment</button>

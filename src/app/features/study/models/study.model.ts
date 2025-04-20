@@ -7,10 +7,23 @@ export interface StudySettings {
   requireEmail: boolean;
   showProgressBar: boolean;
   collectDeviceInfo: boolean;
+  timeoutSettings?: {
+    enableTimeout: boolean;
+    timeoutMinutes: number;
+    showWarning: boolean;
+    warningAtMinutes: number;
+  };
+  notifications?: {
+    onNewResponse: boolean;
+    onCompletion: boolean;
+    emailAddresses: string[];
+  };
   customBranding?: {
     logo?: string;
     primaryColor?: string;
     secondaryColor?: string;
+    fontFamily?: string;
+    customCss?: string;
   };
 }
 
@@ -22,24 +35,24 @@ export interface Study {
   status: 'draft' | 'published' | 'completed' | 'archived';
   sections: Section[];
   settings: StudySettings;
-  
-  // URLs
+
+  // Public access URLs
   publicUrl?: string;
   previewUrl?: string;
-  
-  // Estadísticas
+
+  // Statistics
   stats: {
     totalResponses: number;
     completedResponses: number;
     averageCompletionTime?: number;
     lastResponseAt?: Date;
   };
-  
-  // Referencias a respuestas y participantes
+
+  // Reference to responses and participants
   participantIds: string[];
   responseIds: string[];
-  
-  // Metadatos
+
+  // Metadata
   createdAt: Date;
   updatedAt: Date;
   publishedAt?: Date;

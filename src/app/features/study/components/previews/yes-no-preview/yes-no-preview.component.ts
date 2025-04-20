@@ -5,6 +5,8 @@ import { MatIconModule } from '@angular/material/icon';
 import { YesNoSection } from '../../../models/section.model';
 import { YesNoResponse } from '../../../models/study-response.model';
 
+type ButtonStyle = 'default' | 'emoji' | 'thumbs';
+
 @Component({
   selector: 'app-yes-no-preview',
   standalone: true,
@@ -21,15 +23,25 @@ export class YesNoPreviewComponent {
   previewData = {
     title: '',
     description: '',
-    required: false
+    required: false,
+    yesLabel: '',
+    noLabel: '',
+    yesDescription: '',
+    noDescription: '',
+    buttonStyle: 'default' as ButtonStyle
   };
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['section'] && this.section) {
       this.previewData = {
-        title: this.section.title || 'No se ha ingresado el título',
+        title: this.section.title || '',
         description: this.section.description || '',
-        required: this.section.required || false
+        required: this.section.required,
+        yesLabel: this.section.data.yesLabel || 'Sí',
+        noLabel: this.section.data.noLabel || 'No',
+        yesDescription: this.section.data.yesDescription || '',
+        noDescription: this.section.data.noDescription || '',
+        buttonStyle: this.section.data.buttonStyle || 'default'
       };
     }
   }
@@ -40,14 +52,16 @@ export class YesNoPreviewComponent {
   }
 
   private emitResponse() {
-    const response: YesNoResponse = {
-      sectionId: this.section.id,
-      timestamp: new Date(),
-      type: 'yes-no',
-      response: {
-        answer: this.selectedOption === 'yes'
-      }
-    };
-    this.responseChange.emit(response);
+    if (this.selectedOption) {
+      const response: YesNoResponse = {
+        sectionId: this.section.id,
+        timestamp: new Date(),
+        type: 'yes-no',
+        response: {
+          answer: this.selectedOption === 'yes'
+        }
+      };
+      this.responseChange.emit(response);
+    }
   }
 }

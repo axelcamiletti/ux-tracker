@@ -28,7 +28,12 @@ export interface MultipleChoiceSection extends BaseSection {
 export interface YesNoSection extends BaseSection {
   type: 'yes-no';
   data: {
-    selectedOption?: string;
+    yesLabel: string;
+    noLabel: string;
+    yesDescription?: string;
+    noDescription?: string;
+    selectedOption?: 'yes' | 'no';
+    buttonStyle?: 'default' | 'emoji' | 'thumbs';
   };
 }
 
@@ -37,6 +42,23 @@ export interface PrototypeTestSection extends BaseSection {
   data: {
     prototypeUrl: string;
     instructions?: string;
+    interactionTracking?: {
+      enabled: boolean;
+      trackClicks: boolean;
+      trackMouseMovement: boolean;
+      trackScrolling: boolean;
+      trackKeyboard: boolean;
+      elements?: Array<{
+        selector: string;
+        description: string;
+        expectedAction?: string;
+      }>;
+    };
+    timeLimit?: number; // in seconds
+    successCriteria?: {
+      requiredActions: string[];
+      maxAttempts?: number;
+    };
   };
 }
 

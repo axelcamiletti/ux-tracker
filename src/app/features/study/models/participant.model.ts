@@ -1,13 +1,22 @@
+import { DeviceInfo } from './study-response.model';
+
+export interface ParticipantMetadata {
+  location?: {
+    country?: string;
+    city?: string;
+    timezone?: string;
+  };
+  referrer?: string;
+  customFields?: {
+    [key: string]: string | number | boolean;
+  };
+}
+
 export interface Participant {
   id: string;
   studyId: string;
   email?: string;
-  deviceInfo: {
-    browser: string;
-    os: string;
-    screenSize: string;
-    userAgent?: string;
-  };
+  deviceInfo: DeviceInfo;
   startedAt: Date;
   completedAt?: Date;
   lastInteractionAt: Date;
@@ -15,9 +24,7 @@ export interface Participant {
   progress: {
     currentSectionIndex: number;
     totalSections: number;
-    completedSections: string[];  // Array de sectionIds completadas
+    completedSections: string[];  // Array of completed sectionIds
   };
-  metadata?: {
-    [key: string]: any;  // Datos adicionales que podríamos querer guardar
-  };
+  metadata?: ParticipantMetadata;
 }

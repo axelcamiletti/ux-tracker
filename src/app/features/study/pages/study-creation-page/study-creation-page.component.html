@@ -27,12 +27,12 @@
       </ng-container>
 
       <!-- Botón para agregar páginas -->
-      <button mat-stroked-button color="primary" (click)="showClipMenu = !showClipMenu" class="w-full">
+      <button mat-stroked-button color="primary" (click)="showClipMenu = !showClipMenu" class="w-full mb-3">
         <mat-icon>add</mat-icon> Add page
       </button>
 
       <!-- Menú de tipos de páginas -->
-      <div *ngIf="showClipMenu" class="menu bg-white border rounded-xl p-2 mb-3 mt-2">
+      <div *ngIf="showClipMenu" class="menu bg-white border rounded-xl p-2 mb-3">
         <button (click)="addSection('open-question')" class="w-full text-left px-3 py-2 hover:bg-gray-100 rounded">Agregar Open Question</button>
         <button (click)="addSection('prototype-test')" class="w-full text-left px-3 py-2 hover:bg-gray-100 rounded">Agregar Prototype Test</button>
         <button (click)="addSection('yes-no')" class="w-full text-left px-3 py-2 hover:bg-gray-100 rounded">Agregar Yes/No</button>

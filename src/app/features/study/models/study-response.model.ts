@@ -1,3 +1,10 @@
+export interface DeviceInfo {
+  browser: string;
+  os: string;
+  screenSize: string;
+  userAgent?: string;
+}
+
 export interface BaseSectionResponse {
   sectionId: string;
   timestamp: Date;
@@ -68,11 +75,8 @@ export interface StudyResponse {
   startedAt: Date;
   completedAt?: Date;
   status: 'in-progress' | 'completed' | 'abandoned';
-  deviceInfo?: {
-    browser: string;
-    os: string;
-    screenSize: string;
-  };
+  deviceInfo?: DeviceInfo;
+  sectionTimes?: { [sectionId: string]: number };
 }
 
 export interface StudyAnalytics {

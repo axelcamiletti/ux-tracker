@@ -117,7 +117,9 @@ export class ProjectPageComponent implements OnInit, OnDestroy {
       },
       stats: {
         totalResponses: 0,
-        completedResponses: 0
+        completedResponses: 0,
+        averageCompletionTime: 0,
+        lastResponseAt: new Date()
       },
       participantIds: [],
       responseIds: [],
