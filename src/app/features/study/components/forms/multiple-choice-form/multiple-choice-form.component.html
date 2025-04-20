@@ -10,7 +10,6 @@
 </div>
 
 <div class="form p-8">
-
   <label class="label">Question *</label>
   <mat-form-field appearance="outline" class="w-full">
     <input
@@ -18,41 +17,52 @@
       matInput
       placeholder="Type your question here"
       required
-      [ngModel]="formData.title"
+      [ngModel]="section.title"
       (ngModelChange)="onTitleChange($event)"
       type="text" />
     <mat-error>A title is required to create this block.</mat-error>
   </mat-form-field>
 
-  <label class="label">Add notes</label>
+  <label class="label">Description</label>
   <mat-form-field appearance="outline" class="w-full">
     <textarea
       matInput
       placeholder="Type extra details here. This is optional."
-      [ngModel]="formData.subtitle"
-      (ngModelChange)="onSubtitleChange($event)"
+      [ngModel]="section.description"
+      (ngModelChange)="onDescriptionChange($event)"
     ></textarea>
   </mat-form-field>
 
-  <label class="label">Type selection</label>
-  <mat-radio-group aria-label="Select an option" [(ngModel)]="formData.selectionType" (selectionChange)="updateForm()" class="flex gap-4">
-    <mat-radio-button value="single" class="w-full block border border-gray-200 rounded-xl">Single selection</mat-radio-button>
-    <mat-radio-button value="multiple" class="w-full block border border-gray-200 rounded-xl">Multiple selections</mat-radio-button>
+  <label class="label">Selection Type</label>
+  <mat-radio-group aria-label="Select an option" [(ngModel)]="section.data.allowMultiple" (change)="updateAllowMultiple($event.value)" class="flex gap-4">
+    <mat-radio-button [value]="false" class="w-full block border border-gray-200 rounded-xl">Single selection</mat-radio-button>
+    <mat-radio-button [value]="true" class="w-full block border border-gray-200 rounded-xl">Multiple selections</mat-radio-button>
   </mat-radio-group>
 
   <div class="flex items-center justify-between mb-2 mt-4">
     <label class="label">Choices *</label>
   </div>
 
-  <mat-form-field appearance="outline" class="w-full" *ngFor="let option of formData.options">
-    <input matInput placeholder="Enter choice" [(ngModel)]="option.label" (ngModelChange)="updateOptionLabel(option.id, $event)"  />
-    <button matSuffix mat-icon-button color="warn" (click)="removeOption(option.id)" *ngIf="formData.options.length > 1">
+  <mat-form-field appearance="outline" class="w-full" *ngFor="let option of section.data.options">
+    <input
+      matInput
+      placeholder="Enter choice"
+      [ngModel]="option.text"
+      (ngModelChange)="updateOptionText(option.id, $event)" />
+    <button
+      matSuffix
+      mat-icon-button
+      color="warn"
+      (click)="removeOption(option.id)"
+      *ngIf="section.data.options.length > 1">
       <mat-icon>delete</mat-icon>
     </button>
   </mat-form-field>
-  <button mat-stroked-button color="secondary" (click)="addOption()"><mat-icon>add</mat-icon> Add new choice</button>
-</div>
 
+  <button mat-stroked-button color="secondary" (click)="addOption()">
+    <mat-icon>add</mat-icon> Add new choice
+  </button>
+</div>
 
 <mat-menu #menu="matMenu">
   <button mat-menu-item>Add comment</button>

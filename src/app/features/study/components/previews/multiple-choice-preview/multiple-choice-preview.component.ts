@@ -1,7 +1,7 @@
 import { Component, Input, Output, EventEmitter, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Section } from '../../../models/section.model';
-import { MultipleChoiceData } from '../../../models/multiple-choice.model';
+import { MultipleChoiceSection } from '../../../models/section.model';
+import { MultipleChoiceResponse } from '../../../models/study-response.model';
 
 @Component({
   selector: 'app-multiple-choice-preview',
@@ -11,37 +11,33 @@ import { MultipleChoiceData } from '../../../models/multiple-choice.model';
   styleUrl: './multiple-choice-preview.component.css'
 })
 export class MultipleChoicePreviewComponent {
-  @Input() section: Section | null = null;
-  @Output() responseChange = new EventEmitter<any>();
+  @Input() section!: MultipleChoiceSection;
+  @Output() responseChange = new EventEmitter<MultipleChoiceResponse>();
 
-  previewData: MultipleChoiceData = {
+  previewData = {
     title: '',
-    subtitle: '',
-    selectionType: 'single',
-    options: []
+    description: '',
+    options: [] as Array<{id: string, text: string}>,
+    allowMultiple: false,
+    required: false
   };
 
-  selectedOptions: Set<number> = new Set();
+  selectedOptions: Set<string> = new Set();
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['section'] && this.section) {
-      this.previewData = this.section.data || {
-        title: 'No se ha ingresado la pregunta',
-        subtitle: '',
-        selectionType: 'single',
-        options: []
+      this.previewData = {
+        title: this.section.title || 'No se ha ingresado la pregunta',
+        description: this.section.description || '',
+        options: this.section.data?.options || [],
+        allowMultiple: this.section.data?.allowMultiple || false,
+        required: this.section.required || false
       };
-
-      // Restaurar respuesta guardada si existe
-      if (this.section.response) {
-        this.selectedOptions = new Set(this.section.response);
-        this.emitResponse();
-      }
     }
   }
 
-  toggleOption(optionId: number): void {
-    if (this.previewData.selectionType === 'single') {
+  toggleOption(optionId: string): void {
+    if (!this.previewData.allowMultiple) {
       this.selectSingleOption(optionId);
     } else {
       if (this.selectedOptions.has(optionId)) {
@@ -53,17 +49,25 @@ export class MultipleChoicePreviewComponent {
     this.emitResponse();
   }
 
-  selectSingleOption(optionId: number): void {
+  selectSingleOption(optionId: string): void {
     this.selectedOptions.clear();
     this.selectedOptions.add(optionId);
     this.emitResponse();
   }
 
-  isSelected(optionId: number): boolean {
+  isSelected(optionId: string): boolean {
     return this.selectedOptions.has(optionId);
   }
 
   private emitResponse(): void {
-    this.responseChange.emit(Array.from(this.selectedOptions));
+    const response: MultipleChoiceResponse = {
+      sectionId: this.section.id,
+      timestamp: new Date(),
+      type: 'multiple-choice',
+      response: {
+        selectedOptionIds: Array.from(this.selectedOptions)
+      }
+    };
+    this.responseChange.emit(response);
   }
 }

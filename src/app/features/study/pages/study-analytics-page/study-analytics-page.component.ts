@@ -21,8 +21,8 @@ import { Study } from '../../models/study.model';
   templateUrl: './study-analytics-page.component.html',
   styleUrl: './study-analytics-page.component.css'
 })
-export class StudyAnalyticsPageComponent implements OnInit {
-  study: Study | null = null;
+export class StudyAnalyticsPageComponent {
+  /* study: Study | null = null;
   loading = true;
   studyId: string = '';
   analytics: StudyAnalytics | null = null;
@@ -175,5 +175,5 @@ export class StudyAnalyticsPageComponent implements OnInit {
       count: distribution[option.id] || 0,
       percentage: ((distribution[option.id] || 0) / analytics.totalResponses) * 100
     }));
-  }
+  } */
 }

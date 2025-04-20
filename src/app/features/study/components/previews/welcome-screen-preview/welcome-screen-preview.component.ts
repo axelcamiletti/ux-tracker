@@ -1,33 +1,31 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input, SimpleChanges } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
-import { Section } from '../../../models/section.model';
-import { WelcomeScreenData } from '../../../models/welcome-screen.model';
+import { WelcomeScreenSection } from '../../../models/section.model';
 
 @Component({
   selector: 'app-welcome-screen-preview',
+  standalone: true,
   imports: [CommonModule, MatButtonModule],
   templateUrl: './welcome-screen-preview.component.html',
   styleUrl: './welcome-screen-preview.component.css'
 })
 export class WelcomeScreenPreviewComponent {
-  // Recibimos el objeto de la sección (con sus datos guardados)
-  @Input() section!: Section;
+  @Input() section!: WelcomeScreenSection;
 
-  // Variable local para la vista previa (podés darle la estructura que necesites)
-  previewData: WelcomeScreenData = {
+  previewData = {
     title: '',
-    subtitle: '',
+    description: '',
+    welcomeMessage: ''
   };
 
-  // Cada vez que el input cambia (por ejemplo, al cambiar de clip o actualizar datos),
-  // actualizamos la variable local con los datos de block.data.
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['section'] && this.section) {
-      // Si hay un valor guardado en block.data.title, lo usamos; de lo contrario, un valor por defecto.
-      this.previewData = this.section.data && this.section.data.title 
-        ? { title: this.section.data.title, subtitle: this.section.data.subtitle }
-        : { title: 'No se ha ingresado la pregunta', subtitle: '' };
+      this.previewData = {
+        title: this.section.title || 'No se ha ingresado el título',
+        description: this.section.description || '',
+        welcomeMessage: this.section.data?.welcomeMessage || ''
+      };
     }
   }
 }

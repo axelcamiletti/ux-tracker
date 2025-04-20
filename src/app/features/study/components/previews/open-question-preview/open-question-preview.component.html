@@ -1,13 +1,22 @@
 <div class="open-question-preview">
-    <h1 class="text-2xl mt-4 mb-2"><b>{{ previewData.title }}</b></h1>
-    <p class="text-md text-gray-600">{{ previewData.subtitle }}</p>
-    
+    <h1 class="text-2xl mt-4 mb-2">
+        <b>{{ previewData.title }}</b>
+        <span *ngIf="previewData.required" class="text-red-500 ml-1">*</span>
+    </h1>
+    <p *ngIf="previewData.description" class="text-md text-gray-600">{{ previewData.description }}</p>
+
     <div class="mt-6">
-      <textarea
-        [(ngModel)]="response"
-        (ngModelChange)="onResponseChange($event)"
-        class="w-full p-4 border rounded-lg min-h-[150px]"
-        placeholder="Write your answer here...">
-      </textarea>
+        <textarea
+            [(ngModel)]="response"
+            (ngModelChange)="onResponseChange($event)"
+            class="w-full p-4 border rounded-lg min-h-[150px]"
+            [placeholder]="previewData.placeholder || 'Write your answer here...'"
+            [required]="previewData.required">
+        </textarea>
+        <div *ngIf="previewData.minLength || previewData.maxLength" class="text-sm text-gray-500 mt-2">
+            <span *ngIf="previewData.minLength">Min: {{previewData.minLength}} characters</span>
+            <span *ngIf="previewData.minLength && previewData.maxLength"> | </span>
+            <span *ngIf="previewData.maxLength">Max: {{previewData.maxLength}} characters</span>
+        </div>
     </div>
 </div>

@@ -1,7 +1,15 @@
 import { Injectable } from '@angular/core';
 import { Firestore, collection, addDoc, updateDoc, doc, query, where, getDocs, getDoc, DocumentData, arrayUnion } from '@angular/fire/firestore';
 import { Observable, from, map } from 'rxjs';
-import { SectionAnalytics, StudyAnalytics, StudyResponse, SectionResponse } from '../models/study-response.model';
+import {
+  SectionAnalytics,
+  StudyAnalytics,
+  StudyResponse,
+  SectionResponse,
+  YesNoResponse,
+  MultipleChoiceResponse,
+  OpenQuestionResponse
+} from '../models/study-response.model';
 import { Study } from '../models/study.model';
 
 @Injectable({
@@ -13,11 +21,11 @@ export class StudyResponsesService {
   // Crear una nueva respuesta de estudio
   async createStudyResponse(studyId: string): Promise<string> {
     const studyResponse: StudyResponse = {
+      id: '',
       studyId,
       userId: crypto.randomUUID(), // Generamos un ID único para el participante
       responses: [],
       startedAt: new Date(),
-      sectionId: '',
       status: 'in-progress'
     };
 
@@ -26,14 +34,21 @@ export class StudyResponsesService {
   }
 
   // Actualizar una respuesta de sección
-  async updateSectionResponse(responseId: string, sectionId: string, response: any): Promise<void> {
+  async updateSectionResponse(
+    responseId: string,
+    sectionId: string,
+    response: {
+      type: 'open-question' | 'multiple-choice' | 'yes-no' | 'prototype-test' | 'welcome-screen' | 'thank-you';
+      value: { text: string } | { selectedOptionIds: string[] } | { answer: boolean } | { completed: boolean; timeSpent: number; interactions?: { elementId: string; action: string; timestamp: Date }[] }
+    }
+  ): Promise<void> {
     const docRef = doc(this.firestore, 'study-responses', responseId);
-    const sectionResponse: SectionResponse = {
+    const sectionResponse = {
       sectionId,
       type: response.type,
       response: response.value,
       timestamp: new Date()
-    };
+    } as SectionResponse;
 
     await updateDoc(docRef, {
       responses: arrayUnion(sectionResponse),
@@ -60,10 +75,10 @@ export class StudyResponsesService {
     const study = studyDoc.data() as Study;
 
     // 4. Incrementar el contador de respuestas
-    await updateDoc(studyRef, {
+    /* await updateDoc(studyRef, {
       totalResponses: (study.totalResponses || 0) + 1,
       updatedAt: new Date()
-    });
+    }); */
   }
 
   // Obtener analíticas de un estudio
@@ -129,13 +144,19 @@ export class StudyResponsesService {
 
         switch (sectionResponse.type) {
           case 'yes-no':
-            this.updateYesNoDistribution(section, sectionResponse.response);
+            if (typeof sectionResponse.response === 'string') {
+              this.updateYesNoDistribution(section, sectionResponse.response);
+            }
             break;
           case 'multiple-choice':
-            this.updateOptionDistribution(section, sectionResponse.response);
+            if (Array.isArray(sectionResponse.response)) {
+              this.updateOptionDistribution(section, sectionResponse.response);
+            }
             break;
           case 'open-question':
-            this.updateKeywordAnalysis(section, sectionResponse.response);
+            if (typeof sectionResponse.response === 'string') {
+              this.updateKeywordAnalysis(section, sectionResponse.response);
+            }
             break;
         }
       });
@@ -144,11 +165,13 @@ export class StudyResponsesService {
     return sectionAnalytics;
   }
 
-  private updateYesNoDistribution(section: SectionAnalytics, response: 'yes' | 'no'): void {
-    if (!section.yesNoDistribution) {
+  private updateYesNoDistribution(section: SectionAnalytics, response: YesNoResponse): void {
+    /* if (!section.yesNoDistribution) {
       section.yesNoDistribution = { yes: 0, no: 0 };
     }
-    section.yesNoDistribution[response]++;
+    if (response === 'yes' || response === 'no') {
+      section.yesNoDistribution[response]++;
+    } */
   }
 
   private updateOptionDistribution(section: SectionAnalytics, response: number[]): void {

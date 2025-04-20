@@ -100,14 +100,29 @@ export class ProjectPageComponent implements OnInit, OnDestroy {
 
   createNewStudy() {
     if (!this.projectId) return;
-    
+
     const newStudy: Omit<Study, 'id'> = {
       name: 'Nuevo estudio',
       projectId: this.projectId,
+      description: '',
       status: 'draft',
       sections: [],
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
+      settings: {
+        allowMultipleResponses: false,
+        requireEmail: false,
+        showProgressBar: true,
+        collectDeviceInfo: true
+      },
+      stats: {
+        totalResponses: 0,
+        completedResponses: 0
+      },
+      participantIds: [],
+      responseIds: [],
+      createdBy: '',
+      lastModifiedBy: ''
     };
 
     this.studyService.createStudy(newStudy).then(studyId => {

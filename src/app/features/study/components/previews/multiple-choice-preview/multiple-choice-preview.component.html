@@ -1,20 +1,28 @@
 <div class="multiple-choice-preview">
-  <h1 class="text-2xl mt-4 mb-2"><b>{{ previewData.title }}</b></h1>
-  <p class="text-md text-gray-600">{{ previewData.subtitle }}</p>
-  
+  <h1 class="text-2xl mt-4 mb-2">
+    <b>{{ previewData.title }}</b>
+    <span *ngIf="previewData.required" class="text-red-500 ml-1">*</span>
+  </h1>
+
+  <p *ngIf="previewData.description" class="text-md text-gray-600">{{ previewData.description }}</p>
+
   <div class="mt-6 space-y-3">
-    <div *ngFor="let option of previewData.options" 
-         class="option-item p-4 border rounded-lg cursor-pointer transition-colors"
+    <div *ngFor="let option of previewData.options"
+         class="option-item p-4 border rounded-lg cursor-pointer transition-all hover:border-blue-500 hover:bg-blue-50/50"
          [class.bg-blue-50]="isSelected(option.id)"
          [class.border-blue-500]="isSelected(option.id)"
          (click)="toggleOption(option.id)">
       <div class="flex items-center">
-        <div class="w-5 h-5 rounded-full border mr-3 flex items-center justify-center"
+        <div class="w-5 h-5 rounded-full border-2 border-blue-500 mr-3 flex items-center justify-center transition-colors"
              [class.bg-blue-500]="isSelected(option.id)">
           <div *ngIf="isSelected(option.id)" class="w-2 h-2 rounded-full bg-white"></div>
         </div>
-        <span>{{ option.label }}</span>
+        <span class="text-lg">{{ option.text }}</span>
       </div>
     </div>
   </div>
+
+  <p *ngIf="previewData.allowMultiple" class="text-sm text-gray-500 mt-4">
+    Puedes seleccionar múltiples opciones
+  </p>
 </div>

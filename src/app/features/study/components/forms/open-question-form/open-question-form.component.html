@@ -23,15 +23,47 @@
     <mat-error>A title is required to create this block.</mat-error>
   </mat-form-field>
 
-  <label class="label">Message</label>
+  <label class="label">Description</label>
   <mat-form-field appearance="outline" class="w-full">
     <textarea
       matInput
       placeholder="Type extra details here. This is optional."
-      [ngModel]="formData.subtitle"
+      [ngModel]="formData.description"
       (ngModelChange)="onSubtitleChange($event)"
     ></textarea>
   </mat-form-field>
+
+  <label class="label">Answer Placeholder</label>
+  <mat-form-field appearance="outline" class="w-full">
+    <input
+      matInput
+      placeholder="Enter a placeholder text for the answer field"
+      [ngModel]="formData.placeholder"
+      (ngModelChange)="onPlaceholderChange($event)"
+      type="text" />
+  </mat-form-field>
+
+  <div class="flex gap-4">
+    <mat-form-field appearance="outline" class="w-full">
+      <mat-label>Minimum Length</mat-label>
+      <input
+        matInput
+        type="number"
+        [ngModel]="formData.minLength"
+        (ngModelChange)="onMinLengthChange($event)"
+        placeholder="Optional" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="w-full">
+      <mat-label>Maximum Length</mat-label>
+      <input
+        matInput
+        type="number"
+        [ngModel]="formData.maxLength"
+        (ngModelChange)="onMaxLengthChange($event)"
+        placeholder="Optional" />
+    </mat-form-field>
+  </div>
 </div>
 
 <mat-menu #menu="matMenu">

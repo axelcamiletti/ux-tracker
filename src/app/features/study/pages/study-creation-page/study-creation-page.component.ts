@@ -33,7 +33,7 @@ import { MultipleChoicePreviewComponent } from "../../components/previews/multip
 import { ClipElementComponent } from "../../components/clip-element/clip-element.component";
 
 // Modelos
-import { Section } from '../../models/section.model';
+import { MultipleChoiceSection, OpenQuestionSection, PrototypeTestSection, Section, ThankYouSection, WelcomeScreenSection, YesNoSection } from '../../models/section.model';
 import { StudyService } from '../../services/study.service';
 import { StudyStateService } from '../../services/study-state.service';
 
@@ -84,22 +84,28 @@ export class StudyCreationPageComponent implements OnInit, OnDestroy {
   showClipMenu: boolean = false;
 
   // Sección de bienvenida fija
-  welcomeSection: Section = {
+  welcomeSection: WelcomeScreenSection = {
     id: 'welcome',
+    title: 'A-mazeing to meet you!',
+    description: 'Please read the instructions carefully',
+    required: true,
     type: 'welcome-screen',
     data: {
-      title: 'A-mazeing to meet you!',
-      subtitle: 'Please read the instructions carefully'
+      welcomeMessage: 'Please read the instructions carefully',
+      imageUrl: undefined
     }
   };
 
   // Sección de agradecimiento fija
-  thankYouSection: Section = {
+  thankYouSection: ThankYouSection = {
     id: 'thanks',
+    title: 'Thank You!',
+    description: 'Completaste nuestro prototipo',
+    required: true,
     type: 'thank-you',
     data: {
-      title: 'Thank You!',
-      subtitle: 'Completaste nuestro prototipo, y no podemos agradecerte lo suficiente por ello! Gracias por ayudarnos a construir un mejor producto: ¡Espero que lo hayan disfrutado!'
+      thankYouMessage: 'Completaste nuestro prototipo, y no podemos agradecerte lo suficiente por ello! Gracias por ayudarnos a construir un mejor producto: ¡Espero que lo hayan disfrutado!',
+      imageUrl: undefined
     }
   };
 
@@ -128,7 +134,7 @@ export class StudyCreationPageComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.studyId = this.route.parent?.snapshot.paramMap.get('id') || '';
-    
+
     if (!this.studyId) {
       this.snackBar.open('Error: No se encontró el ID del estudio', 'Cerrar');
       this.router.navigate(['/projects']);
@@ -169,12 +175,48 @@ export class StudyCreationPageComponent implements OnInit, OnDestroy {
   }
 
   // Función para agregar una nueva sección
-  addSection(type: 'open-question' | 'prototype-test' | 'yes-no' | 'multiple-choice'): void {
-    const newSection: Section = {
+  addSection(type: Section['type']): void {
+    const baseSection = {
       id: this.generateUniqueId(),
-      type,
-      data: this.getInitialData(type),
+      title: '',
+      description: '',
+      required: true
     };
+
+    let newSection: Section;
+
+    switch (type) {
+      case 'open-question':
+        newSection = {
+          ...baseSection,
+          type: 'open-question',
+          data: this.getInitialData('open-question')
+        } as OpenQuestionSection;
+        break;
+      case 'multiple-choice':
+        newSection = {
+          ...baseSection,
+          type: 'multiple-choice',
+          data: this.getInitialData('multiple-choice')
+        } as MultipleChoiceSection;
+        break;
+      case 'yes-no':
+        newSection = {
+          ...baseSection,
+          type: 'yes-no',
+          data: this.getInitialData('yes-no')
+        } as YesNoSection;
+        break;
+      case 'prototype-test':
+        newSection = {
+          ...baseSection,
+          type: 'prototype-test',
+          data: this.getInitialData('prototype-test')
+        } as PrototypeTestSection;
+        break;
+      default:
+        throw new Error(`Tipo de sección no soportado: ${type}`);
+    }
 
     this.sections.push(newSection);
     this.selectSection(newSection);
@@ -186,16 +228,29 @@ export class StudyCreationPageComponent implements OnInit, OnDestroy {
   }
 
   // Helper para inicializar 'data' según el tipo
-  getInitialData(type: 'open-question' | 'prototype-test' | 'yes-no' | 'multiple-choice'): any {
+  getInitialData(type: Section['type']): any {
     switch (type) {
       case 'open-question':
-        return { title: '', subtitle: '' };
+        return {
+          placeholder: '',
+          minLength: undefined,
+          maxLength: undefined
+        };
       case 'prototype-test':
-        return { prototypeUrl: '', tasks: [] };
+        return {
+          prototypeUrl: '',
+          instructions: ''
+        };
       case 'yes-no':
-        return { title: '', options: ['Sí', 'No'] };
+        return {
+          yesLabel: 'Sí',
+          noLabel: 'No'
+        };
       case 'multiple-choice':
-        return { title: '', options: [] };
+        return {
+          options: [],
+          allowMultiple: false
+        };
       default:
         return {};
     }
@@ -244,11 +299,11 @@ export class StudyCreationPageComponent implements OnInit, OnDestroy {
       if (study) {
         this.studyId = study.id;
         this.studyName = study.name;
-        
+
         // Encontrar las secciones de bienvenida y agradecimiento
         const welcomeSection = study.sections.find(s => s.type === 'welcome-screen');
         const thankYouSection = study.sections.find(s => s.type === 'thank-you');
-        
+
         // Actualizar las secciones fijas si existen
         if (welcomeSection) {
           this.welcomeSection = welcomeSection;
@@ -256,17 +311,17 @@ export class StudyCreationPageComponent implements OnInit, OnDestroy {
         if (thankYouSection) {
           this.thankYouSection = thankYouSection;
         }
-        
+
         // Filtrar las secciones dinámicas
-        this.sections = study.sections.filter(section => 
+        this.sections = study.sections.filter(section =>
           section.type !== 'welcome-screen' && section.type !== 'thank-you'
         );
-        
+
         // Actualizar el estado en el servicio
         this.studyState.setWelcomeSection(this.welcomeSection);
         this.studyState.setThankYouSection(this.thankYouSection);
         this.studyState.setSections(this.sections);
-        
+
         // Seleccionar la primera sección si existe
         this.selectedSection = this.sections[0] || null;
       }

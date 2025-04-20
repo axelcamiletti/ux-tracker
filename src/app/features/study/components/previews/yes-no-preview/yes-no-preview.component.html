@@ -1,8 +1,10 @@
 <div class="yes-no-preview">
+  <h1 class="text-2xl mt-4 mb-2">
+    <b>{{ previewData.title }}</b>
+    <span *ngIf="previewData.required" class="text-red-500 ml-1">*</span>
+  </h1>
 
-  <h1 class="text-2xl mt-4 mb-2"><b> {{ previewData.title || 'No se ha ingresado la pregunta' }} </b></h1>
-
-  <p class="text-md text-gray-600"> {{ previewData.subtitle }} </p>
+  <p *ngIf="previewData.description" class="text-md text-gray-600">{{ previewData.description }}</p>
 
   <div class="mt-6 flex gap-4">
     <button mat-stroked-button
@@ -14,7 +16,7 @@
       </div>
       <span class="text-2xl font-bold">Sí</span>
     </button>
-    
+
     <button mat-stroked-button
             class="w-1/2 flex flex-col !h-auto !py-4 !rounded-2xl"
             [ngClass]="{'!bg-red-500 !border-red-500 !text-white !hover:bg-red-600': selectedOption === 'no'}"
@@ -25,7 +27,4 @@
       <span class="text-2xl font-bold">No</span>
     </button>
   </div>
-
-  <br>
-  Option selected: {{ selectedOption }}
 </div>

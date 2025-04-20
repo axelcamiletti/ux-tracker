@@ -21,8 +21,8 @@ export class MultipleChoiceResultComponent {
     );
   }
 
-  getParticipantResponse(participant: StudyResponse, sectionId: string): string {
+  /* getParticipantResponse(participant: StudyResponse, sectionId: string): string {
     const response = participant.responses.find(r => r.sectionId === sectionId);
     return response?.response || '';
-  }
+  } */
 }

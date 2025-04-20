@@ -5,7 +5,7 @@
         </div>
 
         <div class="texts mr-auto">
-            <p class="text-2xl font-bold text-gray-900">{{ section.data.title }}</p>
+            <p class="text-2xl font-bold text-gray-900">{{ section.title }}</p>
             <p class="text-sm font-medium text-gray-600">Multiple Choice</p>
         </div>
 
@@ -46,7 +46,7 @@
                         <tr *ngFor="let participant of getResponsesForSection(section.id)" class="tr-pointer">
                             <td class="td-cell">Participant {{ participant.userId.slice(0, 8) }}</td>
                             <td class="td-cell">
-                                {{ getParticipantResponse(participant, section.id) }}
+                                <!-- {{ getParticipantResponse(participant, section.id) }} -->
                             </td>
                             <td class="td-cell">{{ participant.completedAt | date:'medium' }}</td>
                         </tr>

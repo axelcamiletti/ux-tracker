@@ -1,7 +1,7 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
-import { Section } from '../../../models/section.model';
+import { Section, ThankYouSection } from '../../../models/section.model';
 
 @Component({
   selector: 'app-thank-you-preview',
@@ -11,12 +11,19 @@ import { Section } from '../../../models/section.model';
   styleUrls: ['./thank-you-preview.component.css']
 })
 export class ThankYouPreviewComponent {
-  @Input() section: Section | null = null;
+  @Input() section!: ThankYouSection;
 
-  get previewData() {
-    return this.section?.data || {
-      title: '¡Gracias por tu participación!',
-      subtitle: 'Tus respuestas han sido guardadas correctamente. ¡Apreciamos mucho tu tiempo y feedback!'
-    };
+  previewData = {
+    title: '',
+    description: '',
+  };
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['section'] && this.section) {
+      this.previewData = {
+        title: this.section.title || 'No se ha ingresado el título',
+        description: this.section.description || '',
+      };
+    }
   }
 }

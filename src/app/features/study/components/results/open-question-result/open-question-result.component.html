@@ -5,7 +5,7 @@
         </div>
 
         <div class="texts mr-auto">
-            <p class="text-2xl font-bold text-gray-900">{{ section.data.title }}</p>
+            <p class="text-2xl font-bold text-gray-900">{{ section.title }}</p>
             <p class="text-sm font-medium text-gray-600">Open Question</p>
         </div>
 
@@ -21,7 +21,7 @@
 
         <div class="response-list mt-4">
             <div class="response mb-4 bg-white rounded-lg p-5" *ngFor="let participant of getResponsesForSection(section.id)">
-                <p class="text-base text-gray-900">{{ getParticipantResponse(participant, section.id) }}</p>
+                <!-- <p class="text-base text-gray-900">{{ getParticipantResponse(participant, section.id) }}</p> -->
 
                 <div class="flex gap-1 items-center text-gray-600 mt-2">
                     <mat-icon class="scale-80">person</mat-icon>

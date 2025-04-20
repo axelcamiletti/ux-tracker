@@ -1,0 +1,17 @@
+.option-item {
+  user-select: none;
+}
+
+:host {
+  display: block;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.transition-colors {
+  transition: background-color 0.2s ease-in-out;
+}
+
+.transition-all {
+  transition: all 0.2s ease-in-out;
+}

@@ -1,0 +1,13 @@
+.scale-160 {
+  transform: scale(1.6);
+}
+
+.circle {
+  margin: 0 auto;
+}
+
+:host {
+  display: block;
+  max-width: 600px;
+  margin: 0 auto;
+}

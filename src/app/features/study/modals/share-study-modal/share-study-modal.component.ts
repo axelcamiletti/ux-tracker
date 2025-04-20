@@ -46,7 +46,7 @@ export class ShareStudyModalComponent {
   async saveAndClose() {
     try {
       await this.studyService.updateStudy(this.data.studyId, {
-        allowMultipleResponses: this.allowMultipleResponses.value ?? undefined
+        /* allowMultipleResponses: this.allowMultipleResponses.value ?? undefined */
       });
       this.dialogRef.close(true);
     } catch (error) {

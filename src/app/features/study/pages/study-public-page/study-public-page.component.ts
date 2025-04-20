@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { Section } from '../../models/section.model';
+import { Section, WelcomeScreenSection, OpenQuestionSection, MultipleChoiceSection, YesNoSection, PrototypeTestSection, ThankYouSection } from '../../models/section.model';
 import { ActivatedRoute, Router } from '@angular/router';
 import { trigger, transition, style, animate } from '@angular/animations';
 import { firstValueFrom } from 'rxjs';
@@ -81,10 +81,10 @@ export class StudyPublicPageComponent implements OnInit {
 
       // Verificar si el usuario ya completó el estudio y no se permiten múltiples respuestas
       const hasCompleted = localStorage.getItem(`study_${this.studyId}_completed`);
-      if (hasCompleted && !study.allowMultipleResponses) {
+      /* if (hasCompleted && !study.allowMultipleResponses) {
         this.snackBar.open('Ya has completado este estudio', 'Cerrar', { duration: 3000 });
         return;
-      }
+      } */
 
       this.sections = study.sections;
 
@@ -95,6 +95,17 @@ export class StudyPublicPageComponent implements OnInit {
       console.error('Error loading study:', error);
       this.snackBar.open('Error al cargar el estudio', 'Cerrar', { duration: 3000 });
     }
+  }
+
+  startNow(): void {
+    this.studyResponsesService.createStudyResponse(this.studyId)
+      .then(id => {
+        this.responseId = id;
+        // Aquí se puede agregar lógica adicional, por ejemplo, avanzar al siguiente paso
+      })
+      .catch(error => {
+        console.error('Error starting the study response', error);
+      });
   }
 
   nextSection() {
@@ -120,9 +131,40 @@ export class StudyPublicPageComponent implements OnInit {
     const section = this.sections[this.currentSectionIndex];
     if (section) {
       // Asegurarnos de que la sección tenga la respuesta guardada
-      section.response = this.responses[section.id];
+      /* section.response = this.responses[section.id]; */
     }
     return section;
+  }
+
+  // Type-specific getters for each section type
+  getWelcomeSection(): WelcomeScreenSection | undefined {
+    const section = this.getCurrentSection();
+    return section?.type === 'welcome-screen' ? section as WelcomeScreenSection : undefined;
+  }
+
+  getOpenQuestionSection(): OpenQuestionSection | undefined {
+    const section = this.getCurrentSection();
+    return section?.type === 'open-question' ? section as OpenQuestionSection : undefined;
+  }
+
+  getMultipleChoiceSection(): MultipleChoiceSection | undefined {
+    const section = this.getCurrentSection();
+    return section?.type === 'multiple-choice' ? section as MultipleChoiceSection : undefined;
+  }
+
+  getYesNoSection(): YesNoSection | undefined {
+    const section = this.getCurrentSection();
+    return section?.type === 'yes-no' ? section as YesNoSection : undefined;
+  }
+
+  getPrototypeTestSection(): PrototypeTestSection | undefined {
+    const section = this.getCurrentSection();
+    return section?.type === 'prototype-test' ? section as PrototypeTestSection : undefined;
+  }
+
+  getThankYouSection(): ThankYouSection | undefined {
+    const section = this.getCurrentSection();
+    return section?.type === 'thank-you' ? section as ThankYouSection : undefined;
   }
 
   // Guardar la respuesta de la sección actual
@@ -150,7 +192,7 @@ export class StudyPublicPageComponent implements OnInit {
     const currentSection = this.getCurrentSection();
     if (currentSection) {
       this.responses[currentSection.id] = response;
-      currentSection.response = response;
+      /* currentSection.response = response; */
     }
   }
 

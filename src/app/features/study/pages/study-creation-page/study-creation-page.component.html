@@ -6,31 +6,31 @@
       <div class="box bg-gray-100 flex items-center py-3 px-4 rounded-xl mb-3 font-medium sticky top-0">
         Pages
       </div>
-  
+
       <!-- Welcome Screen -->
-      <app-clip-element 
-        (click)="selectWelcomeSection()" 
+      <app-clip-element
+        (click)="selectWelcomeSection()"
         [type]="'welcome-screen'"
         [title]="'A-mazeing to meet you!'"
         [isActive]="selectedSection?.type === 'welcome-screen'">
       </app-clip-element>
-  
+
       <!-- Secciones dinámicas -->
       <ng-container *ngFor="let section of sections">
         <app-clip-element
           (click)="selectSection(section)"
           [isActive]="selectedSection?.id === section.id"
           [type]="section.type"
-          [title]="section.data?.title"
+          [title]="section.title"
           (delete)="removeSection(section.id)">
         </app-clip-element>
       </ng-container>
-  
+
       <!-- Botón para agregar páginas -->
       <button mat-stroked-button color="primary" (click)="showClipMenu = !showClipMenu" class="w-full">
         <mat-icon>add</mat-icon> Add page
       </button>
-      
+
       <!-- Menú de tipos de páginas -->
       <div *ngIf="showClipMenu" class="menu bg-white border rounded-xl p-2 mb-3 mt-2">
         <button (click)="addSection('open-question')" class="w-full text-left px-3 py-2 hover:bg-gray-100 rounded">Agregar Open Question</button>
@@ -38,25 +38,25 @@
         <button (click)="addSection('yes-no')" class="w-full text-left px-3 py-2 hover:bg-gray-100 rounded">Agregar Yes/No</button>
         <button (click)="addSection('multiple-choice')" class="w-full text-left px-3 py-2 hover:bg-gray-100 rounded">Agregar Multiple Choice</button>
       </div>
-  
+
       <!-- Welcome Screen -->
-      <app-clip-element 
-        (click)="selectThankSection()" 
+      <app-clip-element
+        (click)="selectThankSection()"
         [title]="'Thank You!'"
         [type]="'thank-you'"
         class="mt-auto"
         [isActive]="selectedSection?.type === 'thank-you'">
       </app-clip-element>
     </div>
-  
+
     <!-- Panel de Formularios -->
     <div class="forms w-1/2 border-r border-l border-gray-200 h-full overflow-y-auto">
       <!-- Formulario fijo de bienvenida -->
-      <app-welcome-screen-form 
+      <app-welcome-screen-form
         *ngIf="selectedSection?.type === 'welcome-screen'"
         [section]="welcomeSection">
       </app-welcome-screen-form>
-  
+
       <!-- Formularios dinámicos -->
       <ng-container *ngFor="let section of sections">
         <!-- Se muestra el formulario solo si es la sección activa -->
@@ -64,63 +64,63 @@
           *ngIf="section.type === 'open-question' && selectedSection?.id === section.id"
           [section]="section">
         </app-open-question-form>
-  
+
         <app-prototype-test-form
           *ngIf="section.type === 'prototype-test' && selectedSection?.id === section.id"
           [section]="section">
         </app-prototype-test-form>
-  
+
         <app-yes-no-form
           *ngIf="section.type === 'yes-no' && selectedSection?.id === section.id"
           [section]="section">
         </app-yes-no-form>
-  
+
         <app-multiple-choice-form
           *ngIf="section.type === 'multiple-choice' && selectedSection?.id === section.id"
           [section]="section">
         </app-multiple-choice-form>
       </ng-container>
-  
+
       <!-- Formulario fijo de agradecimiento -->
-      <app-thank-you-form 
+      <app-thank-you-form
         *ngIf="selectedSection?.type === 'thank-you'"
         [section]="thankYouSection">
       </app-thank-you-form>
     </div>
-  
+
     <!-- Panel de Previsualización -->
     <div class="previews w-1/2 bg-gray-100 flex justify-center items-center p-10 h-full overflow-y-auto" [ngClass]="{'prototype-preview': isPrototypePreview}">
       <div class="container w-sm shadow-md bg-white rounded-xl p-8 h-full" [ngClass]="{'!bg-transparent !shadow-none !w-full': isPrototypePreview}">
-  
+
         <!-- Previsualización fijo de bienvenida -->
-        <app-welcome-screen-preview 
+        <app-welcome-screen-preview
           *ngIf="selectedSection?.type === 'welcome-screen'"
           [section]="welcomeSection">
         </app-welcome-screen-preview>
-  
+
         <!-- Previsualizaciones dinámicas -->
         <ng-container *ngFor="let section of sections">
           <app-open-question-preview
             *ngIf="section.type === 'open-question' && selectedSection?.id === section.id"
             [section]="section">
           </app-open-question-preview>
-    
+
           <app-yes-no-preview
             *ngIf="section.type === 'yes-no' && selectedSection?.id === section.id"
             [section]="section">
           </app-yes-no-preview>
-    
+
           <app-multiple-choice-preview
             *ngIf="section.type === 'multiple-choice' && selectedSection?.id === section.id"
             [section]="section">
           </app-multiple-choice-preview>
-    
+
           <app-prototype-test-preview
             *ngIf="section.type === 'prototype-test' && selectedSection?.id === section.id"
             [section]="section">
           </app-prototype-test-preview>
         </ng-container>
-  
+
         <!-- Previsualización fijo de agradecimiento -->
         <app-thank-you-preview
           *ngIf="selectedSection?.type === 'thank-you'"
