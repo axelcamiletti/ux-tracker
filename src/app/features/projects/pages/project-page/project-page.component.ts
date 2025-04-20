@@ -87,7 +87,16 @@ export class ProjectPageComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (studies) => {
-          this.studies = studies;
+          // Asegurarse de que cada estudio tenga stats inicializados
+          this.studies = studies.map(study => ({
+            ...study,
+            stats: study.stats || {
+              totalResponses: 0,
+              completedResponses: 0,
+              averageCompletionTime: 0,
+              lastResponseAt: null
+            }
+          }));
           this.loading = false;
         },
         error: (error) => {

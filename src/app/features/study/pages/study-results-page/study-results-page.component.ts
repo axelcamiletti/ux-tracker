@@ -14,7 +14,7 @@ import { YesNoResultComponent } from "../../components/results/yes-no-result/yes
 import { MultipleChoiceResultComponent } from "../../components/results/multiple-choice-result/multiple-choice-result.component";
 import { MatButtonToggleChange } from '@angular/material/button-toggle';
 import { ActivatedRoute } from '@angular/router';
-import { Firestore, collection, query, where, getDocs } from '@angular/fire/firestore';
+import { inject } from '@angular/core';
 
 @Component({
   selector: 'app-study-results-page',
@@ -31,12 +31,9 @@ export class StudyResultsPageComponent implements OnInit {
   participants: StudyResponse[] = [];
   studyId: string = '';
 
-  constructor(
-    private studyService: StudyService,
-    private studyResponsesService: StudyResponsesService,
-    private route: ActivatedRoute,
-    private firestore: Firestore
-  ) {}
+  private studyService = inject(StudyService);
+  private studyResponsesService = inject(StudyResponsesService);
+  private route = inject(ActivatedRoute);
 
   ngOnInit() {
     this.studyId = this.route.parent?.snapshot.paramMap.get('id') || '';
@@ -66,24 +63,14 @@ export class StudyResultsPageComponent implements OnInit {
   async loadParticipants() {
     try {
       const analytics = await this.studyResponsesService.getStudyAnalytics(this.studyId);
-      const q = query(
-        collection(this.firestore, 'study-responses'),
-        where('studyId', '==', this.studyId),
-        where('status', '==', 'completed')
-      );
-
-      const querySnapshot = await getDocs(q);
-      this.participants = querySnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      } as StudyResponse));
+      this.participants = await this.studyResponsesService.getCompletedStudyResponses(this.studyId);
     } catch (error) {
       console.error('Error al cargar los participantes:', error);
     }
   }
 
   getFilteredSections(): Section[] {
-    return this.sections.filter(section => 
+    return this.sections.filter(section =>
       section.type !== 'welcome-screen' && section.type !== 'thank-you'
     );
   }

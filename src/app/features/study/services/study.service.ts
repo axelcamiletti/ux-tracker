@@ -1,5 +1,5 @@
-import { Injectable, PLATFORM_ID, Inject } from '@angular/core';
-import { BehaviorSubject, Observable, from, map } from 'rxjs';
+import { Injectable, PLATFORM_ID, Inject, inject } from '@angular/core';
+import { BehaviorSubject, Observable, from, map, of } from 'rxjs';
 import { isPlatformBrowser } from '@angular/common';
 import { Firestore, collection, addDoc, getDocs, query, where, doc, updateDoc, getDoc, deleteDoc } from '@angular/fire/firestore';
 import { Study } from '../models/study.model';
@@ -14,11 +14,9 @@ export class StudyService {
   private responses = new BehaviorSubject<StudyResponse[]>([]);
   private isBrowser: boolean;
   private readonly collectionName = 'studies';
+  private firestore = inject(Firestore);
 
-  constructor(
-    @Inject(PLATFORM_ID) platformId: Object,
-    private firestore: Firestore,
-  ) {
+  constructor(@Inject(PLATFORM_ID) platformId: Object) {
     this.isBrowser = isPlatformBrowser(platformId);
     if (this.isBrowser) {
       this.loadFromLocalStorage();
@@ -27,19 +25,24 @@ export class StudyService {
 
   // Obtener el estudio actual
   getCurrentStudy(): Observable<Study | null> {
+    if (!this.isBrowser) {
+      return of(null);
+    }
     return this.currentStudy.asObservable();
   }
 
   // Establecer el estudio actual
   setCurrentStudy(study: Study): void {
+    if (!this.isBrowser) return;
     this.currentStudy.next(study);
-    if (this.isBrowser) {
-      this.saveToLocalStorage();
-    }
+    this.saveToLocalStorage();
   }
 
   // Obtener un estudio por ID
   getStudyById(studyId: string): Observable<Study> {
+    if (!this.isBrowser) {
+      return of({} as Study);
+    }
     const studyRef = doc(this.firestore, this.collectionName, studyId);
     return from(getDoc(studyRef)).pipe(
       map(doc => ({
@@ -51,6 +54,9 @@ export class StudyService {
 
   // Obtener todos los estudios de un proyecto
   getStudiesByProjectId(projectId: string): Observable<Study[]> {
+    if (!this.isBrowser) {
+      return of([]);
+    }
     const studiesRef = collection(this.firestore, this.collectionName);
     const q = query(studiesRef, where('projectId', '==', projectId));
 
@@ -66,6 +72,9 @@ export class StudyService {
 
   // Crear un nuevo estudio
   async createStudy(study: Omit<Study, 'id'>): Promise<string> {
+    if (!this.isBrowser) {
+      return '';
+    }
     const studiesRef = collection(this.firestore, this.collectionName);
     const docRef = await addDoc(studiesRef, study);
     return docRef.id;
@@ -73,27 +82,33 @@ export class StudyService {
 
   // Actualizar un estudio
   async updateStudy(studyId: string, data: Partial<Study>): Promise<void> {
+    if (!this.isBrowser) return;
     const studyRef = doc(this.firestore, this.collectionName, studyId);
     await updateDoc(studyRef, data);
   }
 
   // Guardar una respuesta
   saveResponse(response: StudyResponse): void {
+    if (!this.isBrowser) return;
     const currentResponses = this.responses.value;
     currentResponses.push(response);
     this.responses.next(currentResponses);
-    if (this.isBrowser) {
-      this.saveToLocalStorage();
-    }
+    this.saveToLocalStorage();
   }
 
   // Obtener todas las respuestas
   getResponses(): Observable<StudyResponse[]> {
+    if (!this.isBrowser) {
+      return of([]);
+    }
     return this.responses.asObservable();
   }
 
   // Obtener respuestas por sección
   getResponsesBySection(sectionId: string): StudyResponse[] {
+    if (!this.isBrowser) {
+      return [];
+    }
     return this.responses.value.filter(r => r.id === sectionId);
   }
 
@@ -121,21 +136,24 @@ export class StudyService {
 
   // Limpiar datos del estudio actual
   clearStudyData(): void {
+    if (!this.isBrowser) return;
     this.currentStudy.next(null);
     this.responses.next([]);
-    if (this.isBrowser) {
-      localStorage.removeItem('study_data');
-    }
+    localStorage.removeItem('study_data');
   }
 
   // Eliminar un estudio
   deleteStudy(studyId: string): Promise<void> {
+    if (!this.isBrowser) {
+      return Promise.resolve();
+    }
     const studyRef = doc(this.firestore, this.collectionName, studyId);
     return deleteDoc(studyRef);
   }
 
   // Publicar un estudio y generar URL pública
   async publishStudy(studyId: string): Promise<void> {
+    if (!this.isBrowser) return;
     const studyRef = doc(this.firestore, this.collectionName, studyId);
     const publicUrl = `${environment.baseUrl}/study-public/${studyId}`;
 

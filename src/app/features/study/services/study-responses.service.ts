@@ -1,6 +1,7 @@
-import { Injectable } from '@angular/core';
+import { Injectable, PLATFORM_ID, Inject, inject } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { Firestore, collection, addDoc, updateDoc, doc, query, where, getDocs, getDoc, DocumentData, arrayUnion } from '@angular/fire/firestore';
-import { Observable, from, map } from 'rxjs';
+import { Observable, from, map, of } from 'rxjs';
 import {
   SectionAnalytics,
   StudyAnalytics,
@@ -16,14 +17,21 @@ import { Study } from '../models/study.model';
   providedIn: 'root'
 })
 export class StudyResponsesService {
-  constructor(private firestore: Firestore) {}
+  private isBrowser: boolean;
+  private firestore = inject(Firestore);
+
+  constructor(@Inject(PLATFORM_ID) platformId: Object) {
+    this.isBrowser = isPlatformBrowser(platformId);
+  }
 
   // Crear una nueva respuesta de estudio
   async createStudyResponse(studyId: string): Promise<string> {
+    if (!this.isBrowser) return '';
+
     const studyResponse: StudyResponse = {
       id: '',
       studyId,
-      userId: crypto.randomUUID(), // Generamos un ID único para el participante
+      userId: crypto.randomUUID(),
       responses: [],
       startedAt: new Date(),
       status: 'in-progress'
@@ -42,6 +50,8 @@ export class StudyResponsesService {
       value: { text: string } | { selectedOptionIds: string[] } | { answer: boolean } | { completed: boolean; timeSpent: number; interactions?: { elementId: string; action: string; timestamp: Date }[] }
     }
   ): Promise<void> {
+    if (!this.isBrowser) return;
+
     const docRef = doc(this.firestore, 'study-responses', responseId);
     const sectionResponse = {
       sectionId,
@@ -58,31 +68,35 @@ export class StudyResponsesService {
 
   // Finalizar un estudio y actualizar el contador de respuestas
   async completeStudy(responseId: string): Promise<void> {
-    // 1. Obtener la respuesta actual
+    if (!this.isBrowser) return;
+
     const responseRef = doc(this.firestore, 'study-responses', responseId);
     const responseDoc = await getDoc(responseRef);
     const response = responseDoc.data() as StudyResponse;
 
-    // 2. Marcar la respuesta como completada
     await updateDoc(responseRef, {
       status: 'completed',
       completedAt: new Date()
     });
 
-    // 3. Obtener el estudio y actualizar el contador de respuestas
     const studyRef = doc(this.firestore, 'studies', response.studyId);
-    const studyDoc = await getDoc(studyRef);
-    const study = studyDoc.data() as Study;
-
-    // 4. Incrementar el contador de respuestas
-    /* await updateDoc(studyRef, {
-      totalResponses: (study.totalResponses || 0) + 1,
-      updatedAt: new Date()
-    }); */
+    await updateDoc(studyRef, {
+      'stats.totalResponses': arrayUnion(responseId),
+      'stats.lastResponseAt': new Date()
+    });
   }
 
   // Obtener analíticas de un estudio
   async getStudyAnalytics(studyId: string): Promise<StudyAnalytics> {
+    if (!this.isBrowser) {
+      return {
+        totalResponses: 0,
+        completionRate: 0,
+        averageTimeSpent: 0,
+        sectionAnalytics: {}
+      };
+    }
+
     const q = query(
       collection(this.firestore, 'study-responses'),
       where('studyId', '==', studyId)
@@ -97,19 +111,36 @@ export class StudyResponsesService {
     return this.calculateAnalytics(responses);
   }
 
+  // Add new method
+  async getCompletedStudyResponses(studyId: string): Promise<StudyResponse[]> {
+    if (!this.isBrowser) return [];
+
+    const q = query(
+      collection(this.firestore, 'study-responses'),
+      where('studyId', '==', studyId),
+      where('status', '==', 'completed')
+    );
+
+    const querySnapshot = await getDocs(q);
+    return querySnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    } as StudyResponse));
+  }
+
   // Calcular analíticas
   private calculateAnalytics(responses: StudyResponse[]): StudyAnalytics {
     const totalResponses = responses.length;
     const completedResponses = responses.filter(r => r.status === 'completed').length;
+    const averageTimeSpent = this.calculateAverageTimeSpent(responses);
+    const sectionAnalytics = this.calculateSectionAnalytics(responses);
 
-    const analytics: StudyAnalytics = {
+    return {
       totalResponses,
       completionRate: totalResponses > 0 ? (completedResponses / totalResponses) * 100 : 0,
-      averageTimeSpent: this.calculateAverageTimeSpent(responses),
-      sectionAnalytics: this.calculateSectionAnalytics(responses)
+      averageTimeSpent,
+      sectionAnalytics
     };
-
-    return analytics;
   }
 
   // Calcular tiempo promedio
@@ -134,28 +165,39 @@ export class StudyResponsesService {
         if (!sectionAnalytics[sectionResponse.sectionId]) {
           sectionAnalytics[sectionResponse.sectionId] = {
             totalResponses: 0,
-            responses: []
+            responses: [],
+            yesNoStats: { yes: 0, no: 0 },
+            multipleChoiceStats: {},
+            commonKeywords: [],
+            averageTimeSpent: 0
           };
         }
 
         const section = sectionAnalytics[sectionResponse.sectionId];
+        section.responses.push(sectionResponse);
         section.totalResponses++;
-        section.responses.push(sectionResponse.response);
 
         switch (sectionResponse.type) {
           case 'yes-no':
-            if (typeof sectionResponse.response === 'string') {
-              this.updateYesNoDistribution(section, sectionResponse.response);
+            const yesNoResponse = sectionResponse as YesNoResponse;
+            if (yesNoResponse.response.answer) {
+              section.yesNoStats.yes++;
+            } else {
+              section.yesNoStats.no++;
             }
             break;
+
           case 'multiple-choice':
-            if (Array.isArray(sectionResponse.response)) {
-              this.updateOptionDistribution(section, sectionResponse.response);
-            }
+            const multipleChoiceResponse = sectionResponse as MultipleChoiceResponse;
+            multipleChoiceResponse.response.selectedOptionIds.forEach(optionId => {
+              section.multipleChoiceStats[optionId] = (section.multipleChoiceStats[optionId] || 0) + 1;
+            });
             break;
+
           case 'open-question':
-            if (typeof sectionResponse.response === 'string') {
-              this.updateKeywordAnalysis(section, sectionResponse.response);
+            const openQuestionResponse = sectionResponse as OpenQuestionResponse;
+            if (openQuestionResponse.response.text) {
+              this.updateKeywordAnalysis(section, openQuestionResponse.response.text);
             }
             break;
         }
@@ -165,46 +207,19 @@ export class StudyResponsesService {
     return sectionAnalytics;
   }
 
-  private updateYesNoDistribution(section: SectionAnalytics, response: YesNoResponse): void {
-    /* if (!section.yesNoDistribution) {
-      section.yesNoDistribution = { yes: 0, no: 0 };
-    }
-    if (response === 'yes' || response === 'no') {
-      section.yesNoDistribution[response]++;
-    } */
-  }
-
-  private updateOptionDistribution(section: SectionAnalytics, response: number[]): void {
-    if (!section.optionDistribution) {
-      section.optionDistribution = {};
-    }
-    response.forEach(optionId => {
-      section.optionDistribution![optionId] = (section.optionDistribution![optionId] || 0) + 1;
-    });
-  }
-
   private updateKeywordAnalysis(section: SectionAnalytics, response: string): void {
-    if (!section.commonKeywords) {
-      section.commonKeywords = [];
-    }
-
-    // Análisis simple de palabras clave (se podría mejorar con NLP)
     const words = response.toLowerCase().split(/\s+/);
-    const stopWords = new Set(['el', 'la', 'los', 'las', 'un', 'una', 'y', 'o', 'pero', 'si', 'no', 'en', 'con', 'por']);
+    const wordCount: { [key: string]: number } = {};
 
-    words
-      .filter(word => word.length > 3 && !stopWords.has(word))
-      .forEach(word => {
-        const existing = section.commonKeywords!.find(k => k.word === word);
-        if (existing) {
-          existing.count++;
-        } else {
-          section.commonKeywords!.push({ word, count: 1 });
-        }
-      });
+    words.forEach(word => {
+      if (word.length > 3) {
+        wordCount[word] = (wordCount[word] || 0) + 1;
+      }
+    });
 
-    // Ordenar por frecuencia y mantener solo las top 10 palabras
-    section.commonKeywords.sort((a, b) => b.count - a.count);
-    section.commonKeywords = section.commonKeywords.slice(0, 10);
+    section.commonKeywords = Object.entries(wordCount)
+      .map(([word, count]) => ({ word, count }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 10);
   }
 }

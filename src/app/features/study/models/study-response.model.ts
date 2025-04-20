@@ -90,16 +90,17 @@ export interface StudyAnalytics {
 
 export interface SectionAnalytics {
   totalResponses: number;
-  responses: any[];
-  optionDistribution?: {
-    [optionId: string]: number;
-  };
-  yesNoDistribution?: {
+  responses: SectionResponse[];
+  yesNoStats: {
     yes: number;
     no: number;
   };
-  commonKeywords?: {
+  multipleChoiceStats: {
+    [optionId: string]: number;
+  };
+  commonKeywords: Array<{
     word: string;
     count: number;
-  }[];
+  }>;
+  averageTimeSpent: number;
 }

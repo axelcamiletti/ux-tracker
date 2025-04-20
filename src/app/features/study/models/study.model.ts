@@ -40,12 +40,12 @@ export interface Study {
   publicUrl?: string;
   previewUrl?: string;
 
-  // Statistics
+  // Statistics - Asegurándonos de que stats sea requerido y tenga valores por defecto
   stats: {
     totalResponses: number;
     completedResponses: number;
-    averageCompletionTime?: number;
-    lastResponseAt?: Date;
+    averageCompletionTime: number;
+    lastResponseAt: Date | null;
   };
 
   // Reference to responses and participants
