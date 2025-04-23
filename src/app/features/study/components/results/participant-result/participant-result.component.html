@@ -1,0 +1,117 @@
+<div class="participant-result">
+
+  <div class="header bg-white rounded-xl p-5 mb-3">
+    <div class="flex items-center gap-4">
+      <div class="image-container bg-black text-white w-10 h-10 overflow-hidden rounded-full flex items-center justify-center">
+        <img class="w-full h-full object-cover rounded-lg" src="https://i.pravatar.cc/300" alt="">
+      </div>
+      <div class="text-xl font-bold text-gray-900">Participant #{{participant.userId}}</div>
+
+      <button mat-stroked-button (click)="toggleExpand()" class="mr-auto">
+        <mat-icon>{{isExpanded ? 'keyboard_arrow_up' : 'keyboard_arrow_down'}}</mat-icon>
+        <span>{{isExpanded ? 'Show less' : 'Show more'}}</span>
+      </button>
+
+      <button mat-icon-button matTooltip="Previous participant"><mat-icon>chevron_left</mat-icon></button>
+      <button mat-icon-button matTooltip="Next participant"><mat-icon>chevron_right</mat-icon></button>
+    </div>
+
+    <div class="box flex flex-wrap p-5 mt-6 border border-gray-300 rounded-xl" *ngIf="isExpanded">
+      <div class="item w-1/4 mb-4">
+        <div class="text-xs text-gray-600">BROWSER</div>
+        <div class="text-base text-gray-900 font-medium">{{participant.deviceInfo?.browser || 'Unknown'}}</div>
+      </div>
+
+      <div class="item w-1/4 mb-4">
+        <div class="text-xs text-gray-600">BROWSER VERSION</div>
+        <div class="text-base text-gray-900 font-medium">{{participant.deviceInfo?.userAgent || 'Unknown'}}</div>
+      </div>
+
+      <div class="item w-1/4 mb-4">
+        <div class="text-xs text-gray-600">OS</div>
+        <div class="text-base text-gray-900 font-medium">{{participant.deviceInfo?.os || 'Unknown'}}</div>
+      </div>
+
+      <div class="item w-1/4 mb-4">
+        <div class="text-xs text-gray-600">DEVICE TYPE</div>
+        <div class="text-base text-gray-900 font-medium">{{participant.deviceInfo?.screenSize || 'Unknown'}}</div>
+      </div>
+
+      <div class="item w-1/4 mb-4">
+        <div class="text-xs text-gray-600">START DATE</div>
+        <div class="text-base text-gray-900 font-medium">{{participant.startedAt | date:'MMM d, y, HH:mm'}}</div>
+      </div>
+
+      <div class="item w-1/4 mb-4">
+        <div class="text-xs text-gray-600">STUDY COMPLETION</div>
+        <div class="text-base text-gray-900 font-medium">{{participant.completedAt | date:'MMM d, y'}}</div>
+      </div>
+    </div>
+  </div>
+
+
+  <div class="answers" *ngIf="participant.responses">
+    <div class="answer bg-white rounded-xl p-5 mb-3" *ngFor="let response of participant.responses">
+
+      <div class="flex items-center gap-3">
+        <div class="icon bg-black text-white w-10 h-10 rounded-lg flex items-center justify-center"
+          matTooltip="{{ response.type }}"
+          [ngClass]="{
+            'bg-indigo-300': response.type == 'open-question',
+            'bg-orange-300': response.type == 'yes-no',
+            'bg-emerald-400': response.type == 'multiple-choice',
+            'bg-red-400': response.type == 'prototype-test',
+          }">
+          <mat-icon *ngIf="response.type == 'open-question'">help</mat-icon>
+          <mat-icon *ngIf="response.type == 'yes-no'">check_circle</mat-icon>
+          <mat-icon *ngIf="response.type == 'multiple-choice'">list</mat-icon>
+          <mat-icon *ngIf="response.type == 'prototype-test'">design_services</mat-icon>
+        </div>
+
+        <div class="texts">
+          <div class="text-base text-gray-900 font-medium">{{getSectionTitle(response.sectionId)}}</div>
+          <div [ngSwitch]="response.type" class="text-gray-600 text-sm">
+            <!-- Open Question Response -->
+            <div *ngSwitchCase="'open-question'">
+              {{getOpenQuestionText(response)}}
+            </div>
+
+            <!-- Yes/No Response -->
+            <div *ngSwitchCase="'yes-no'">
+              {{getYesNoAnswer(response)}}
+            </div>
+
+            <!-- Multiple Choice Response -->
+            <div *ngSwitchCase="'multiple-choice'">
+              <div *ngFor="let optionId of getMultipleChoiceOptions(response)">
+                - {{optionId}}
+              </div>
+            </div>
+
+            <!-- Prototype Test Response -->
+            <div *ngSwitchCase="'prototype-test'">
+              <ng-container *ngTemplateOutlet="prototypeTestInfo; context: { $implicit: getPrototypeTestInfo(response) }">
+              </ng-container>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+
+    </div>
+  </div>
+</div>
+
+<ng-template #prototypeTestInfo let-info>
+  <div>Completed: {{info.completed ? 'Yes' : 'No'}}</div>
+  <div>Time spent: {{info.timeSpent}} seconds</div>
+  <div *ngIf="info.interactions.length">
+    <div>Interactions:</div>
+    <ul>
+      <li *ngFor="let interaction of info.interactions">
+        {{interaction.action}} on {{interaction.elementId}} at {{interaction.timestamp | date:'HH:mm:ss'}}
+      </li>
+    </ul>
+  </div>
+</ng-template>

@@ -1,9 +1,11 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, Output, EventEmitter, SimpleChanges } from '@angular/core';
+import { Component, Input, Output, EventEmitter, SimpleChanges, OnInit, OnDestroy } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { YesNoSection } from '../../../models/section.model';
 import { YesNoResponse } from '../../../models/study-response.model';
+import { StudyStateService } from '../../../services/study-state.service';
+import { Subject, takeUntil } from 'rxjs';
 
 type ButtonStyle = 'default' | 'emoji' | 'thumbs';
 
@@ -14,11 +16,12 @@ type ButtonStyle = 'default' | 'emoji' | 'thumbs';
   templateUrl: './yes-no-preview.component.html',
   styleUrl: './yes-no-preview.component.css'
 })
-export class YesNoPreviewComponent {
+export class YesNoPreviewComponent implements OnInit, OnDestroy {
   @Input() section!: YesNoSection;
   @Output() responseChange = new EventEmitter<YesNoResponse>();
 
   selectedOption: 'yes' | 'no' | null = null;
+  private destroy$ = new Subject<void>();
 
   previewData = {
     title: '',
@@ -31,19 +34,42 @@ export class YesNoPreviewComponent {
     buttonStyle: 'default' as ButtonStyle
   };
 
+  constructor(private studyState: StudyStateService) {}
+
+  ngOnInit(): void {
+    // Subscribe to yes-no section changes
+    this.studyState.yesNoSection$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(section => {
+        if (section) {
+          this.updatePreviewData(section);
+        }
+      });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['section'] && this.section) {
-      this.previewData = {
-        title: this.section.title || '',
-        description: this.section.description || '',
-        required: this.section.required,
-        yesLabel: this.section.data.yesLabel || 'Sí',
-        noLabel: this.section.data.noLabel || 'No',
-        yesDescription: this.section.data.yesDescription || '',
-        noDescription: this.section.data.noDescription || '',
-        buttonStyle: this.section.data.buttonStyle || 'default'
-      };
+      this.updatePreviewData(this.section);
+      this.studyState.setYesNoSection(this.section);
     }
+  }
+
+  private updatePreviewData(section: YesNoSection) {
+    this.previewData = {
+      title: section.title || '',
+      description: section.description || '',
+      required: section.required,
+      yesLabel: section.data.yesLabel || 'Sí',
+      noLabel: section.data.noLabel || 'No',
+      yesDescription: section.data.yesDescription || '',
+      noDescription: section.data.noDescription || '',
+      buttonStyle: section.data.buttonStyle || 'default'
+    };
   }
 
   selectOption(option: 'yes' | 'no') {

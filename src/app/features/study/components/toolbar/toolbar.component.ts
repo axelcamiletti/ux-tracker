@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, Output, EventEmitter } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
 import { StudyService } from '../../services/study.service';
 import { Study } from '../../models/study.model';
@@ -28,6 +28,9 @@ import { ShareStudyModalComponent } from '../../modals/share-study-modal/share-s
 })
 export class ToolbarComponent implements OnInit {
   @Input() studyId: string = '';
+  @Input() saving: boolean = false;
+  @Input() lastSaved: Date | null = null;
+  @Output() saveStudy = new EventEmitter<void>();
   study: Study | null = null;
   studyName: string = 'Cargando...';
 
@@ -102,5 +105,9 @@ export class ToolbarComponent implements OnInit {
       console.error('Error publishing study:', error);
       this.snackBar.open('Error al publicar el estudio', 'Cerrar', { duration: 3000 });
     }
+  }
+
+  triggerSaveStudy() {
+    this.saveStudy.emit();
   }
 }

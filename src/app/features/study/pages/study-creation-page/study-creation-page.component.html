@@ -54,6 +54,7 @@
       <!-- Formulario fijo de bienvenida -->
       <app-welcome-screen-form
         *ngIf="selectedSection?.type === 'welcome-screen'"
+        (sectionChange)="welcomeSection = $event"
         [section]="welcomeSection">
       </app-welcome-screen-form>
 

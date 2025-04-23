@@ -1,4 +1,4 @@
-import { Component, Input, SimpleChanges } from '@angular/core';
+import { Component, Input, SimpleChanges, OnInit, OnDestroy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -8,6 +8,8 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { CommonModule } from '@angular/common';
 import { YesNoSection } from '../../../models/section.model';
+import { StudyStateService } from '../../../services/study-state.service';
+import { Subject, takeUntil } from 'rxjs';
 
 type ButtonStyle = 'default' | 'emoji' | 'thumbs';
 
@@ -27,10 +29,11 @@ type ButtonStyle = 'default' | 'emoji' | 'thumbs';
   templateUrl: './yes-no-form.component.html',
   styleUrl: './yes-no-form.component.css'
 })
-export class YesNoFormComponent {
+export class YesNoFormComponent implements OnInit, OnDestroy {
   @Input() section!: YesNoSection;
 
   selectedOption: 'yes' | 'no' | null = null;
+  private destroy$ = new Subject<void>();
 
   formData = {
     title: '',
@@ -43,30 +46,54 @@ export class YesNoFormComponent {
     buttonStyle: 'default' as ButtonStyle
   };
 
+  constructor(private studyState: StudyStateService) {}
+
+  ngOnInit() {
+    // Subscribe to yes-no section changes
+    this.studyState.yesNoSection$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(section => {
+        if (section) {
+          this.updateFormDataFromSection(section);
+        }
+      });
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['section'] && this.section) {
-      this.formData = {
-        title: this.section.title || 'Title not entered',
-        description: this.section.description || '',
-        required: this.section.required || false,
-        yesLabel: this.section.data.yesLabel || 'Sí',
-        noLabel: this.section.data.noLabel || 'No',
-        yesDescription: this.section.data.yesDescription || '',
-        noDescription: this.section.data.noDescription || '',
-        buttonStyle: this.section.data.buttonStyle || 'default'
-      };
-      this.selectedOption = this.section.data.selectedOption || null;
+      this.updateFormDataFromSection(this.section);
     }
+  }
+
+  private updateFormDataFromSection(section: YesNoSection) {
+    this.formData = {
+      title: section.title || 'Title not entered',
+      description: section.description || '',
+      required: section.required || false,
+      yesLabel: section.data.yesLabel || 'Sí',
+      noLabel: section.data.noLabel || 'No',
+      yesDescription: section.data.yesDescription || '',
+      noDescription: section.data.noDescription || '',
+      buttonStyle: section.data.buttonStyle || 'default'
+    };
+    this.selectedOption = section.data.selectedOption || null;
   }
 
   onTitleChange(newTitle: string): void {
     this.formData.title = newTitle;
     this.section.title = newTitle;
+    this.studyState.setYesNoSection(this.section);
   }
 
   onSubtitleChange(newDescription: string): void {
     this.formData.description = newDescription;
     this.section.description = newDescription;
+    this.studyState.setYesNoSection(this.section);
   }
 
   onSelectedOptionChange(option: 'yes' | 'no'): void {
@@ -75,6 +102,7 @@ export class YesNoFormComponent {
       ...this.section.data,
       selectedOption: option
     };
+    this.studyState.setYesNoSection(this.section);
   }
 
   onLabelChange(type: 'yes' | 'no', value: string): void {
@@ -91,6 +119,7 @@ export class YesNoFormComponent {
         noLabel: value
       };
     }
+    this.studyState.setYesNoSection(this.section);
   }
 
   onDescriptionChange(type: 'yes' | 'no', value: string): void {
@@ -107,6 +136,7 @@ export class YesNoFormComponent {
         noDescription: value
       };
     }
+    this.studyState.setYesNoSection(this.section);
   }
 
   onButtonStyleChange(style: ButtonStyle): void {
@@ -115,5 +145,6 @@ export class YesNoFormComponent {
       ...this.section.data,
       buttonStyle: style
     };
+    this.studyState.setYesNoSection(this.section);
   }
 }

@@ -1,60 +1,43 @@
 <div class="yes-no-result">
-    <div class="flex items-center gap-4 mb-4">
-        <div class="icon text-white w-10 h-10 rounded-lg flex items-center justify-center bg-orange-300">
-            <mat-icon>check_circle</mat-icon>
-        </div>
+    <div class="bg-white rounded-xl p-8">
+        <h2 class="text-2xl font-bold text-gray-900 mb-1">{{ section.title }}</h2>
+        <p class="text-gray-600 mb-6">{{ section.description }}</p>
 
-        <div class="texts mr-auto">
-            <p class="text-2xl font-bold text-gray-900">{{ section.title }}</p>
-            <p class="text-sm font-medium text-gray-600">Yes/No Question</p>
-        </div>
+        <hr class="my-4">
 
-        <div class="response text-gray-600 text-center bg-gray-200 rounded-lg p-3">
-            <p class="text-xl font-bold">{{ getResponsesForSection(section.id).length }}</p>
-            <p class="text-sm">Responses</p>
-        </div>
-    </div>
-
-    <div class="result bg-white rounded-xl p-10">
-        <div class="flex justify-center gap-4">
-            <div class="relative text-center">
-                <div class="text-[10vw] font-extrabold bg-gradient-to-t from-blue-600 from-[33%] to-[0%] to-blue-100 bg-clip-text text-transparent">YES</div>
-                <p class="text-[2vw] font-bold text-blue-600">33%</p>
-                <p class="text-sm text-gray-600">(1 testers)</p>
+        <!-- Estadísticas -->
+        <ng-container *ngIf="participants.length > 0">
+            <div class="mb-8">
+                <h3 class="text-xl font-bold text-gray-900 mb-4">Distribution</h3>
+                <div class="flex gap-4">
+                    <div class="bg-green-100 p-4 rounded-lg text-center w-1/2">
+                        <div class="text-2xl font-bold text-green-700">{{ getYesNoStats(section.id).yes }}</div>
+                        <div class="text-green-600">Yes</div>
+                    </div>
+                    <div class="bg-red-100 p-4 rounded-lg text-center w-1/2">
+                        <div class="text-2xl font-bold text-red-700">{{ getYesNoStats(section.id).no }}</div>
+                        <div class="text-red-600">No</div>
+                    </div>
+                </div>
             </div>
-            <span class="text-[10vw] font-extrabold text-blue-100">/</span>
-            <div class="relative text-center">
-                <div class="text-[10vw] font-extrabold bg-gradient-to-t from-blue-600 from-[66%] to-[0%] to-blue-100 bg-clip-text text-transparent">NO</div>
-                <p class="text-[2vw] font-bold text-blue-600">66%</p>
-                <p class="text-sm text-gray-600">(2 testers)</p>
-            </div>
-        </div>
+        </ng-container>
 
-    </div>
-
-    <div class="responses mt-5">
-        <h2 class="text-xl font-bold text-gray-900">Responses</h2>
+        <!-- Lista de respuestas -->
+        <h2 class="text-xl font-bold text-gray-900">Individual Responses</h2>
         <p class="text-sm text-gray-600">Click a participant's row to view full session</p>
 
-        <div class="table-container mt-4">
-            <div class="bg-white rounded-xl shadow-sm overflow-hidden">
-                <table class="w-full">
-                    <thead>
-                        <tr class="bg-gray-50">
-                            <th class="td-header-cell">PARTICIPANT</th>
-                            <!-- <th class="td-header-cell">RESPONSE</th> -->
-                            <th class="td-header-cell">RESPONDED AT</th>
-                        </tr>
-                    </thead>
-
-                    <tbody>
-                        <tr *ngFor="let participant of getResponsesForSection(section.id)" class="tr-pointer">
-                            <td class="td-cell">Participant {{ participant.userId.slice(0, 8) }}</td>
-                            <!-- <td class="td-cell">{{ getParticipantResponse(participant, section.id) }}</td> -->
-                            <td class="td-cell">{{ participant.completedAt | date:'medium' }}</td>
-                        </tr>
-                    </tbody>
-                </table>
+        <div class="response-list mt-4">
+            <div class="response mb-4 bg-white rounded-lg p-5 border border-gray-200" *ngFor="let participant of getResponsesForSection(section.id)">
+                <div class="flex items-center justify-between">
+                    <div class="flex gap-1 items-center text-gray-600">
+                        <mat-icon class="scale-80">person</mat-icon>
+                        <p class="text-sm cursor-pointer hover:text-blue-600 hover:underline">Participant {{ participant.userId.slice(0, 8) }}</p>
+                        <p class="text-sm text-gray-400 ml-2">{{ participant.completedAt | date:'medium' }}</p>
+                    </div>
+                    <div [class]="getParticipantResponse(participant, section.id) === 'Yes' ? 'text-green-600' : 'text-red-600'" class="font-medium">
+                        {{ getParticipantResponse(participant, section.id) }}
+                    </div>
+                </div>
             </div>
         </div>
     </div>

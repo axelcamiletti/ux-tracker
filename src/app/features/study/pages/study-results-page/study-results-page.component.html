@@ -1,6 +1,6 @@
 <div class="study-results-page flex h-full">
     <div class="sidebar flex flex-col w-sm min-w-sm h-full overflow-y-auto p-5">
-        <mat-button-toggle-group name="section" [value]="activeView" (change)="onViewChange($event)" aria-label="Section" class="mb-5">
+        <mat-button-toggle-group name="section" [value]="activeView" (change)="onViewChange($event)" aria-label="Section" [hideSingleSelectionIndicator]="true" class="mb-5">
             <mat-button-toggle class="w-1/2" value="results"><mat-icon>home</mat-icon> Results</mat-button-toggle>
             <mat-button-toggle class="w-1/2" value="participants"><mat-icon>refresh</mat-icon> Participants</mat-button-toggle>
         </mat-button-toggle-group>
@@ -37,25 +37,34 @@
     </div>
 
     <div class="content bg-gray-100 w-full h-full p-10">
-        <!-- Previsualizaciones dinámicas -->
-        <ng-container *ngFor="let section of getFilteredSections()">
-            <app-open-question-result
-              *ngIf="section.type === 'open-question' && selectedSection?.id === section.id"
-              [section]="section"
-              [participants]="participants">
-            </app-open-question-result>
+        <!-- Participant view content -->
+        <app-participant-result
+            *ngIf="activeView === 'participants' && selectedParticipant"
+            [participant]="selectedParticipant"
+            [sections]="sections">
+        </app-participant-result>
 
-            <app-yes-no-result
-              *ngIf="section.type === 'yes-no' && selectedSection?.id === section.id"
-              [section]="section"
-              [participants]="participants">
-            </app-yes-no-result>
+        <!-- Results view content -->
+        <ng-container *ngIf="activeView === 'results'">
+            <ng-container *ngFor="let section of getFilteredSections()">
+                <app-open-question-result
+                    *ngIf="section.type === 'open-question' && selectedSection?.id === section.id"
+                    [section]="section"
+                    [participants]="participants">
+                </app-open-question-result>
 
-            <app-multiple-choice-result
-              *ngIf="section.type === 'multiple-choice' && selectedSection?.id === section.id"
-              [section]="section"
-              [participants]="participants">
-            </app-multiple-choice-result>
+                <app-yes-no-result
+                    *ngIf="section.type === 'yes-no' && selectedSection?.id === section.id"
+                    [section]="section"
+                    [participants]="participants">
+                </app-yes-no-result>
+
+                <app-multiple-choice-result
+                    *ngIf="section.type === 'multiple-choice' && selectedSection?.id === section.id"
+                    [section]="section"
+                    [participants]="participants">
+                </app-multiple-choice-result>
+            </ng-container>
         </ng-container>
     </div>
 </div>

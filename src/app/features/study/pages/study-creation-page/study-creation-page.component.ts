@@ -128,7 +128,9 @@ export class StudyCreationPageComponent implements OnInit, OnDestroy {
       debounceTime(2000), // Esperar 2 segundos de inactividad
       takeUntil(this.destroy$)
     ).subscribe(() => {
-      this.saveStudy();
+      if (this.studyId) {
+        this.studyState.saveStudy(this.studyId);
+      }
     });
   }
 
@@ -152,21 +154,7 @@ export class StudyCreationPageComponent implements OnInit, OnDestroy {
   // Método para guardar el estudio
   async saveStudy() {
     if (!this.studyId) return;
-
-    try {
-      const allSections = [this.welcomeSection, ...this.sections, this.thankYouSection];
-      await this.studyService.updateStudy(this.studyId, {
-        name: this.studyName || 'Nuevo estudio',
-        sections: allSections,
-        updatedAt: new Date()
-      });
-      this.studyState.completeSave();
-      this.snackBar.open('Cambios guardados', 'Cerrar', { duration: 2000 });
-    } catch (error) {
-      console.error('Error saving study:', error);
-      this.studyState.errorSave();
-      this.snackBar.open('Error al guardar los cambios', 'Cerrar', { duration: 3000 });
-    }
+    this.studyState.saveStudy(this.studyId);
   }
 
   // Función para generar IDs únicos (aquí lo hacemos como string)
@@ -296,38 +284,47 @@ export class StudyCreationPageComponent implements OnInit, OnDestroy {
   private async loadExistingStudy(studyId: string) {
     try {
       const study = await this.studyService.getStudyById(studyId).toPromise();
-      if (study) {
-        this.studyId = study.id;
-        this.studyName = study.name;
+      if (!study) {
+        throw new Error('No se encontró el estudio');
+      }
 
-        // Encontrar las secciones de bienvenida y agradecimiento
-        const welcomeSection = study.sections.find(s => s.type === 'welcome-screen');
-        const thankYouSection = study.sections.find(s => s.type === 'thank-you');
+      this.studyId = study.id;
+      this.studyName = study.name;
 
-        // Actualizar las secciones fijas si existen
-        if (welcomeSection) {
-          this.welcomeSection = welcomeSection;
-        }
-        if (thankYouSection) {
-          this.thankYouSection = thankYouSection;
-        }
+      // Asegurarnos de que sections existe, si no, inicializarlo como array vacío
+      const sections = study.sections || [];
 
-        // Filtrar las secciones dinámicas
-        this.sections = study.sections.filter(section =>
-          section.type !== 'welcome-screen' && section.type !== 'thank-you'
-        );
+      // Encontrar las secciones de bienvenida y agradecimiento
+      const welcomeSection = sections.find(s => s.type === 'welcome-screen');
+      const thankYouSection = sections.find(s => s.type === 'thank-you');
 
-        // Actualizar el estado en el servicio
-        this.studyState.setWelcomeSection(this.welcomeSection);
-        this.studyState.setThankYouSection(this.thankYouSection);
-        this.studyState.setSections(this.sections);
+      // Actualizar las secciones fijas si existen
+      if (welcomeSection) {
+        this.welcomeSection = welcomeSection;
+      }
+      if (thankYouSection) {
+        this.thankYouSection = thankYouSection;
+      }
 
-        // Seleccionar la primera sección si existe
-        this.selectedSection = this.sections[0] || null;
+      // Filtrar las secciones dinámicas
+      this.sections = sections.filter(section =>
+        section.type !== 'welcome-screen' && section.type !== 'thank-you'
+      );
+
+      // Actualizar el estado en el servicio
+      this.studyState.setWelcomeSection(this.welcomeSection);
+      this.studyState.setThankYouSection(this.thankYouSection);
+      this.studyState.setSections(this.sections);
+
+      // Seleccionar la primera sección si existe
+      if (this.sections.length > 0) {
+        this.selectedSection = this.sections[0];
       }
     } catch (error) {
       console.error('Error loading study:', error);
       this.snackBar.open('Error al cargar el estudio', 'Cerrar', { duration: 3000 });
+      // Redirigir al usuario a la página de proyectos en caso de error
+      this.router.navigate(['/projects']);
     }
   }
 }

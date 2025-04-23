@@ -52,6 +52,8 @@ export class StudyPublicPageComponent implements OnInit {
   responseId: string = '';
   sections: Section[] = [];
   responses: { [key: string]: any } = {};
+  private _lastLoggedSectionId: string | undefined;
+  private _currentSection: Section | undefined;
 
   constructor(
     private studyService: StudyService,
@@ -62,37 +64,37 @@ export class StudyPublicPageComponent implements OnInit {
   ) {}
 
   async ngOnInit() {
-    // Obtener el ID del estudio de la URL
+    console.log('Iniciando estudio público');
     this.studyId = this.route.snapshot.params['id'];
 
     if (!this.studyId) {
+      console.error('No se encontró ID del estudio en la URL');
       this.snackBar.open('Error: No se encontró el ID del estudio', 'Cerrar', { duration: 3000 });
       return;
     }
 
     try {
-      // Cargar el estudio
+      console.log('Cargando estudio con ID:', this.studyId);
       const study = await firstValueFrom(this.studyService.getStudyById(this.studyId));
+      console.log('Estudio cargado:', study);
 
       if (study.status !== 'published') {
+        console.warn('Intento de acceder a estudio no publicado');
         this.snackBar.open('Este estudio no está disponible', 'Cerrar', { duration: 3000 });
         return;
       }
 
-      // Verificar si el usuario ya completó el estudio y no se permiten múltiples respuestas
       const hasCompleted = localStorage.getItem(`study_${this.studyId}_completed`);
-      /* if (hasCompleted && !study.allowMultipleResponses) {
-        this.snackBar.open('Ya has completado este estudio', 'Cerrar', { duration: 3000 });
-        return;
-      } */
+      console.log('Estado de completado previo:', hasCompleted);
 
       this.sections = study.sections;
+      console.log('Secciones cargadas:', this.sections);
 
-      // Crear una nueva respuesta de estudio
       this.responseId = await this.studyResponsesService.createStudyResponse(this.studyId);
+      console.log('Nueva respuesta creada con ID:', this.responseId);
 
     } catch (error) {
-      console.error('Error loading study:', error);
+      console.error('Error detallado al cargar el estudio:', error);
       this.snackBar.open('Error al cargar el estudio', 'Cerrar', { duration: 3000 });
     }
   }
@@ -109,81 +111,137 @@ export class StudyPublicPageComponent implements OnInit {
   }
 
   nextSection() {
+    console.log('Avanzando a siguiente sección');
     if (this.currentSectionIndex < this.sections.length - 1) {
-      // Guardar la respuesta de la sección actual antes de avanzar
-      this.saveCurrentResponse();
-      this.currentSectionIndex++;
+      this.saveCurrentResponse().then(() => {
+        console.log('Respuesta guardada, avanzando a siguiente sección');
+        this.currentSectionIndex++;
+        this._currentSection = undefined; // Reset current section
+        console.log('Índice actual:', this.currentSectionIndex);
+      }).catch(error => {
+        console.error('Error al guardar respuesta antes de avanzar:', error);
+      });
     } else {
-      // Si es la última sección, finalizar el estudio
+      console.log('Última sección alcanzada, finalizando estudio');
       this.finishStudy();
     }
   }
 
   previousSection() {
+    console.log('Retrocediendo a sección anterior');
     if (this.currentSectionIndex > 0) {
-      // Guardar la respuesta actual antes de retroceder
-      this.saveCurrentResponse();
-      this.currentSectionIndex--;
+      this.saveCurrentResponse().then(() => {
+        console.log('Respuesta guardada, retrocediendo a sección anterior');
+        this.currentSectionIndex--;
+        this._currentSection = undefined; // Reset current section
+        console.log('Índice actual:', this.currentSectionIndex);
+      }).catch(error => {
+        console.error('Error al guardar respuesta antes de retroceder:', error);
+      });
     }
   }
 
   getCurrentSection(): Section | undefined {
     const section = this.sections[this.currentSectionIndex];
-    if (section) {
-      // Asegurarnos de que la sección tenga la respuesta guardada
-      /* section.response = this.responses[section.id]; */
+    // Solo logueamos cuando realmente cambia la sección
+    if (section?.id !== this._lastLoggedSectionId) {
+      console.log('Sección actual:', section);
+      this._lastLoggedSectionId = section?.id;
     }
     return section;
   }
 
   // Type-specific getters for each section type
   getWelcomeSection(): WelcomeScreenSection | undefined {
-    const section = this.getCurrentSection();
-    return section?.type === 'welcome-screen' ? section as WelcomeScreenSection : undefined;
+    this._currentSection = this._currentSection || this.getCurrentSection();
+    return this._currentSection?.type === 'welcome-screen' ? this._currentSection as WelcomeScreenSection : undefined;
   }
 
   getOpenQuestionSection(): OpenQuestionSection | undefined {
-    const section = this.getCurrentSection();
-    return section?.type === 'open-question' ? section as OpenQuestionSection : undefined;
+    this._currentSection = this._currentSection || this.getCurrentSection();
+    return this._currentSection?.type === 'open-question' ? this._currentSection as OpenQuestionSection : undefined;
   }
 
   getMultipleChoiceSection(): MultipleChoiceSection | undefined {
-    const section = this.getCurrentSection();
-    return section?.type === 'multiple-choice' ? section as MultipleChoiceSection : undefined;
+    this._currentSection = this._currentSection || this.getCurrentSection();
+    return this._currentSection?.type === 'multiple-choice' ? this._currentSection as MultipleChoiceSection : undefined;
   }
 
   getYesNoSection(): YesNoSection | undefined {
-    const section = this.getCurrentSection();
-    return section?.type === 'yes-no' ? section as YesNoSection : undefined;
+    this._currentSection = this._currentSection || this.getCurrentSection();
+    return this._currentSection?.type === 'yes-no' ? this._currentSection as YesNoSection : undefined;
   }
 
   getPrototypeTestSection(): PrototypeTestSection | undefined {
-    const section = this.getCurrentSection();
-    return section?.type === 'prototype-test' ? section as PrototypeTestSection : undefined;
+    this._currentSection = this._currentSection || this.getCurrentSection();
+    return this._currentSection?.type === 'prototype-test' ? this._currentSection as PrototypeTestSection : undefined;
   }
 
   getThankYouSection(): ThankYouSection | undefined {
-    const section = this.getCurrentSection();
-    return section?.type === 'thank-you' ? section as ThankYouSection : undefined;
+    this._currentSection = this._currentSection || this.getCurrentSection();
+    return this._currentSection?.type === 'thank-you' ? this._currentSection as ThankYouSection : undefined;
   }
 
   // Guardar la respuesta de la sección actual
   private async saveCurrentResponse() {
     const currentSection = this.getCurrentSection();
-    if (currentSection && this.responses[currentSection.id]) {
-      try {
-        await this.studyResponsesService.updateSectionResponse(
-          this.responseId,
-          currentSection.id,
-          {
-            type: currentSection.type,
-            value: this.responses[currentSection.id]
-          }
-        );
-      } catch (error) {
-        console.error('Error saving response:', error);
-        this.snackBar.open('Error al guardar la respuesta', 'Cerrar', { duration: 3000 });
+    const response = this.responses[currentSection?.id || ''];
+
+    console.log('Intentando guardar respuesta:', {
+      sectionId: currentSection?.id,
+      sectionType: currentSection?.type,
+      response: response
+    });
+
+    if (!currentSection || !response) {
+      console.warn('No hay sección actual o respuesta para guardar');
+      return;
+    }
+
+    try {
+      let formattedResponse;
+      switch (currentSection.type) {
+        case 'open-question':
+          formattedResponse = { text: response };
+          break;
+        case 'multiple-choice':
+          formattedResponse = { selectedOptionIds: Array.isArray(response) ? response : [response] };
+          break;
+        case 'yes-no':
+          formattedResponse = { answer: Boolean(response) };
+          break;
+        case 'prototype-test':
+          formattedResponse = {
+            completed: true,
+            timeSpent: response.timeSpent || 0,
+            interactions: response.interactions || []
+          };
+          break;
+        default:
+          formattedResponse = { viewed: true };
       }
+
+      console.log('Guardando respuesta formateada:', {
+        responseId: this.responseId,
+        sectionId: currentSection.id,
+        type: currentSection.type,
+        formattedResponse
+      });
+
+      await this.studyResponsesService.updateSectionResponse(
+        this.responseId,
+        currentSection.id,
+        {
+          type: currentSection.type,
+          value: formattedResponse
+        }
+      );
+
+      console.log('Respuesta guardada exitosamente');
+    } catch (error) {
+      console.error('Error detallado al guardar respuesta:', error);
+      this.snackBar.open('Error al guardar la respuesta', 'Cerrar', { duration: 3000 });
+      throw error;
     }
   }
 
@@ -191,24 +249,36 @@ export class StudyPublicPageComponent implements OnInit {
   onResponse(response: any) {
     const currentSection = this.getCurrentSection();
     if (currentSection) {
+      console.log('Respuesta recibida para sección', {
+        sectionId: currentSection.id,
+        sectionType: currentSection.type,
+        response: response
+      });
+
       this.responses[currentSection.id] = response;
-      /* currentSection.response = response; */
+    } else {
+      console.warn('Se recibió una respuesta pero no hay sección actual');
     }
   }
 
   // Finalizar el estudio
   private async finishStudy() {
+    console.log('Iniciando proceso de finalización del estudio');
     try {
+      console.log('Guardando última respuesta');
       await this.saveCurrentResponse();
+
+      console.log('Marcando estudio como completado');
       await this.studyResponsesService.completeStudy(this.responseId);
 
-      // Marcar el estudio como completado en localStorage
       localStorage.setItem(`study_${this.studyId}_completed`, 'true');
+      console.log('Estudio marcado como completado en localStorage');
 
       this.snackBar.open('¡Gracias por completar el estudio!', 'Cerrar', { duration: 3000 });
+      console.log('Redirigiendo a página principal');
       this.router.navigate(['/']);
     } catch (error) {
-      console.error('Error completing study:', error);
+      console.error('Error detallado al finalizar el estudio:', error);
       this.snackBar.open('Error al finalizar el estudio', 'Cerrar', { duration: 3000 });
     }
   }

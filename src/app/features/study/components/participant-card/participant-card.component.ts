@@ -14,17 +14,27 @@ export class ParticipantCardComponent {
   @Input() isActive: boolean = false;
 
   get title(): string {
-    return `Participant ${this.participant.userId.slice(0, 8)}`;
+    try {
+      const userId = this.participant?.userId || 'Unknown';
+      // Simplemente tomar los primeros 8 caracteres sin codificación
+      const shortId = userId.substring(0, 8);
+      return `Participant ${shortId}`;
+    } catch (error) {
+      console.warn('Error generating participant title:', error);
+      return 'Participant';
+    }
   }
 
   get subtitle(): string {
-    return this.participant.completedAt ? `Completed: ${this.participant.completedAt.toLocaleString()}` : 'In Progress';
-  }
-
-  get avatar(): string {
-    // Generar un color aleatorio basado en el userId para el fondo del avatar
-    const hash = this.participant.userId.split('').reduce((acc, char) => char.charCodeAt(0) + ((acc << 5) - acc), 0);
-    const hue = Math.abs(hash % 360);
-    return `hsl(${hue}, 70%, 30%)`;
+    try {
+      if (!this.participant?.completedAt) {
+        return 'In Progress';
+      }
+      const date = new Date(this.participant.completedAt);
+      return `Completed: ${date.toLocaleString()}`;
+    } catch (error) {
+      console.warn('Error generating participant subtitle:', error);
+      return 'Status unknown';
+    }
   }
 }

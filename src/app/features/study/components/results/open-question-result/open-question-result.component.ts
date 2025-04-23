@@ -16,14 +16,26 @@ export class OpenQuestionResultComponent {
   @Input() title: string = '';
   @Input() participants: StudyResponse[] = [];
 
-  getResponsesForSection(sectionId: string): StudyResponse[] {
-    return this.participants.filter(participant =>
-      participant.responses.some(response => response.sectionId === sectionId)
-    );
+  ngOnChanges() {
+    console.log('OpenQuestionResult: Input changes detectados');
+    console.log('OpenQuestionResult: Section recibida:', this.section);
+    console.log('OpenQuestionResult: Participantes recibidos:', this.participants);
   }
 
-  /* getParticipantResponse(participant: StudyResponse, sectionId: string): string {
-    const response = participant.responses.find(r => r.sectionId === sectionId);
-    return response?.response || '';
-  } */
+  getResponsesForSection(sectionId: string): StudyResponse[] {
+    console.log('OpenQuestionResult: Buscando respuestas para sección:', sectionId);
+    const responses = this.participants.filter(participant =>
+      participant.responses?.some(response => response.sectionId === sectionId)
+    );
+    console.log('OpenQuestionResult: Respuestas encontradas:', responses.length);
+    return responses;
+  }
+
+  getParticipantResponse(participant: StudyResponse, sectionId: string): string {
+    const response = participant.responses?.find(r => r.sectionId === sectionId);
+    if (response?.type === 'open-question' && response.response?.text) {
+      return response.response.text;
+    }
+    return 'No response';
+  }
 }

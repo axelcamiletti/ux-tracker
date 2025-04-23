@@ -1,27 +1,16 @@
 <div class="open-question-result">
-    <div class="flex items-center gap-4">
-        <div class="icon text-white w-10 h-10 rounded-lg flex items-center justify-center bg-indigo-300">
-            <mat-icon>help</mat-icon>
-        </div>
+    <div class="bg-white rounded-xl p-8">
+        <h2 class="text-2xl font-bold text-gray-900 mb-1">{{ section.title }}</h2>
+        <p class="text-gray-600 mb-6">{{ section.description }}</p>
 
-        <div class="texts mr-auto">
-            <p class="text-2xl font-bold text-gray-900">{{ section.title }}</p>
-            <p class="text-sm font-medium text-gray-600">Open Question</p>
-        </div>
+        <hr class="my-4">
 
-        <div class="response text-gray-600 text-center bg-gray-200 rounded-lg p-3">
-            <p class="text-xl font-bold">{{ getResponsesForSection(section.id).length }}</p>
-            <p class="text-sm">Responses</p>
-        </div>
-    </div>
-
-    <div class="responses mt-5">
         <h2 class="text-xl font-bold text-gray-900">Responses</h2>
         <p class="text-sm text-gray-600">Click a participant's row to view full session</p>
 
         <div class="response-list mt-4">
             <div class="response mb-4 bg-white rounded-lg p-5" *ngFor="let participant of getResponsesForSection(section.id)">
-                <!-- <p class="text-base text-gray-900">{{ getParticipantResponse(participant, section.id) }}</p> -->
+                <p class="text-base text-gray-900">{{ getParticipantResponse(participant, section.id) }}</p>
 
                 <div class="flex gap-1 items-center text-gray-600 mt-2">
                     <mat-icon class="scale-80">person</mat-icon>

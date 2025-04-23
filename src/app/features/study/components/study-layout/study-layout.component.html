@@ -1,5 +1,10 @@
 <div class="study-layout h-screen max-h-screen">
-    <app-toolbar [studyId]="studyId"></app-toolbar>
+    <app-toolbar
+        [studyId]="studyId"
+        [saving]="saving"
+        [lastSaved]="lastSaved"
+        (saveStudy)="saveStudy()">
+    </app-toolbar>
     <div class="content-pages">
         <router-outlet></router-outlet>
     </div>

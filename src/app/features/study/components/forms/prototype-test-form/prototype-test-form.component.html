@@ -18,7 +18,7 @@
 
   <label class="label">Description</label>
   <mat-form-field appearance="outline" class="w-full">
-    <textarea matInput placeholder="Give tester details to complete the mission" [(ngModel)]="subtitle" (ngModelChange)="updateSubtitle($event)"></textarea>
+    <textarea matInput placeholder="Give tester details to complete the mission" [(ngModel)]="description" (ngModelChange)="updateSubtitle($event)"></textarea>
   </mat-form-field>
 
   <p class="mt-4"><b>Prototype *</b></p>
@@ -71,5 +71,5 @@
 </div>
 
 <mat-menu #menu="matMenu">
-  <button mat-menu-item (click)="onDelete()">Delete</button>
+  <!-- <button mat-menu-item (click)="onDelete()">Delete</button> -->
 </mat-menu>

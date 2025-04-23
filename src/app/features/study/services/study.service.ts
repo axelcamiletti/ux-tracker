@@ -1,5 +1,5 @@
 import { Injectable, PLATFORM_ID, Inject, inject } from '@angular/core';
-import { BehaviorSubject, Observable, from, map, of } from 'rxjs';
+import { BehaviorSubject, Observable, from, map, of, tap } from 'rxjs';
 import { isPlatformBrowser } from '@angular/common';
 import { Firestore, collection, addDoc, getDocs, query, where, doc, updateDoc, getDoc, deleteDoc } from '@angular/fire/firestore';
 import { Study } from '../models/study.model';
@@ -11,6 +11,7 @@ import { environment } from '../../../../environments/environment';
 })
 export class StudyService {
   private currentStudy = new BehaviorSubject<Study | null>(null);
+  private studies = new BehaviorSubject<Study[]>([]);
   private responses = new BehaviorSubject<StudyResponse[]>([]);
   private isBrowser: boolean;
   private readonly collectionName = 'studies';
@@ -18,37 +19,45 @@ export class StudyService {
 
   constructor(@Inject(PLATFORM_ID) platformId: Object) {
     this.isBrowser = isPlatformBrowser(platformId);
+    // Solo cargar del localStorage si estamos en el navegador
     if (this.isBrowser) {
+      console.log('StudyService: Ejecutando en el navegador');
       this.loadFromLocalStorage();
+    } else {
+      console.log('StudyService: No ejecutando en el navegador');
     }
   }
 
   // Obtener el estudio actual
   getCurrentStudy(): Observable<Study | null> {
-    if (!this.isBrowser) {
-      return of(null);
-    }
+    console.log('StudyService: Solicitando estudio actual');
     return this.currentStudy.asObservable();
   }
 
   // Establecer el estudio actual
   setCurrentStudy(study: Study): void {
-    if (!this.isBrowser) return;
+    console.log('StudyService: Estableciendo estudio actual:', study);
+    if (!this.isBrowser) {
+      console.log('StudyService: No en navegador, ignorando setCurrentStudy');
+      return;
+    }
     this.currentStudy.next(study);
     this.saveToLocalStorage();
   }
 
   // Obtener un estudio por ID
   getStudyById(studyId: string): Observable<Study> {
-    if (!this.isBrowser) {
-      return of({} as Study);
-    }
-    const studyRef = doc(this.firestore, this.collectionName, studyId);
-    return from(getDoc(studyRef)).pipe(
-      map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      } as Study))
+    console.log('StudyService: Obteniendo estudio por ID:', studyId);
+    return from(getDoc(doc(this.firestore, 'studies', studyId))).pipe(
+      map(doc => {
+        if (doc.exists()) {
+          const study = { id: doc.id, ...doc.data() } as Study;
+          console.log('StudyService: Estudio encontrado:', study);
+          this.setCurrentStudy(study);
+          return study;
+        }
+        throw new Error('Estudio no encontrado');
+      })
     );
   }
 
@@ -82,9 +91,27 @@ export class StudyService {
 
   // Actualizar un estudio
   async updateStudy(studyId: string, data: Partial<Study>): Promise<void> {
-    if (!this.isBrowser) return;
+    console.log('StudyService: Actualizando estudio:', { studyId, data });
+    if (!this.isBrowser) {
+      console.log('StudyService: No en navegador, ignorando updateStudy');
+      return;
+    }
     const studyRef = doc(this.firestore, this.collectionName, studyId);
-    await updateDoc(studyRef, data);
+    try {
+      await updateDoc(studyRef, data);
+      console.log('StudyService: Estudio actualizado exitosamente');
+
+      // Actualizar el estudio actual con los cambios
+      if (this.currentStudy.value && this.currentStudy.value.id === studyId) {
+        this.setCurrentStudy({
+          ...this.currentStudy.value,
+          ...data
+        });
+      }
+    } catch (error) {
+      console.error('StudyService: Error actualizando estudio:', error);
+      throw error;
+    }
   }
 
   // Guardar una respuesta

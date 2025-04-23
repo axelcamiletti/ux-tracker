@@ -3,7 +3,7 @@
     <button mat-icon-button (click)="navigateToProjects()" matTooltip="Volver al proyecto">
       <mat-icon class="text-gray-600">arrow_back</mat-icon>
     </button>
-    
+
     <h1 class="text-xl font-bold cursor-pointer hover:text-primary" (click)="openEditNameModal()">
       {{ studyName }}
     </h1>
@@ -18,7 +18,7 @@
       <a [routerLink]="['/study', studyId, 'analytics']" routerLinkActive="bg-blue-50! text-blue-600!" mat-button>Analytics</a>
     </div>
 
-    <!-- <div class="flex items-center gap-4">
+    <div class="flex items-center gap-4">
       <span *ngIf="saving" class="text-gray-600 flex items-center gap-2">
         <mat-spinner diameter="20"></mat-spinner>
         Guardando cambios...
@@ -26,11 +26,11 @@
       <span *ngIf="lastSaved && !saving" class="text-gray-600">
         Último guardado: {{ lastSaved | date:'medium' }}
       </span>
-      <button mat-raised-button color="primary" (click)="saveStudy()" [disabled]="saving">
+      <button mat-raised-button color="primary" (click)="triggerSaveStudy()" [disabled]="saving">
         <mat-icon>save</mat-icon>
         Guardar
       </button>
-    </div> -->
+    </div>
 
     <button mat-icon-button matTooltip="Configuración del prototipo"><mat-icon>home</mat-icon></button>
 

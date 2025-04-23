@@ -31,20 +31,6 @@
       (ngModelChange)="onDescriptionChange($event)"
     ></textarea>
   </mat-form-field>
-
-  <label class="label">Logo URL</label>
-  <mat-form-field appearance="outline" class="w-full">
-    <input
-      matInput
-      placeholder="Enter the URL of your logo"
-      [ngModel]="formData.imageUrl"
-      (ngModelChange)="onLogoUrlChange($event)"
-      type="text" />
-  </mat-form-field>
-
-  <div class="preview-image mt-4" *ngIf="formData.imageUrl">
-    <img [src]="formData.imageUrl" alt="Logo preview" class="max-h-32">
-  </div>
 </div>
 
 <mat-menu #menu="matMenu">

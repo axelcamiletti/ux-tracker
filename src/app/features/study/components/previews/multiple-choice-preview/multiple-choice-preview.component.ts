@@ -1,7 +1,9 @@
-import { Component, Input, Output, EventEmitter, SimpleChanges } from '@angular/core';
+import { Component, Input, Output, EventEmitter, SimpleChanges, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MultipleChoiceSection } from '../../../models/section.model';
 import { MultipleChoiceResponse } from '../../../models/study-response.model';
+import { StudyStateService } from '../../../services/study-state.service';
+import { Subject, takeUntil } from 'rxjs';
 
 @Component({
   selector: 'app-multiple-choice-preview',
@@ -10,62 +12,81 @@ import { MultipleChoiceResponse } from '../../../models/study-response.model';
   templateUrl: './multiple-choice-preview.component.html',
   styleUrl: './multiple-choice-preview.component.css'
 })
-export class MultipleChoicePreviewComponent {
+export class MultipleChoicePreviewComponent implements OnInit, OnDestroy {
   @Input() section!: MultipleChoiceSection;
   @Output() responseChange = new EventEmitter<MultipleChoiceResponse>();
+
+  selectedOptions: string[] = [];
+  private destroy$ = new Subject<void>();
 
   previewData = {
     title: '',
     description: '',
-    options: [] as Array<{id: string, text: string}>,
+    required: false,
     allowMultiple: false,
-    required: false
+    options: [] as { id: string; text: string }[]
   };
 
-  selectedOptions: Set<string> = new Set();
+  constructor(private studyState: StudyStateService) {}
+
+  ngOnInit(): void {
+    // Subscribe to multiple choice section changes
+    this.studyState.multipleChoiceSection$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(section => {
+        if (section) {
+          this.updatePreviewData(section);
+        }
+      });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['section'] && this.section) {
-      this.previewData = {
-        title: this.section.title || 'No se ha ingresado la pregunta',
-        description: this.section.description || '',
-        options: this.section.data?.options || [],
-        allowMultiple: this.section.data?.allowMultiple || false,
-        required: this.section.required || false
-      };
+      this.updatePreviewData(this.section);
+      this.studyState.setMultipleChoiceSection(this.section);
     }
   }
 
-  toggleOption(optionId: string): void {
-    if (!this.previewData.allowMultiple) {
-      this.selectSingleOption(optionId);
-    } else {
-      if (this.selectedOptions.has(optionId)) {
-        this.selectedOptions.delete(optionId);
-      } else {
-        this.selectedOptions.add(optionId);
-      }
-    }
-    this.emitResponse();
-  }
-
-  selectSingleOption(optionId: string): void {
-    this.selectedOptions.clear();
-    this.selectedOptions.add(optionId);
-    this.emitResponse();
+  private updatePreviewData(section: MultipleChoiceSection) {
+    this.previewData = {
+      title: section.title || '',
+      description: section.description || '',
+      required: section.required,
+      allowMultiple: section.data.allowMultiple || false,
+      options: section.data.options || []
+    };
   }
 
   isSelected(optionId: string): boolean {
-    return this.selectedOptions.has(optionId);
+    return this.selectedOptions.includes(optionId);
   }
 
-  private emitResponse(): void {
+  toggleOption(optionId: string): void {
+    if (this.previewData.allowMultiple) {
+      const index = this.selectedOptions.indexOf(optionId);
+      if (index === -1) {
+        this.selectedOptions.push(optionId);
+      } else {
+        this.selectedOptions.splice(index, 1);
+      }
+    } else {
+      this.selectedOptions = [optionId];
+    }
+    this.emitResponse();
+  }
+
+  private emitResponse() {
     const response: MultipleChoiceResponse = {
       sectionId: this.section.id,
       timestamp: new Date(),
       type: 'multiple-choice',
       response: {
-        selectedOptionIds: Array.from(this.selectedOptions)
+        selectedOptionIds: this.selectedOptions
       }
     };
     this.responseChange.emit(response);
