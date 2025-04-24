@@ -247,6 +247,7 @@ export class StudyCreationPageComponent implements OnInit, OnDestroy {
   // Selecciona una sección (al hacer clic en un clip)
   selectSection(section: Section): void {
     this.selectedSection = section;
+    this.isPrototypePreview = section.type === 'prototype-test';
   }
 
   // Elimina una sección
@@ -274,11 +275,13 @@ export class StudyCreationPageComponent implements OnInit, OnDestroy {
   // Función para seleccionar la sección de bienvenida
   selectWelcomeSection(): void {
     this.selectedSection = this.welcomeSection;
+    this.isPrototypePreview = false;
   }
 
-  // Función para seleccionar la sección de bienvenida
+  // Función para seleccionar la sección de agradecimiento
   selectThankSection(): void {
     this.selectedSection = this.thankYouSection;
+    this.isPrototypePreview = false;
   }
 
   private async loadExistingStudy(studyId: string) {

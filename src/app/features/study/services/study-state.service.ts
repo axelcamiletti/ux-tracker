@@ -62,7 +62,25 @@ export class StudyStateService {
   }
 
   setPrototypeTestSection(section: PrototypeTestSection) {
+    console.log('StudyStateService: setPrototypeTestSection called with:', section);
+
+    const currentSections = this.sections.getValue();
+    console.log('StudyStateService: Current sections:', currentSections);
+
+    const index = currentSections.findIndex(s => s.id === section.id);
+    if (index !== -1) {
+      console.log('StudyStateService: Updating existing section at index:', index);
+      currentSections[index] = section;
+      this.sections.next([...currentSections]);
+    }
+
     this.prototypeTestSectionSubject.next(section);
+    console.log('StudyStateService: Updated prototype section');
+
+    if (this.saveRequested) {
+      console.log('StudyStateService: Triggering autosave');
+      this.saveRequested.next();
+    }
   }
 
   setThankYouSection(section: ThankYouSection) {

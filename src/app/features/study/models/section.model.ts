@@ -42,6 +42,14 @@ export interface PrototypeTestSection extends BaseSection {
   data: {
     prototypeUrl: string;
     instructions?: string;
+    startingNodeId?: string;
+    selectedTargetNodeId?: string;
+    frames?: Array<{
+      id: string;
+      name: string;
+      imageUrl: string;
+    }>;
+    showPreview?: boolean;
     interactionTracking?: {
       enabled: boolean;
       trackClicks: boolean;
@@ -77,6 +85,14 @@ export interface ThankYouSection extends BaseSection {
     imageUrl?: string;
     redirectUrl?: string;
   };
+}
+
+export interface FigmaUrl {
+  fileType: string;
+  fileKey: string;
+  fileName: string;
+  nodeId: string;
+  startingNodeId?: string;
 }
 
 export type Section =

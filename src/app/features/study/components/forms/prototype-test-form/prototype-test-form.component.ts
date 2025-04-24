@@ -8,9 +8,10 @@ import { MatRadioModule } from '@angular/material/radio';
 import { FormsModule } from '@angular/forms';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { PrototypeTestSection } from '../../../models/section.model';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { PrototypeTestSection, FigmaUrl } from '../../../models/section.model';
 import { StudyStateService } from '../../../services/study-state.service';
-import { FigmaService } from '../../../../../services/figma.service';
+import { FigmaService } from '../../../services/figma.service';
 import { Subject, takeUntil } from 'rxjs';
 
 @Component({
@@ -34,25 +35,36 @@ export class PrototypeTestFormComponent implements OnInit, OnDestroy {
   @Input() section!: PrototypeTestSection;
 
   private destroy$ = new Subject<void>();
+  private urlRegex = /^https:\/\/www\.figma\.com\/(proto|file)\/([a-zA-Z0-9]+)\/([^?]+)\?.*(?:node-id=([^&]+)).*(?:starting-point-node-id=([^&]+))?/;
 
   title = '';
   description = '';
   fileId = '';
+  figmaUrl: FigmaUrl | null = null;
+  figmaFileName = '';
   images: any = [];
   exportedImages: { name: string; imageUrl: string }[] = [];
   selectedImage: { name: string, imageUrl: string } | null = null;
+  startScreenImage: { name: string, imageUrl: string } | null = null;
   isLoading = false;
+  importEnabled = false;
 
   constructor(
     private figmaService: FigmaService,
-    private studyState: StudyStateService
-  ) {}
+    private studyState: StudyStateService,
+    private snackBar: MatSnackBar
+  ) {
+    console.log('PrototypeTestFormComponent: Constructor called');
+  }
 
   ngOnInit() {
+    console.log('PrototypeTestFormComponent: ngOnInit');
     this.studyState.prototypeTestSection$
       .pipe(takeUntil(this.destroy$))
       .subscribe(section => {
-        if (section) {
+        console.log('PrototypeTestFormComponent: Received section update:', section);
+        if (section && section.id === this.section?.id) {
+          console.log('PrototypeTestFormComponent: Updating form data from section');
           this.updateFormDataFromSection(section);
         }
       });
@@ -64,20 +76,29 @@ export class PrototypeTestFormComponent implements OnInit, OnDestroy {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['section'] && this.section) {
+    console.log('PrototypeTestFormComponent: ngOnChanges', changes);
+    if (changes['section'] && !changes['section'].firstChange && this.section) {
+      console.log('PrototypeTestFormComponent: Section changed, updating form data');
       this.updateFormDataFromSection(this.section);
-      this.studyState.setPrototypeTestSection(this.section);
     }
   }
 
   private updateFormDataFromSection(section: PrototypeTestSection) {
-    this.title = section.title || '';
-    this.description = section.description || '';
-    this.fileId = section.data.prototypeUrl || '';
+    console.log('PrototypeTestFormComponent: updateFormDataFromSection called with:', section);
 
-    /* if (section.data.selectedImage) {
-      this.selectedImage = section.data.selectedImage;
-    } */
+    // Solo actualizar si los valores son diferentes
+    if (this.title !== section.title) {
+      this.title = section.title || '';
+    }
+    if (this.description !== section.description) {
+      this.description = section.description || '';
+    }
+    if (this.fileId !== section.data.prototypeUrl) {
+      this.fileId = section.data.prototypeUrl || '';
+      if (this.fileId) {
+        this.processUrl(this.fileId);
+      }
+    }
   }
 
   updateTitle(value: string) {
@@ -92,16 +113,71 @@ export class PrototypeTestFormComponent implements OnInit, OnDestroy {
     this.studyState.setPrototypeTestSection(this.section);
   }
 
+  onUrlChange(url: string) {
+    console.log('onUrlChange called with url:', url);
+    this.fileId = url;
+    this.processUrl(url);
+  }
+
+  processUrl(url: string) {
+    console.log('processUrl called with url:', url);
+    console.log('Current regex pattern:', this.urlRegex);
+
+    try {
+      const match = url.match(this.urlRegex);
+      console.log('URL match result:', match);
+
+      if (match) {
+        console.log('URL matched successfully, extracting components...');
+        this.figmaUrl = {
+          fileType: match[1],
+          fileKey: match[2],
+          fileName: decodeURIComponent(match[3]),
+          nodeId: match[4],
+          startingNodeId: match[5]
+        };
+        console.log('Parsed figmaUrl object:', this.figmaUrl);
+
+        this.figmaFileName = this.figmaUrl.fileName.replace(/-/g, ' ');
+        this.importEnabled = true;
+
+        // Update section data
+        this.section.data = {
+          ...this.section.data,
+          prototypeUrl: url
+        };
+
+        console.log('Updating section with new URL data');
+        this.studyState.setPrototypeTestSection(this.section);
+      } else {
+        console.log('URL did not match the expected pattern');
+        this.figmaUrl = null;
+        this.figmaFileName = '';
+        this.importEnabled = false;
+      }
+    } catch (error) {
+      console.error('Error in processUrl:', error);
+      this.figmaUrl = null;
+      this.figmaFileName = '';
+      this.importEnabled = false;
+    }
+  }
+
   extractFramesAsImages() {
-    if (!this.fileId) {
-      console.error('No Figma File ID provided');
+    console.log('extractFramesAsImages called');
+    console.log('Current figmaUrl:', this.figmaUrl);
+
+    if (!this.figmaUrl) {
+      console.error('No valid Figma URL provided');
       return;
     }
 
     this.isLoading = true;
+    console.log('Attempting to get file with key:', this.figmaUrl.fileKey);
 
-    this.figmaService.getFile(this.fileId).subscribe({
+    this.figmaService.getFile(this.figmaUrl.fileKey).subscribe({
       next: (fileResponse) => {
+        console.log('File response received:', fileResponse);
         const pages = fileResponse.document.children;
         const allFrames: any[] = [];
 
@@ -110,44 +186,80 @@ export class PrototypeTestFormComponent implements OnInit, OnDestroy {
           allFrames.push(...topLevelFrames);
         }
 
+        console.log('Found frames:', allFrames);
         const frameIds = allFrames.map(frame => frame.id);
+        console.log('Frame IDs to export:', frameIds);
 
-        this.figmaService.getImages(this.fileId, frameIds).subscribe({
+        if (!this.figmaUrl) return;
+
+        console.log('Requesting images for frames...');
+        this.figmaService.getImages(this.figmaUrl.fileKey, frameIds).subscribe({
           next: (imageResponse) => {
+            console.log('Image response received:', imageResponse);
             this.exportedImages = allFrames.map(frame => ({
               name: frame.name,
               imageUrl: imageResponse.images[frame.id]
             }));
 
-            // Update section with prototype URL
+            // Encontrar y establecer el start screen basado en el nodeId
+            if (this.figmaUrl?.nodeId) {
+              const startFrame = allFrames.find(frame => frame.id.replace(':', '%3A') === this.figmaUrl?.nodeId);
+              if (startFrame) {
+                this.startScreenImage = {
+                  name: startFrame.name,
+                  imageUrl: imageResponse.images[startFrame.id]
+                };
+              }
+            }
+
+            // Update section with prototype URL, frames and starting node
             this.section.data = {
               ...this.section.data,
-              prototypeUrl: this.fileId
+              prototypeUrl: this.fileId,
+              startingNodeId: this.figmaUrl?.nodeId,
+              frames: allFrames.map(frame => ({
+                id: frame.id,
+                name: frame.name,
+                imageUrl: imageResponse.images[frame.id]
+              })),
+              showPreview: true
             };
 
+            console.log('Updating section with frame data');
             this.studyState.setPrototypeTestSection(this.section);
             this.isLoading = false;
           },
           error: (error) => {
-            console.error('Error exporting images:', error);
-            this.isLoading = false;
+            console.error('Error getting images:', error);
+            this.handleFigmaError(error);
           }
         });
       },
       error: (error) => {
         console.error('Error getting file:', error);
-        this.isLoading = false;
+        this.handleFigmaError(error);
       }
     });
   }
 
+  private handleFigmaError(error: any) {
+    console.error('Error in Figma API:', error);
+    this.isLoading = false;
+    this.snackBar.open('Error accessing Figma API', 'Dismiss', { duration: 3000 });
+  }
+
   selectImage(image: { name: string, imageUrl: string }) {
     this.selectedImage = image;
-    this.section.data = {
-      ...this.section.data,
-      /* selectedImage: image */
-    };
-    this.studyState.setPrototypeTestSection(this.section);
+
+    // Buscar el ID del frame seleccionado
+    const selectedFrame = this.section.data.frames?.find(f => f.imageUrl === image.imageUrl);
+    if (selectedFrame) {
+      this.section.data = {
+        ...this.section.data,
+        selectedTargetNodeId: selectedFrame.id
+      };
+      this.studyState.setPrototypeTestSection(this.section);
+    }
   }
 
   private findTopLevelFrames(node: any): any[] {

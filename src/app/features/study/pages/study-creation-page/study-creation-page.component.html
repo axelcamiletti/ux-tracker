@@ -90,8 +90,8 @@
     </div>
 
     <!-- Panel de Previsualización -->
-    <div class="previews w-1/2 bg-gray-100 flex justify-center items-center p-10 h-full overflow-y-auto" [ngClass]="{'prototype-preview': isPrototypePreview}">
-      <div class="container w-sm shadow-md bg-white rounded-xl p-8 h-full" [ngClass]="{'!bg-transparent !shadow-none !w-full': isPrototypePreview}">
+    <div class="previews w-1/2 bg-gray-100 flex justify-center items-center p-10 h-full overflow-y-auto" [ngClass]="{'p-0!': isPrototypePreview}">
+      <div class="container w-sm shadow-md bg-white rounded-xl p-8 h-full" [ngClass]="{'bg-transparent! shadow-none!': isPrototypePreview}">
 
         <!-- Previsualización fijo de bienvenida -->
         <app-welcome-screen-preview
