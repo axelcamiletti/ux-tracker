@@ -8,7 +8,6 @@ export interface BaseSection {
 export interface OpenQuestionSection extends BaseSection {
   type: 'open-question';
   data: {
-    placeholder?: string;
     minLength?: number;
     maxLength?: number;
   };

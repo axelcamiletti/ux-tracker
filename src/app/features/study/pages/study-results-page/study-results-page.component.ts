@@ -16,11 +16,13 @@ import { ParticipantResultComponent } from "../../components/results/participant
 import { MatButtonToggleChange } from '@angular/material/button-toggle';
 import { ActivatedRoute } from '@angular/router';
 import { inject } from '@angular/core';
+import { StudyAnalyticsService } from '../../services/study-analytics.service';
+import { PrototypeTestResultComponent } from "../../components/results/prototype-test-result/prototype-test-result.component";
 
 @Component({
   selector: 'app-study-results-page',
   standalone: true,
-  imports: [CommonModule, MatButtonToggleModule, MatIconModule, FormsModule, ClipElementComponent, ParticipantCardComponent, OpenQuestionResultComponent, YesNoResultComponent, MultipleChoiceResultComponent, ParticipantResultComponent],
+  imports: [CommonModule, MatButtonToggleModule, MatIconModule, FormsModule, ClipElementComponent, ParticipantCardComponent, OpenQuestionResultComponent, YesNoResultComponent, MultipleChoiceResultComponent, ParticipantResultComponent, PrototypeTestResultComponent],
   templateUrl: './study-results-page.component.html',
   styleUrl: './study-results-page.component.css'
 })
@@ -34,6 +36,7 @@ export class StudyResultsPageComponent implements OnInit {
 
   private studyService = inject(StudyService);
   private studyResponsesService = inject(StudyResponsesService);
+  private studyAnalyticsService = inject(StudyAnalyticsService);
   private route = inject(ActivatedRoute);
 
   ngOnInit() {
@@ -73,15 +76,6 @@ export class StudyResultsPageComponent implements OnInit {
       const responses = await this.studyResponsesService.getCompletedStudyResponses(this.studyId);
       console.log('StudyResultsPage: Respuestas completadas obtenidas:', responses);
       this.participants = responses;
-
-      // Luego intentar cargar las analíticas
-      try {
-        const analytics = await this.studyResponsesService.getStudyAnalytics(this.studyId);
-        console.log('StudyResultsPage: Analíticas obtenidas:', analytics);
-      } catch (analyticsError) {
-        console.warn('StudyResultsPage: Error al cargar analíticas:', analyticsError);
-        // Continuamos aunque fallen las analíticas, ya que tenemos las respuestas
-      }
 
     } catch (error) {
       console.error('StudyResultsPage: Error al cargar los participantes:', error);

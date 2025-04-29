@@ -14,7 +14,7 @@
         </div>
 
         <!-- Sección de Clips (visible solo en vista de resultados) -->
-        <div class="clips" *ngIf="activeView === 'results'">
+        <div class="clips flex flex-col gap-2" *ngIf="activeView === 'results'">
             <ng-container *ngFor="let section of getFilteredSections()">
                 <app-clip-element
                     (click)="selectSection(section)"
@@ -64,6 +64,11 @@
                     [section]="section"
                     [participants]="participants">
                 </app-multiple-choice-result>
+
+                <app-prototype-test-result
+                    *ngIf="section.type === 'prototype-test' && selectedSection?.id === section.id"
+                    >
+                </app-prototype-test-result>
             </ng-container>
         </ng-container>
     </div>

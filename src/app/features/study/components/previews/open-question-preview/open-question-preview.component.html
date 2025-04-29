@@ -1,16 +1,12 @@
 <div class="open-question-preview">
-    <h1 class="text-2xl mt-4 mb-2">
-        <b>{{ previewData.title }}</b>
-        <span *ngIf="previewData.required" class="text-red-500 ml-1">*</span>
-    </h1>
+    <h1 class="text-2xl mt-4 mb-2 font-bold">{{ previewData.title }}</h1>
     <p *ngIf="previewData.description" class="text-md text-gray-600">{{ previewData.description }}</p>
 
     <div class="mt-6">
         <textarea
             [(ngModel)]="response"
             (ngModelChange)="onResponseChange($event)"
-            class="w-full p-4 border rounded-lg min-h-[150px]"
-            [placeholder]="previewData.placeholder || 'Write your answer here...'"
+            placeholder="Write your answer here..."
             [required]="previewData.required">
         </textarea>
         <div *ngIf="previewData.minLength || previewData.maxLength" class="text-sm text-gray-500 mt-2">

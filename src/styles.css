@@ -1,13 +1,73 @@
 @import "tailwindcss";
 
-html, body { 
+html, body {
   height: 100%;
   font-family: theme('fontFamily.sans');
 }
 body { margin: 0; }
 
+.btn-icon{
+  @apply w-12 h-12 min-w-12 min-h-12 cursor-pointer rounded-full flex justify-center items-center bg-gray-100 text-gray-500 hover:bg-gray-200 transition-all duration-200 ease-out active:bg-gray-300;
+}
+
+.btn-error{
+  @apply bg-red-100 text-red-500 hover:bg-red-200 active:bg-red-300 active:text-red-700;
+}
+
+.btn-icon-sm{
+  @apply w-10! h-10! min-w-10! min-h-10!;
+}
+
 .label {
-  @apply text-gray-900 font-bold text-base mb-2 block;
+  @apply text-gray-900 font-semibold text-base mb-2 block;
+}
+
+.input-container{
+  @apply relative;
+}
+
+.input{
+  @apply py-3 px-4 block w-full bg-gray-100 border border-gray-200 rounded-lg text-base hover:bg-gray-200 focus:border-black focus:ring-black disabled:opacity-50 disabled:pointer-events-none transition-all duration-300 ease-out;
+  &::placeholder
+  {
+    @apply text-gray-400;
+  }
+
+  &.ng-invalid {
+    @apply border-red-500 bg-transparent;
+  }
+}
+
+.input-error {
+  @apply text-red-600 text-sm mt-1 hidden;
+}
+
+.input.ng-invalid ~ .input-error {
+  @apply block;
+}
+
+.input-hint{
+  @apply text-gray-600 text-sm mt-2;
+}
+
+textarea, .textarea{
+  @apply h-28 max-h-96 py-3 px-4 block w-full bg-gray-100 border border-transparent rounded-lg text-base hover:bg-gray-200 focus:border-black focus:ring-black disabled:opacity-50 disabled:pointer-events-none transition-all duration-300 ease-out;
+  &::placeholder
+  {
+    @apply text-gray-400;
+  }
+}
+
+.btn-toggle-container{
+  @apply flex items-center w-fit bg-gray-100 p-1 rounded-xl overflow-hidden gap-1;
+}
+
+.btn-toggle{
+  @apply flex gap-2 items-center px-4 py-2 text-gray-700 hover:bg-gray-200 transition-all duration-300 ease-out cursor-pointer rounded-lg;
+}
+
+.btn-toggle.active{
+  @apply bg-white! font-semibold!;
 }
 
 .btn-link {
@@ -28,6 +88,12 @@ body { margin: 0; }
 
 .td-header-cell{
   @apply py-3 px-4 text-sm text-gray-500 text-left font-medium;
+}
+
+.hidden-scroll{
+  &::-webkit-scrollbar{
+    display: none !important;
+  }
 }
 
 /* Sobreescribir las fuentes de Material */

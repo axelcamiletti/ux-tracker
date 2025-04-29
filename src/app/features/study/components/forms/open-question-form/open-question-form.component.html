@@ -1,4 +1,4 @@
-<div class="header border-b border-gray-200 flex items-center gap-3 px-8 py-4 mb-4">
+<div class="header border-b border-gray-200 flex items-center gap-3 px-8 py-4">
   <div class="icon rounded-lg bg-indigo-300 text-white flex justify-center items-center h-10 w-10">
     <mat-icon>help</mat-icon>
   </div>
@@ -9,60 +9,47 @@
   </button>
 </div>
 
-<div class="form p-8">
-  <label class="label">Question *</label>
-  <mat-form-field appearance="outline" class="w-full">
+<div class="form p-8 flex flex-col gap-6">
+  <div class="input-container">
+    <label class="label">Question *</label>
     <input
-      id="question"
-      matInput
-      placeholder="Type your question here"
       required
+      type="text"
+      class="input"
+      placeholder="Type your question here"
       [ngModel]="formData.title"
-      (ngModelChange)="onTitleChange($event)"
-      type="text" />
-    <mat-error>A title is required to create this block.</mat-error>
-  </mat-form-field>
+      (ngModelChange)="onTitleChange($event)">
+      <div class="input-error">A question is required to create this block.</div>
+  </div>
 
-  <label class="label">Description</label>
-  <mat-form-field appearance="outline" class="w-full">
+  <div class="input-container">
+    <label class="label">Description</label>
     <textarea
-      matInput
-      placeholder="Type extra details here. This is optional."
+      type="text"
+      class="textarea"
+      placeholder="Type extra details here. This is optional"
       [ngModel]="formData.description"
-      (ngModelChange)="onSubtitleChange($event)"
-    ></textarea>
-  </mat-form-field>
-
-  <label class="label">Answer Placeholder</label>
-  <mat-form-field appearance="outline" class="w-full">
-    <input
-      matInput
-      placeholder="Enter a placeholder text for the answer field"
-      [ngModel]="formData.placeholder"
-      (ngModelChange)="onPlaceholderChange($event)"
-      type="text" />
-  </mat-form-field>
+      (ngModelChange)="onSubtitleChange($event)"></textarea>
+  </div>
 
   <div class="flex gap-4">
-    <mat-form-field appearance="outline" class="w-full">
-      <mat-label>Minimum Length</mat-label>
+    <div class="input-container w-1/2">
+      <label class="label">Minimum Length</label>
       <input
-        matInput
         type="number"
+        class="input"
         [ngModel]="formData.minLength"
-        (ngModelChange)="onMinLengthChange($event)"
-        placeholder="Optional" />
-    </mat-form-field>
+        (ngModelChange)="onMinLengthChange($event)">
+    </div>
 
-    <mat-form-field appearance="outline" class="w-full">
-      <mat-label>Maximum Length</mat-label>
+    <div class="input-container w-1/2">
+      <label class="label">Maximum Length</label>
       <input
-        matInput
         type="number"
+        class="input"
         [ngModel]="formData.maxLength"
-        (ngModelChange)="onMaxLengthChange($event)"
-        placeholder="Optional" />
-    </mat-form-field>
+        (ngModelChange)="onMaxLengthChange($event)">
+    </div>
   </div>
 </div>
 

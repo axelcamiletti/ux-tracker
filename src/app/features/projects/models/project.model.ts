@@ -3,4 +3,5 @@ export interface Project {
   name: string;
   studies: any[];
   createdAt: Date;
-} 
+  imageUrl?: string | null;
+}

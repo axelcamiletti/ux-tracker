@@ -23,7 +23,6 @@ export class OpenQuestionPreviewComponent implements OnInit, OnDestroy {
   previewData = {
     title: '',
     description: '',
-    placeholder: '',
     minLength: undefined as number | undefined,
     maxLength: undefined as number | undefined,
     required: false
@@ -58,7 +57,6 @@ export class OpenQuestionPreviewComponent implements OnInit, OnDestroy {
     this.previewData = {
       title: section.title || 'No se ha ingresado el título',
       description: section.description || '',
-      placeholder: section.data.placeholder || '',
       minLength: section.data.minLength,
       maxLength: section.data.maxLength,
       required: section.required

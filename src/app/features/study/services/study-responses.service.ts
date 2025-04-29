@@ -2,8 +2,6 @@ import { Injectable, PLATFORM_ID, Inject, inject } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { Firestore, collection, addDoc, updateDoc, doc, query, where, getDocs, getDoc, DocumentData, arrayUnion, increment } from '@angular/fire/firestore';
 import {
-  SectionAnalytics,
-  StudyAnalytics,
   StudyResponse,
   SectionResponse,
   YesNoResponse,
@@ -11,6 +9,7 @@ import {
   OpenQuestionResponse,
   DeviceInfo
 } from '../models/study-response.model';
+import { StudyAnalytics } from '../models/study-analytics.model';
 
 @Injectable({
   providedIn: 'root'
@@ -143,50 +142,6 @@ export class StudyResponsesService {
     }
   }
 
-  async getStudyAnalytics(studyId: string): Promise<StudyAnalytics> {
-    console.log('StudyResponsesService: Iniciando getStudyAnalytics para studyId:', studyId);
-
-    const q = query(
-      collection(this.firestore, 'study-responses'),
-      where('studyId', '==', studyId)
-    );
-    console.log('StudyResponsesService: Ejecutando query para analytics...');
-
-    try {
-      const querySnapshot = await getDocs(q);
-      console.log('StudyResponsesService: Documentos encontrados:', querySnapshot.size);
-
-      const responses: StudyResponse[] = [];
-      querySnapshot.forEach((doc) => {
-        console.log('StudyResponsesService: Procesando documento:', doc.id);
-        const data = doc.data();
-        try {
-          const response = {
-            id: doc.id,
-            ...data,
-            startedAt: data['startedAt']?.toDate?.() || new Date(data['startedAt']),
-            completedAt: data['completedAt']?.toDate?.() || (data['completedAt'] ? new Date(data['completedAt']) : undefined),
-            responses: data['responses']?.map((response: any) => ({
-              ...response,
-              timestamp: response['timestamp']?.toDate?.() || new Date(response['timestamp'])
-            })) || []
-          } as StudyResponse;
-          console.log('StudyResponsesService: Documento procesado exitosamente:', doc.id);
-          responses.push(response);
-        } catch (error) {
-          console.error('StudyResponsesService: Error procesando documento:', doc.id, error);
-        }
-      });
-
-      const analytics = this.calculateAnalytics(responses);
-      console.log('StudyResponsesService: Analytics calculados:', analytics);
-      return analytics;
-    } catch (error) {
-      console.error('StudyResponsesService: Error en getStudyAnalytics:', error);
-      throw error;
-    }
-  }
-
   async getCompletedStudyResponses(studyId: string): Promise<StudyResponse[]> {
     console.log('StudyResponsesService: Iniciando getCompletedStudyResponses para studyId:', studyId);
 
@@ -244,138 +199,6 @@ export class StudyResponsesService {
       console.error('StudyResponsesService: Error en getCompletedStudyResponses:', error);
       throw error;
     }
-  }
-
-  private calculateAnalytics(responses: StudyResponse[]): StudyAnalytics {
-    console.log('StudyResponsesService: Iniciando calculateAnalytics con respuestas:', responses);
-
-    if (!Array.isArray(responses)) {
-      console.warn('StudyResponsesService: responses no es un array:', responses);
-      responses = [];
-    }
-
-    const totalResponses = responses.length;
-    const completedResponses = responses.filter(r => r?.status === 'completed').length;
-    const averageTimeSpent = this.calculateAverageTimeSpent(responses);
-
-    try {
-      const sectionAnalytics = this.calculateSectionAnalytics(responses);
-      console.log('StudyResponsesService: Analytics calculados exitosamente');
-
-      return {
-        totalResponses,
-        completionRate: totalResponses > 0 ? (completedResponses / totalResponses) * 100 : 0,
-        averageTimeSpent,
-        sectionAnalytics
-      };
-    } catch (error) {
-      console.error('StudyResponsesService: Error calculando analytics:', error);
-      return {
-        totalResponses: 0,
-        completionRate: 0,
-        averageTimeSpent: 0,
-        sectionAnalytics: {}
-      };
-    }
-  }
-
-  private calculateAverageTimeSpent(responses: StudyResponse[]): number {
-    const completedResponses = responses.filter(r => r.status === 'completed' && r.completedAt);
-    if (completedResponses.length === 0) return 0;
-
-    const totalTime = completedResponses.reduce((sum, response) => {
-      const timeSpent = response.completedAt!.getTime() - response.startedAt.getTime();
-      return sum + timeSpent;
-    }, 0);
-
-    return totalTime / completedResponses.length;
-  }
-
-  private calculateSectionAnalytics(responses: StudyResponse[]): { [key: string]: SectionAnalytics } {
-    console.log('StudyResponsesService: Iniciando calculateSectionAnalytics con respuestas:', responses);
-    const sectionAnalytics: { [key: string]: SectionAnalytics } = {};
-
-    responses.forEach(response => {
-      console.log('StudyResponsesService: Procesando respuesta:', response);
-      if (!response.responses || !Array.isArray(response.responses)) {
-        console.warn('StudyResponsesService: Respuesta sin array de responses válido:', response);
-        return;
-      }
-
-      response.responses.forEach(sectionResponse => {
-        if (!sectionResponse || !sectionResponse.sectionId) {
-          console.warn('StudyResponsesService: SectionResponse inválida:', sectionResponse);
-          return;
-        }
-
-        if (!sectionAnalytics[sectionResponse.sectionId]) {
-          sectionAnalytics[sectionResponse.sectionId] = {
-            totalResponses: 0,
-            responses: [],
-            yesNoStats: { yes: 0, no: 0 },
-            multipleChoiceStats: {},
-            commonKeywords: [],
-            averageTimeSpent: 0
-          };
-        }
-
-        const section = sectionAnalytics[sectionResponse.sectionId];
-        section.responses.push(sectionResponse);
-        section.totalResponses++;
-
-        try {
-          switch (sectionResponse.type) {
-            case 'yes-no':
-              const yesNoResponse = sectionResponse as YesNoResponse;
-              if (yesNoResponse.response && typeof yesNoResponse.response.answer === 'boolean') {
-                if (yesNoResponse.response.answer) {
-                  section.yesNoStats.yes++;
-                } else {
-                  section.yesNoStats.no++;
-                }
-              }
-              break;
-
-            case 'multiple-choice':
-              const multipleChoiceResponse = sectionResponse as MultipleChoiceResponse;
-              if (multipleChoiceResponse.response && Array.isArray(multipleChoiceResponse.response.selectedOptionIds)) {
-                multipleChoiceResponse.response.selectedOptionIds.forEach(optionId => {
-                  section.multipleChoiceStats[optionId] = (section.multipleChoiceStats[optionId] || 0) + 1;
-                });
-              }
-              break;
-
-            case 'open-question':
-              const openQuestionResponse = sectionResponse as OpenQuestionResponse;
-              if (openQuestionResponse.response && typeof openQuestionResponse.response.text === 'string') {
-                this.updateKeywordAnalysis(section, openQuestionResponse.response.text);
-              }
-              break;
-          }
-        } catch (error) {
-          console.error('StudyResponsesService: Error procesando sectionResponse:', error, sectionResponse);
-        }
-      });
-    });
-
-    console.log('StudyResponsesService: Analytics calculados:', sectionAnalytics);
-    return sectionAnalytics;
-  }
-
-  private updateKeywordAnalysis(section: SectionAnalytics, response: string): void {
-    const words = response.toLowerCase().split(/\s+/);
-    const wordCount: { [key: string]: number } = {};
-
-    words.forEach(word => {
-      if (word.length > 3) {
-        wordCount[word] = (wordCount[word] || 0) + 1;
-      }
-    });
-
-    section.commonKeywords = Object.entries(wordCount)
-      .map(([word, count]) => ({ word, count }))
-      .sort((a, b) => b.count - a.count)
-      .slice(0, 10);
   }
 
   private getDeviceInfo(): DeviceInfo {

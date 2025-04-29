@@ -80,7 +80,13 @@ export class ToolbarComponent implements OnInit {
   }
 
   navigateToProjects() {
-    this.router.navigate(['/projects']);
+    if (this.study && this.study.projectId) {
+      // If we have a study with a project ID, navigate to that specific project
+      this.router.navigate(['/projects', this.study.projectId]);
+    } else {
+      // Fallback to the projects list if no project ID is available
+      this.router.navigate(['/projects']);
+    }
   }
 
   async publishStudy() {

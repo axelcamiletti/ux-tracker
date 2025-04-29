@@ -3,6 +3,14 @@ service firebase.storage {
   match /b/{bucket}/o {
     match /{allPaths=**} {
       allow read, write: if true;
+
+      // CORS para tu dominio local
+      options {
+        origin: ["http://localhost:4200"];
+        method: ["GET", "POST", "PUT", "DELETE"];
+        maxAgeSeconds: 3600;
+        responseHeader: ["Content-Type", "x-goog-meta-*"];
+      }
     }
   }
 }

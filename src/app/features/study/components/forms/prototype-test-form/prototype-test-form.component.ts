@@ -12,6 +12,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { PrototypeTestSection, FigmaUrl } from '../../../models/section.model';
 import { StudyStateService } from '../../../services/study-state.service';
 import { FigmaService } from '../../../services/figma.service';
+import { StudyPrototypeService } from '../../../services/study-prototype.service';
 import { Subject, takeUntil } from 'rxjs';
 
 @Component({
@@ -52,7 +53,8 @@ export class PrototypeTestFormComponent implements OnInit, OnDestroy {
   constructor(
     private figmaService: FigmaService,
     private studyState: StudyStateService,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private studyPrototypeService: StudyPrototypeService
   ) {
     console.log('PrototypeTestFormComponent: Constructor called');
   }
@@ -200,6 +202,25 @@ export class PrototypeTestFormComponent implements OnInit, OnDestroy {
               name: frame.name,
               imageUrl: imageResponse.images[frame.id]
             }));
+
+            // Save frames to StudyPrototypeService
+            this.studyPrototypeService.saveResponse({
+              sectionId: this.section.id,
+              timestamp: new Date(),
+              type: 'prototype-test',
+              response: {
+                completed: true,
+                timeSpent: 0,
+                interactions: this.exportedImages.map(frame => ({
+                  elementId: frame.name,
+                  action: 'frame-loaded',
+                  timestamp: new Date(),
+                  position: { x: 0, y: 0 }
+                }))
+              }
+            });
+            console.log(this.exportedImages);
+
 
             // Encontrar y establecer el start screen basado en el nodeId
             if (this.figmaUrl?.nodeId) {

@@ -9,28 +9,28 @@
   </button>
 </div>
 
-<div class="form p-8">
-  <label class="label">Title *</label>
-  <mat-form-field appearance="outline" class="w-full">
+<div class="form p-8 flex flex-col gap-6">
+  <div class="input-container">
+    <label class="label">Title *</label>
     <input
-      matInput
-      placeholder="Type your title here"
       required
+      type="text"
+      class="input"
+      placeholder="Type your title here"
       [ngModel]="formData.title"
-      (ngModelChange)="onTitleChange($event)"
-      type="text" />
-    <mat-error>A title is required to create this block.</mat-error>
-  </mat-form-field>
+      (ngModelChange)="onTitleChange($event)">
+    <div class="input-error">A title is required to create this block.</div>
+  </div>
 
-  <label class="label">Message</label>
-  <mat-form-field appearance="outline" class="w-full">
+  <div class="input-container">
+    <label class="label">Message</label>
     <textarea
-      matInput
+      type="text"
+      class="textarea"
       placeholder="Type your welcome message here. This is optional."
       [ngModel]="formData.description"
-      (ngModelChange)="onDescriptionChange($event)"
-    ></textarea>
-  </mat-form-field>
+      (ngModelChange)="onDescriptionChange($event)"></textarea>
+  </div>
 </div>
 
 <mat-menu #menu="matMenu">

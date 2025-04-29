@@ -1,4 +1,4 @@
-<div class="header border-b border-gray-200 flex items-center gap-3 px-8 py-4 mb-4">
+<div class="header border-b border-gray-200 flex items-center gap-3 px-8 py-4">
   <div class="icon rounded-lg bg-orange-300 text-white flex justify-center items-center h-10 w-10">
     <mat-icon>list</mat-icon>
   </div>
@@ -9,29 +9,30 @@
   </button>
 </div>
 
-<div class="form p-8">
-  <label class="label">Question *</label>
-  <mat-form-field appearance="outline" class="w-full">
+<div class="form p-8 flex flex-col gap-6">
+  <!-- Title -->
+  <div class="input-container">
+    <label class="label">Question *</label>
     <input
-      id="question"
-      matInput
-      placeholder="Type your question here"
       required
+      type="text"
+      class="input"
+      placeholder="Type your question here"
       [ngModel]="section.title"
-      (ngModelChange)="onTitleChange($event)"
-      type="text" />
-    <mat-error>A title is required to create this block.</mat-error>
-  </mat-form-field>
+      (ngModelChange)="onTitleChange($event)">
+      <div class="input-error">A question is required to create this block.</div>
+  </div>
 
-  <label class="label">Description</label>
-  <mat-form-field appearance="outline" class="w-full">
+  <!-- Description -->
+  <div class="input-container">
+    <label class="label">Description</label>
     <textarea
-      matInput
+      type="text"
+      class="input"
       placeholder="Type extra details here. This is optional."
       [ngModel]="section.description"
-      (ngModelChange)="onDescriptionChange($event)"
-    ></textarea>
-  </mat-form-field>
+      (ngModelChange)="onDescriptionChange($event)"></textarea>
+  </div>
 
   <label class="label">Selection Type</label>
   <mat-radio-group aria-label="Select an option" [(ngModel)]="section.data.allowMultiple" (change)="updateAllowMultiple($event.value)" class="flex gap-4">
@@ -39,25 +40,19 @@
     <mat-radio-button [value]="true" class="w-full block border border-gray-200 rounded-xl">Multiple selections</mat-radio-button>
   </mat-radio-group>
 
-  <div class="flex items-center justify-between mb-2 mt-4">
+  <div>
     <label class="label">Choices *</label>
-  </div>
 
-  <mat-form-field appearance="outline" class="w-full" *ngFor="let option of section.data.options">
-    <input
-      matInput
-      placeholder="Enter choice"
-      [ngModel]="option.text"
-      (ngModelChange)="updateOptionText(option.id, $event)" />
-    <button
-      matSuffix
-      mat-icon-button
-      color="warn"
-      (click)="removeOption(option.id)"
-      *ngIf="section.data.options.length > 1">
-      <mat-icon>delete</mat-icon>
-    </button>
-  </mat-form-field>
+    <div class="input-container flex gap-4 items-center mb-3" *ngFor="let option of section.data.options">
+      <input
+        type="text"
+        class="input"
+        placeholder="Enter choice"
+        [ngModel]="option.text"
+        (ngModelChange)="updateOptionText(option.id, $event)">
+        <button class="btn-icon btn-icon-sm" matTooltip="Remove option" (click)="removeOption(option.id)" *ngIf="section.data.options.length > 1"><mat-icon>delete</mat-icon></button>
+    </div>
+  </div>
 
   <button mat-stroked-button color="secondary" (click)="addOption()">
     <mat-icon>add</mat-icon> Add new choice

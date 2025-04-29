@@ -1,4 +1,4 @@
-<div class="header border-b border-gray-200 flex items-center gap-3 px-8 py-4 mb-4">
+<div class="header border-b border-gray-200 flex items-center gap-3 px-8 py-4">
   <div class="icon rounded-lg bg-pink-700 text-white flex justify-center items-center h-10 w-10">
     <mat-icon>edit</mat-icon>
   </div>
@@ -9,31 +9,53 @@
   </button>
 </div>
 
-<div class="form p-8">
-  <!-- Task and Description -->
-  <label class="label">Task *</label>
-  <mat-form-field appearance="outline" class="w-full">
-    <input matInput placeholder="Write a short sentence that summarizes the task" required [(ngModel)]="title" (ngModelChange)="updateTitle($event)" type="text" />
-    <mat-error>A title is required to create this block.</mat-error>
-  </mat-form-field>
+<div class="form p-8 flex flex-col gap-6">
+  <!-- Task -->
+  <div class="input-container">
+    <label class="label">Task *</label>
+    <input
+      required
+      type="text"
+      class="input"
+      placeholder="Write a short sentence that summarizes the task"
+      [ngModel]="title"
+      (ngModelChange)="updateTitle($event)">
+      <div class="input-error">A task is required to create this block.</div>
+  </div>
 
-  <label class="label">Description</label>
-  <mat-form-field appearance="outline" class="w-full">
-    <textarea matInput placeholder="Give tester details to complete the mission" [(ngModel)]="description" (ngModelChange)="updateSubtitle($event)"></textarea>
-  </mat-form-field>
+  <!-- Description -->
+  <div class="input-container">
+    <label class="label">Description</label>
+    <textarea
+      type="text"
+      class="input"
+      placeholder="Give tester details to complete the mission"
+      [ngModel]="description"
+      (ngModelChange)="updateSubtitle($event)"></textarea>
+  </div>
 
   <!-- Prototype Link Section - Se oculta cuando hay frames exportados -->
   <div *ngIf="!exportedImages.length">
-    <p class="mt-4"><b>Prototype link *</b></p>
-    <div class="flex my-2">
-      <input type="text" [(ngModel)]="fileId" (ngModelChange)="onUrlChange($event)" placeholder="Pega tu link de Figma" class="border border-gray-300 px-2 w-full">
-      <button mat-flat-button (click)="extractFramesAsImages()" [disabled]="!importEnabled || isLoading">IMPORT</button>
-    </div>
-    <p class="text-xs text-gray-600">Set your prototype permissions to <b>Anyone</b> and <b>can view</b></p>
+    <div class="input-container">
+        <label class="label">Prototype link *</label>
+        <div class="flex gap-4 items-center">
+          <input
+            required
+            type="text"
+            class="input "
+            placeholder="Pega tu link de Figma"
+            [(ngModel)]="fileId"
+            (ngModelChange)="onUrlChange($event)">
 
-    <div class="border border-gray-300 rounded-lg flex items-center gap-3 p-3 mt-2" *ngIf="figmaFileName">
-      <img src="https://app.maze.co/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Ffigma-logo-icon.f470507a.png&w=48&q=75" alt="">
-      <div>{{ figmaFileName }}</div>
+          <button mat-flat-button (click)="extractFramesAsImages()" [disabled]="!importEnabled || isLoading">IMPORT</button>
+        </div>
+        <p class="input-hint">Set your prototype permissions to <b>Anyone</b> and <b>can view</b></p>
+      </div>
+
+
+    <div class="border border-gray-300 rounded-lg flex items-center gap-3 p-3 mt-5" *ngIf="figmaFileName">
+      <img class="w-10" src="https://app.maze.co/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Ffigma-logo-icon.f470507a.png&w=48&q=75" alt="">
+      <p class="font-medium">{{ figmaFileName }}</p>
     </div>
 
     <mat-progress-bar *ngIf="isLoading" mode="indeterminate" class="mt-2"></mat-progress-bar>
@@ -44,7 +66,7 @@
     <!-- Start Screen -->
     <div class="mb-6">
       <p class="mb-2"><b>Start screen</b></p>
-      <div class="btn-icon border border-gray-300 rounded-lg flex items-center gap-3 p-3">
+      <div class="border border-gray-300 rounded-lg flex items-center gap-3 p-3">
         <div class="image-container border border-gray-300 overflow-hidden rounded-md h-16 w-16 flex justify-center items-center">
           <img *ngIf="startScreenImage" [src]="startScreenImage.imageUrl" alt="Start frame" class="object-cover"/>
           <mat-icon *ngIf="!startScreenImage">play_circle</mat-icon>
@@ -59,7 +81,7 @@
     <div>
       <p class="mb-2"><b>Target screen</b></p>
       <p class="text-sm text-gray-600 mb-2">Success criteria: Reach a specific screen</p>
-      <div class="btn-icon border border-gray-300 rounded-lg flex items-center gap-3 p-3">
+      <div class="border border-gray-300 rounded-lg flex items-center gap-3 p-3">
         <div class="image-container border border-gray-300 overflow-hidden rounded-md h-16 w-16 flex justify-center items-center">
           <img *ngIf="selectedImage" [src]="selectedImage.imageUrl" alt="Target frame" class="object-contain"/>
           <mat-icon *ngIf="!selectedImage">add</mat-icon>

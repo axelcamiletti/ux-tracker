@@ -1,0 +1,33 @@
+.image-container {
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-right: 16px;
+  background-color: #f3f4f6;
+}
+
+.img-contain {
+  object-fit: contain;
+}
+
+.image-upload-section {
+  margin-top: 1rem;
+}
+
+.upload-area {
+  min-height: 150px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.preview-area {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.overlay {
+  transition: opacity 0.2s ease-in-out;
+}

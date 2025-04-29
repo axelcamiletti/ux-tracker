@@ -5,7 +5,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { RouterLink, ActivatedRoute, Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { Subject, takeUntil } from 'rxjs';
+import { Subject, takeUntil, finalize } from 'rxjs';
 import { Study } from '../../../study/models/study.model';
 import { Project } from '../../models/project.model';
 import { ProjectService } from '../../services/project.service';
@@ -15,6 +15,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { ConfirmDialogComponent } from '../../../../modals/confirm-dialog/confirm-dialog.component';
 import { EditStudyNameModalComponent } from '../../../study/modals/edit-study-name-modal/edit-study-name-modal.component';
 import { FirebaseDatePipe } from '../../../../pipes/firebase-date.pipe';
+import { MatMenuModule } from '@angular/material/menu';
 
 @Component({
   selector: 'app-project-page',
@@ -26,7 +27,8 @@ import { FirebaseDatePipe } from '../../../../pipes/firebase-date.pipe';
     RouterLink,
     MatProgressSpinnerModule,
     MatTooltipModule,
-    FirebaseDatePipe
+    FirebaseDatePipe,
+    MatMenuModule
   ],
   templateUrl: './project-page.component.html',
   styleUrls: ['./project-page.component.css']
@@ -51,7 +53,8 @@ export class ProjectPageComponent implements OnInit, OnDestroy {
     this.projectId = this.route.snapshot.paramMap.get('id') || '';
     if (this.projectId) {
       this.loadProject();
-      this.loadStudies();
+    } else {
+      this.loading = false;
     }
   }
 
@@ -82,9 +85,11 @@ export class ProjectPageComponent implements OnInit, OnDestroy {
   }
 
   loadStudies() {
-    this.loading = true;
     this.studyService.getStudiesByProjectId(this.projectId)
-      .pipe(takeUntil(this.destroy$))
+      .pipe(
+        takeUntil(this.destroy$),
+        finalize(() => this.loading = false)
+      )
       .subscribe({
         next: (studies) => {
           // Asegurarse de que cada estudio tenga stats inicializados
@@ -97,14 +102,20 @@ export class ProjectPageComponent implements OnInit, OnDestroy {
               lastResponseAt: null
             }
           }));
-          this.loading = false;
         },
         error: (error) => {
           console.error('Error loading studies:', error);
           this.snackBar.open('Error al cargar los estudios', 'Cerrar', { duration: 3000 });
-          this.loading = false;
         }
       });
+  }
+
+  navigateToStudy(study: Study) {
+    if (study.status === 'draft') {
+      this.router.navigate(['/study', study.id, 'creation']);
+    } else if (study.status === 'published' || study.status === 'completed') {
+      this.router.navigate(['/study', study.id, 'results']);
+    }
   }
 
   createNewStudy() {

@@ -1,11 +1,11 @@
-<div class="study-layout h-screen max-h-screen">
+<div class="study-layout h-screen max-h-screen flex flex-col overflow-hidden">
     <app-toolbar
         [studyId]="studyId"
         [saving]="saving"
         [lastSaved]="lastSaved"
         (saveStudy)="saveStudy()">
     </app-toolbar>
-    <div class="content-pages">
+    <div class="content-pages h-full overflow-hidden">
         <router-outlet></router-outlet>
     </div>
 </div>

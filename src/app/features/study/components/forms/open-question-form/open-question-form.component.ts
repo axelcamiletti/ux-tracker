@@ -26,7 +26,6 @@ export class OpenQuestionFormComponent implements OnInit, OnDestroy {
     title: '',
     description: '',
     required: false,
-    placeholder: '',
     minLength: undefined as number | undefined,
     maxLength: undefined as number | undefined
   };
@@ -60,7 +59,6 @@ export class OpenQuestionFormComponent implements OnInit, OnDestroy {
       title: section.title || '',
       description: section.description || '',
       required: section.required || false,
-      placeholder: section.data.placeholder || '',
       minLength: section.data.minLength,
       maxLength: section.data.maxLength
     };
@@ -75,15 +73,6 @@ export class OpenQuestionFormComponent implements OnInit, OnDestroy {
   onSubtitleChange(newDescription: string): void {
     this.formData.description = newDescription;
     this.section.description = newDescription;
-    this.studyState.setOpenQuestionSection(this.section);
-  }
-
-  onPlaceholderChange(newPlaceholder: string): void {
-    this.formData.placeholder = newPlaceholder;
-    this.section.data = {
-      ...this.section.data,
-      placeholder: newPlaceholder
-    };
     this.studyState.setOpenQuestionSection(this.section);
   }
 

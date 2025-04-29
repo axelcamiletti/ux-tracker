@@ -5,6 +5,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'app-new-project-modal',
@@ -15,13 +16,16 @@ import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
-    MatDialogModule
+    MatDialogModule,
+    MatIconModule
   ],
   templateUrl: './new-project-modal.component.html',
   styleUrls: ['./new-project-modal.component.css']
 })
 export class NewProjectModalComponent {
   newProjectForm: FormGroup;
+  selectedImage: File | null = null;
+  imagePreviewUrl: string | null = null;
 
   constructor(
     private fb: FormBuilder,
@@ -32,13 +36,36 @@ export class NewProjectModalComponent {
     });
   }
 
+  onFileSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files[0]) {
+      const file = input.files[0];
+      if (file.type.startsWith('image/')) {
+        this.selectedImage = file;
+        const reader = new FileReader();
+        reader.onload = () => {
+          this.imagePreviewUrl = reader.result as string;
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+  }
+
   onSubmit() {
     if (this.newProjectForm.valid) {
-      this.dialogRef.close(this.newProjectForm.get('name')?.value);
+      this.dialogRef.close({
+        name: this.newProjectForm.get('name')?.value,
+        image: this.selectedImage
+      });
     }
   }
 
   onCancel() {
     this.dialogRef.close();
+  }
+
+  removeImage() {
+    this.selectedImage = null;
+    this.imagePreviewUrl = null;
   }
 }

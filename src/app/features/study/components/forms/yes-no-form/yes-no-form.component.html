@@ -1,4 +1,4 @@
-<div class="header border-b border-gray-200 flex items-center gap-3 px-8 py-4 mb-4">
+<div class="header border-b border-gray-200 flex items-center gap-3 px-8 py-4">
   <div class="icon rounded-lg bg-orange-300 text-white flex justify-center items-center h-10 w-10">
     <mat-icon>map</mat-icon>
   </div>
@@ -9,63 +9,70 @@
   </button>
 </div>
 
-<div class="form p-8">
-  <div class="p-4">
-    <!-- Title -->
-    <mat-form-field class="w-full">
-      <mat-label>Question</mat-label>
-      <input matInput [(ngModel)]="formData.title" (ngModelChange)="onTitleChange($event)" placeholder="Enter your question">
-    </mat-form-field>
+<div class="form p-8 flex flex-col gap-6">
+  <!-- Title -->
+  <div class="input-container">
+    <label class="label">Question *</label>
+    <input
+      required
+      type="text"
+      class="input"
+      placeholder="Enter your question"
+      [(ngModel)]="formData.title"
+      (ngModelChange)="onTitleChange($event)">
+      <div class="input-error">A question is required to create this block.</div>
+  </div>
 
-    <!-- Description -->
-    <mat-form-field class="w-full mt-2">
-      <mat-label>Description (optional)</mat-label>
-      <textarea matInput [(ngModel)]="formData.description" (ngModelChange)="onSubtitleChange($event)" placeholder="Add a description"></textarea>
-    </mat-form-field>
+  <!-- Description -->
+  <div class="input-container">
+    <label class="label">Description (optional)</label>
+    <textarea type="text" class="textarea" [(ngModel)]="formData.description" (ngModelChange)="onSubtitleChange($event)" placeholder="Add a description"></textarea>
+  </div>
 
-    <!-- Yes/No Labels -->
-    <div class="flex gap-4 mt-4">
-      <mat-form-field class="flex-1">
-        <mat-label>Yes Label</mat-label>
-        <input matInput [(ngModel)]="formData.yesLabel" (ngModelChange)="onLabelChange('yes', $event)" placeholder="Yes">
-      </mat-form-field>
-
-      <mat-form-field class="flex-1">
-        <mat-label>No Label</mat-label>
-        <input matInput [(ngModel)]="formData.noLabel" (ngModelChange)="onLabelChange('no', $event)" placeholder="No">
-      </mat-form-field>
+  <!-- Yes/No Labels -->
+  <div class="flex gap-4">
+    <div class="input-container w-1/2">
+      <label class="label">Yes Label</label>
+      <input type="text" class="input" [(ngModel)]="formData.yesLabel" (ngModelChange)="onLabelChange('yes', $event)" placeholder="Yes">
     </div>
 
-    <!-- Yes/No Descriptions -->
-    <div class="flex gap-4 mt-2">
-      <mat-form-field class="flex-1">
-        <mat-label>Yes Description (optional)</mat-label>
-        <textarea matInput [(ngModel)]="formData.yesDescription" (ngModelChange)="onDescriptionChange('yes', $event)" placeholder="Add description for Yes option"></textarea>
-      </mat-form-field>
+    <div class="input-container w-1/2">
+      <label class="label">No Label</label>
+      <input type="text" class="input" [(ngModel)]="formData.noLabel" (ngModelChange)="onLabelChange('no', $event)" placeholder="No">
+    </div>
+  </div>
 
-      <mat-form-field class="flex-1">
-        <mat-label>No Description (optional)</mat-label>
-        <textarea matInput [(ngModel)]="formData.noDescription" (ngModelChange)="onDescriptionChange('no', $event)" placeholder="Add description for No option"></textarea>
-      </mat-form-field>
+  <!-- Yes/No Descriptions -->
+  <div class="flex gap-4">
+    <div class="input-container w-1/2">
+      <label class="label">Yes Description (optional)</label>
+      <input type="text" class="input" [(ngModel)]="formData.yesDescription" (ngModelChange)="onDescriptionChange('yes', $event)" placeholder="Add description for Yes option">
     </div>
 
-    <!-- Button Style Selection -->
-    <div class="mt-4">
-      <h3 class="text-sm font-medium mb-2">Button Style</h3>
-      <div class="flex gap-2">
-        <button mat-stroked-button [class.selected]="formData.buttonStyle === 'default'" (click)="onButtonStyleChange('default')">
-          <mat-icon>check_circle</mat-icon>
-          Default
-        </button>
-        <button mat-stroked-button [class.selected]="formData.buttonStyle === 'emoji'" (click)="onButtonStyleChange('emoji')">
-          <mat-icon>emoji_emotions</mat-icon>
-          Emoji
-        </button>
-        <button mat-stroked-button [class.selected]="formData.buttonStyle === 'thumbs'" (click)="onButtonStyleChange('thumbs')">
-          <mat-icon>thumb_up</mat-icon>
-          Thumbs
-        </button>
-      </div>
+    <div class="input-container w-1/2">
+      <label class="label">No Description (optional)</label>
+      <input type="text" class="input" [(ngModel)]="formData.noDescription" (ngModelChange)="onDescriptionChange('no', $event)" placeholder="Add description for No option">
+    </div>
+  </div>
+
+  <!-- Button Style Selection -->
+  <div class="mt-4">
+    <label class="label">Button Style</label>
+    <div class="btn-toggle-container">
+      <button class="btn-toggle" [ngClass]="{'active': formData.buttonStyle === 'default'}" (click)="onButtonStyleChange('default')">
+        <mat-icon>check_circle</mat-icon>
+        Default
+      </button>
+
+      <button class="btn-toggle" [ngClass]="{'active': formData.buttonStyle === 'emoji'}" (click)="onButtonStyleChange('emoji')">
+        <mat-icon>emoji_emotions</mat-icon>
+        Emoji
+      </button>
+
+      <button class="btn-toggle" [ngClass]="{'active': formData.buttonStyle === 'thumbs'}" (click)="onButtonStyleChange('thumbs')">
+        <mat-icon>thumb_up</mat-icon>
+        Thumbs
+      </button>
     </div>
   </div>
 </div>

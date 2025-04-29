@@ -126,12 +126,16 @@ export class StudyStateService {
           ...(thankYouSection ? [thankYouSection] : [])
         ];
 
-        console.log('StudyStateService: Guardando estudio con secciones:', allSections.length);
-        await this.studyService.updateStudy(studyId, {
+        // Limpiar valores undefined para evitar errores de Firebase
+        const cleanedSections = this.removeUndefinedValues(allSections);
+        const cleanedStudy = this.removeUndefinedValues({
           ...study,
-          sections: allSections,
+          sections: cleanedSections,
           updatedAt: new Date()
         });
+
+        console.log('StudyStateService: Guardando estudio con secciones:', cleanedSections.length);
+        await this.studyService.updateStudy(studyId, cleanedStudy);
         console.log('StudyStateService: Guardado completado exitosamente');
 
         this.setLastSaved(new Date());
@@ -147,6 +151,28 @@ export class StudyStateService {
       console.log('StudyStateService: Finalizando guardado...');
       this.setSaving(false);
     }
+  }
+
+  // Función auxiliar para eliminar valores undefined
+  private removeUndefinedValues(obj: any): any {
+    if (obj === null || typeof obj !== 'object') {
+      return obj;
+    }
+
+    if (Array.isArray(obj)) {
+      return obj.map(item => this.removeUndefinedValues(item));
+    }
+
+    const result: any = {};
+    for (const key in obj) {
+      if (Object.prototype.hasOwnProperty.call(obj, key)) {
+        const value = obj[key];
+        if (value !== undefined) {
+          result[key] = this.removeUndefinedValues(value);
+        }
+      }
+    }
+    return result;
   }
 
   requestSave() {

@@ -32,6 +32,7 @@ export interface YesNoResponse extends BaseSectionResponse {
   };
 }
 
+// Actualizamos la interfaz PrototypeTestResponse para incluir más detalle sobre las interacciones
 export interface PrototypeTestResponse extends BaseSectionResponse {
   type: 'prototype-test';
   response: {
@@ -41,7 +42,12 @@ export interface PrototypeTestResponse extends BaseSectionResponse {
       elementId: string;
       action: string;
       timestamp: Date;
+      position?: { x: number; y: number }; // Posición para clicks
     }>;
+    // Nuevos campos para analíticas detalladas
+    screenTimes?: { [screenId: string]: number }; // Tiempo por pantalla
+    navigationPath?: Array<{ from: string; to: string; timestamp: Date }>; // Camino de navegación
+    completionSuccess?: boolean; // Si el usuario completó el flujo esperado
   };
 }
 
@@ -77,30 +83,4 @@ export interface StudyResponse {
   status: 'in-progress' | 'completed' | 'abandoned';
   deviceInfo?: DeviceInfo;
   sectionTimes?: { [sectionId: string]: number };
-}
-
-export interface StudyAnalytics {
-  totalResponses: number;
-  completionRate: number;
-  averageTimeSpent: number;
-  sectionAnalytics: {
-    [sectionId: string]: SectionAnalytics;
-  };
-}
-
-export interface SectionAnalytics {
-  totalResponses: number;
-  responses: SectionResponse[];
-  yesNoStats: {
-    yes: number;
-    no: number;
-  };
-  multipleChoiceStats: {
-    [optionId: string]: number;
-  };
-  commonKeywords: Array<{
-    word: string;
-    count: number;
-  }>;
-  averageTimeSpent: number;
 }

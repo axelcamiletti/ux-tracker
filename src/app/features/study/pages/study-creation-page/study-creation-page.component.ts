@@ -87,11 +87,11 @@ export class StudyCreationPageComponent implements OnInit, OnDestroy {
   welcomeSection: WelcomeScreenSection = {
     id: 'welcome',
     title: 'A-mazeing to meet you!',
-    description: 'Please read the instructions carefully',
+    description: 'Has sido invitado a compartir tus opiniones, ideas y puntos de vista',
     required: true,
     type: 'welcome-screen',
     data: {
-      welcomeMessage: 'Please read the instructions carefully',
+      welcomeMessage: 'Has sido invitado a compartir tus opiniones, ideas y puntos de vista',
       imageUrl: undefined
     }
   };
@@ -142,6 +142,9 @@ export class StudyCreationPageComponent implements OnInit, OnDestroy {
       this.router.navigate(['/projects']);
       return;
     }
+
+    // Seleccionar la sección de bienvenida por defecto para evitar pantalla en blanco
+    this.selectWelcomeSection();
 
     this.loadExistingStudy(this.studyId);
   }
@@ -321,7 +324,10 @@ export class StudyCreationPageComponent implements OnInit, OnDestroy {
 
       // Seleccionar la primera sección si existe
       if (this.sections.length > 0) {
-        this.selectedSection = this.sections[0];
+        this.selectSection(this.sections[0]);
+      } else {
+        // Si no hay secciones dinámicas, asegurar que la sección de bienvenida esté seleccionada
+        this.selectWelcomeSection();
       }
     } catch (error) {
       console.error('Error loading study:', error);

@@ -1,14 +1,14 @@
-<h2 mat-dialog-title class="text-xl font-bold mb-4">Create new project folder</h2>
+<h2 mat-dialog-title class="text-xl font-bold mb-4">Edit project</h2>
 
 <mat-dialog-content>
-  <form [formGroup]="newProjectForm" (ngSubmit)="onSubmit()">
+  <form [formGroup]="editProjectForm" (ngSubmit)="onSubmit()">
     <mat-form-field class="w-full">
       <mat-label>Project name</mat-label>
       <input matInput formControlName="name" placeholder="Enter project name">
-      <mat-error *ngIf="newProjectForm.get('name')?.hasError('required')">
+      <mat-error *ngIf="editProjectForm.get('name')?.hasError('required')">
         Project name is required
       </mat-error>
-      <mat-error *ngIf="newProjectForm.get('name')?.hasError('minlength')">
+      <mat-error *ngIf="editProjectForm.get('name')?.hasError('minlength')">
         Project name must be at least 3 characters
       </mat-error>
     </mat-form-field>
@@ -16,7 +16,7 @@
     <div class="image-upload-section mt-4">
       <div class="flex items-center justify-between mb-2">
         <label class="text-gray-700">Project image</label>
-        @if (selectedImage) {
+        @if (selectedImage || imagePreviewUrl) {
           <button type="button" mat-icon-button color="warn" (click)="removeImage()">
             <mat-icon>delete</mat-icon>
           </button>
@@ -48,5 +48,5 @@
 
 <mat-dialog-actions align="end">
   <button mat-button (click)="onCancel()">Cancel</button>
-  <button mat-flat-button color="primary" (click)="onSubmit()" [disabled]="!newProjectForm.valid">Create</button>
+  <button mat-flat-button color="primary" (click)="onSubmit()" [disabled]="!editProjectForm.valid">Save changes</button>
 </mat-dialog-actions>

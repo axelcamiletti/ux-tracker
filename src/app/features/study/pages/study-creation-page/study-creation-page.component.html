@@ -1,9 +1,9 @@
-<div class="study-creation-page">
+<div class="study-creation-page h-full overflow-hidden">
 
   <div class="row flex h-full">
     <!-- Sidebar de Clips -->
-    <div class="clips-sidebar flex flex-col w-sm min-w-sm h-full overflow-y-auto p-5">
-      <div class="box bg-gray-100 flex items-center py-3 px-4 rounded-xl mb-3 font-medium sticky top-0">
+    <div class="clips-sidebar flex flex-col gap-3 w-sm min-w-sm h-full overflow-y-auto p-5">
+      <div class="box bg-gray-100 flex items-center py-3 px-4 rounded-xl font-medium sticky top-0">
         Pages
       </div>
 
@@ -50,7 +50,7 @@
     </div>
 
     <!-- Panel de Formularios -->
-    <div class="forms w-1/2 border-r border-l border-gray-200 h-full overflow-y-auto">
+    <div class="forms w-1/2 border-r border-l border-gray-200 h-full overflow-y-auto hidden-scroll">
       <!-- Formulario fijo de bienvenida -->
       <app-welcome-screen-form
         *ngIf="selectedSection?.type === 'welcome-screen'"
@@ -91,7 +91,7 @@
 
     <!-- Panel de Previsualización -->
     <div class="previews w-1/2 bg-gray-100 flex justify-center items-center p-10 h-full overflow-y-auto" [ngClass]="{'p-0!': isPrototypePreview}">
-      <div class="container w-sm shadow-md bg-white rounded-xl p-8 h-full" [ngClass]="{'bg-transparent! shadow-none!': isPrototypePreview}">
+      <div class="container w-sm shadow-md bg-white rounded-xl p-8 h-full" [ngClass]="{'bg-transparent! shadow-none! w-full! p-0!': isPrototypePreview}">
 
         <!-- Previsualización fijo de bienvenida -->
         <app-welcome-screen-preview
