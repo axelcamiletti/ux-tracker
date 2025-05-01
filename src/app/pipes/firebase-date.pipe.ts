@@ -8,9 +8,9 @@ import { Timestamp } from '@angular/fire/firestore';
 export class FirebaseDatePipe implements PipeTransform {
   transform(value: Timestamp | Date | string | undefined | null, format: string = 'mediumDate'): string {
     if (!value) return '';
-    
+
     let date: Date;
-    
+
     try {
       if (value instanceof Timestamp) {
         date = value.toDate();
@@ -22,12 +22,12 @@ export class FirebaseDatePipe implements PipeTransform {
       } else {
         date = value as Date;
       }
-      
+
       // Check if date is valid before formatting
       if (isNaN(date.getTime())) {
         return 'Invalid date';
       }
-      
+
       return new Intl.DateTimeFormat('es-ES', {
         dateStyle: format === 'mediumDate' ? 'medium' : 'short'
       }).format(date);
