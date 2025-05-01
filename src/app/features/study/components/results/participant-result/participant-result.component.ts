@@ -51,11 +51,11 @@ export class ParticipantResultComponent {
   getPrototypeTestInfo(response: SectionResponse): { completed: boolean; timeSpent: number; interactions: any[] } {
     if (response.type === 'prototype-test') {
       const testResponse = response as PrototypeTestResponse;
-      return {
+      /* return {
         completed: testResponse.response?.completed || false,
         timeSpent: testResponse.response?.timeSpent || 0,
         interactions: testResponse.response?.interactions || []
-      };
+      }; */
     }
     return { completed: false, timeSpent: 0, interactions: [] };
   }

@@ -32,23 +32,14 @@ export interface YesNoResponse extends BaseSectionResponse {
   };
 }
 
-// Actualizamos la interfaz PrototypeTestResponse para incluir más detalle sobre las interacciones
 export interface PrototypeTestResponse extends BaseSectionResponse {
   type: 'prototype-test';
   response: {
-    completed: boolean;
-    timeSpent: number;
-    interactions?: Array<{
-      elementId: string;
-      action: string;
+    figmaEventLog: Array<{
       timestamp: Date;
-      position?: { x: number; y: number }; // Posición para clicks
+      [key: string]: any; // Permite cualquier propiedad adicional para adaptarse a diferentes formatos de eventos
     }>;
-    // Nuevos campos para analíticas detalladas
-    screenTimes?: { [screenId: string]: number }; // Tiempo por pantalla
-    navigationPath?: Array<{ from: string; to: string; timestamp: Date }>; // Camino de navegación
-    completionSuccess?: boolean; // Si el usuario completó el flujo esperado
-  };
+  }
 }
 
 export interface WelcomeScreenResponse extends BaseSectionResponse {

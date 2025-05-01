@@ -40,7 +40,6 @@ export interface PrototypeTestSection extends BaseSection {
   type: 'prototype-test';
   data: {
     prototypeUrl: string;
-    instructions?: string;
     startingNodeId?: string;
     selectedTargetNodeId?: string;
     frames?: Array<{
@@ -48,24 +47,6 @@ export interface PrototypeTestSection extends BaseSection {
       name: string;
       imageUrl: string;
     }>;
-    showPreview?: boolean;
-    interactionTracking?: {
-      enabled: boolean;
-      trackClicks: boolean;
-      trackMouseMovement: boolean;
-      trackScrolling: boolean;
-      trackKeyboard: boolean;
-      elements?: Array<{
-        selector: string;
-        description: string;
-        expectedAction?: string;
-      }>;
-    };
-    timeLimit?: number; // in seconds
-    successCriteria?: {
-      requiredActions: string[];
-      maxAttempts?: number;
-    };
   };
 }
 

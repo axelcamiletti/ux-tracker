@@ -23,10 +23,10 @@ import { MatMenuModule } from '@angular/material/menu';
     MatProgressSpinnerModule,
     MatMenuModule
   ],
-  templateUrl: './projects.component.html',
-  styleUrls: ['./projects.component.css']
+  templateUrl: './projects-page.component.html',
+  styleUrls: ['./projects-page.component.css']
 })
-export class ProjectsComponent implements OnInit {
+export class ProjectsPageComponent implements OnInit {
   projects: Project[] = [];
   loading = true;
   creatingProject = false;

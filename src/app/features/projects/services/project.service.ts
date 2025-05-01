@@ -85,7 +85,7 @@ export class ProjectService {
         reader.readAsDataURL(file);
       });
     }
-    
+
     // Si no estamos en modo desarrollo, intentar subir a Firebase
     try {
       const storageRef = ref(this.storage, path);

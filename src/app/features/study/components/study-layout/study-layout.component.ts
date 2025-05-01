@@ -27,34 +27,28 @@ export class StudyLayoutComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
-    console.log('StudyLayoutComponent: Inicializando...');
     this.studyId = this.route.snapshot.paramMap.get('id') || '';
     if (!this.studyId) {
-      console.log('StudyLayoutComponent: No se encontró ID de estudio, redirigiendo...');
       this.router.navigate(['/projects']);
     } else {
-      console.log('StudyLayoutComponent: Cargando estudio:', this.studyId);
 
       // Mantener el estudio actualizado
       this.studyService.getStudyById(this.studyId)
         .pipe(takeUntil(this.destroy$))
         .subscribe({
           next: (study) => {
-            console.log('StudyLayoutComponent: Estudio cargado:', study);
             this.studyService.setCurrentStudy(study);
 
             // Una vez que el estudio está cargado, suscribirse a los estados de guardado
             this.studyState.saving$
               .pipe(takeUntil(this.destroy$))
               .subscribe(saving => {
-                console.log('StudyLayoutComponent: Estado de guardado actualizado:', saving);
                 this.saving = saving;
               });
 
             this.studyState.lastSaved$
               .pipe(takeUntil(this.destroy$))
               .subscribe(date => {
-                console.log('StudyLayoutComponent: Última fecha de guardado actualizada:', date);
                 this.lastSaved = date;
               });
           },
@@ -72,11 +66,9 @@ export class StudyLayoutComponent implements OnInit, OnDestroy {
   }
 
   saveStudy() {
-    console.log('StudyLayoutComponent: Iniciando guardado manual...');
     if (this.studyId) {
       this.studyState.saveStudy(this.studyId);
     } else {
-      console.log('StudyLayoutComponent: No hay ID de estudio para guardar');
     }
   }
 }

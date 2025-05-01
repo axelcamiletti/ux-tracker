@@ -4,9 +4,6 @@ import { Firestore, collection, addDoc, updateDoc, doc, query, where, getDocs, g
 import {
   StudyResponse,
   SectionResponse,
-  YesNoResponse,
-  MultipleChoiceResponse,
-  OpenQuestionResponse,
   DeviceInfo
 } from '../models/study-response.model';
 import { StudyAnalytics } from '../models/study-analytics.model';

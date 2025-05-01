@@ -18,7 +18,7 @@
       type="text"
       class="input"
       placeholder="Write a short sentence that summarizes the task"
-      [ngModel]="title"
+      [ngModel]="formData.title"
       (ngModelChange)="updateTitle($event)">
       <div class="input-error">A task is required to create this block.</div>
   </div>
@@ -30,49 +30,49 @@
       type="text"
       class="input"
       placeholder="Give tester details to complete the mission"
-      [ngModel]="description"
+      [ngModel]="formData.description"
       (ngModelChange)="updateSubtitle($event)"></textarea>
   </div>
 
   <!-- Prototype Link Section - Se oculta cuando hay frames exportados -->
-  <div *ngIf="!exportedImages.length">
+  <div *ngIf="!formData.exportedImages.length">
     <div class="input-container">
         <label class="label">Prototype link *</label>
         <div class="flex gap-4 items-center">
           <input
             required
             type="text"
-            class="input "
+            class="input"
             placeholder="Pega tu link de Figma"
-            [(ngModel)]="fileId"
+            [(ngModel)]="formData.fileId"
             (ngModelChange)="onUrlChange($event)">
 
-          <button mat-flat-button (click)="extractFramesAsImages()" [disabled]="!importEnabled || isLoading">IMPORT</button>
+          <button mat-flat-button (click)="importPrototype()" [disabled]="!formData.importEnabled || formData.isLoading">IMPORT</button>
         </div>
         <p class="input-hint">Set your prototype permissions to <b>Anyone</b> and <b>can view</b></p>
       </div>
 
 
-    <div class="border border-gray-300 rounded-lg flex items-center gap-3 p-3 mt-5" *ngIf="figmaFileName">
+    <div class="border border-gray-300 rounded-lg flex items-center gap-3 p-3 mt-5" *ngIf="formData.figmaFileName">
       <img class="w-10" src="https://app.maze.co/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Ffigma-logo-icon.f470507a.png&w=48&q=75" alt="">
-      <p class="font-medium">{{ figmaFileName }}</p>
+      <p class="font-medium">{{ formData.figmaFileName }}</p>
     </div>
 
-    <mat-progress-bar *ngIf="isLoading" mode="indeterminate" class="mt-2"></mat-progress-bar>
+    <mat-progress-bar *ngIf="formData.isLoading" mode="indeterminate" class="mt-2"></mat-progress-bar>
   </div>
 
   <!-- Prototype Navigation Section - Se muestra cuando hay frames exportados -->
-  <div *ngIf="exportedImages.length" class="mt-4">
+  <div *ngIf="formData.exportedImages.length" class="mt-4">
     <!-- Start Screen -->
     <div class="mb-6">
       <p class="mb-2"><b>Start screen</b></p>
       <div class="border border-gray-300 rounded-lg flex items-center gap-3 p-3">
         <div class="image-container border border-gray-300 overflow-hidden rounded-md h-16 w-16 flex justify-center items-center">
-          <img *ngIf="startScreenImage" [src]="startScreenImage.imageUrl" alt="Start frame" class="object-cover"/>
-          <mat-icon *ngIf="!startScreenImage">play_circle</mat-icon>
+          <img *ngIf="formData.startScreenImage" [src]="formData.startScreenImage.imageUrl" alt="Start frame" class="object-cover"/>
+          <mat-icon *ngIf="!formData.startScreenImage">play_circle</mat-icon>
         </div>
         <div class="texts">
-          <p class="text-lg text-gray-900 font-medium">{{ startScreenImage?.name || 'Loading...' }}</p>
+          <p class="text-lg text-gray-900 font-medium">{{ formData.startScreenImage?.name || 'Loading...' }}</p>
         </div>
       </div>
     </div>
@@ -83,23 +83,23 @@
       <p class="text-sm text-gray-600 mb-2">Success criteria: Reach a specific screen</p>
       <div class="border border-gray-300 rounded-lg flex items-center gap-3 p-3">
         <div class="image-container border border-gray-300 overflow-hidden rounded-md h-16 w-16 flex justify-center items-center">
-          <img *ngIf="selectedImage" [src]="selectedImage.imageUrl" alt="Target frame" class="object-contain"/>
-          <mat-icon *ngIf="!selectedImage">add</mat-icon>
+          <img *ngIf="formData.selectedImage" [src]="formData.selectedImage.imageUrl" alt="Target frame" class="object-contain"/>
+          <mat-icon *ngIf="!formData.selectedImage">add</mat-icon>
         </div>
         <div class="texts">
-          <p *ngIf="!selectedImage" class="text-md text-gray-600">Select a screen</p>
-          <p *ngIf="selectedImage" class="text-lg font-medium">{{selectedImage.name}}</p>
+          <p *ngIf="!formData.selectedImage" class="text-md text-gray-600">Select a screen</p>
+          <p *ngIf="formData.selectedImage" class="text-lg font-medium">{{formData.selectedImage.name}}</p>
         </div>
-        <button mat-icon-button class="ml-auto" (click)="selectedImage = null" *ngIf="selectedImage">
+        <button mat-icon-button class="ml-auto" (click)="formData.selectedImage = null" *ngIf="formData.selectedImage">
           <mat-icon>edit</mat-icon>
         </button>
       </div>
     </div>
 
     <!-- Frame Selection Grid -->
-    <div *ngIf="!selectedImage" class="mt-4">
+    <div *ngIf="!formData.selectedImage" class="mt-4">
       <div class="flex flex-wrap gap-2">
-        <div *ngFor="let image of exportedImages" (click)="selectImage(image)" class="image-item w-40 border border-gray-300 rounded-lg overflow-hidden cursor-pointer hover:border-blue-500">
+        <div *ngFor="let image of formData.exportedImages" (click)="selectImage(image)" class="image-item w-40 border border-gray-300 rounded-lg overflow-hidden cursor-pointer hover:border-blue-500">
           <div class="image-container h-32 overflow-hidden">
             <img [src]="image.imageUrl" alt="Exported frame" class="object-cover" />
           </div>

@@ -62,23 +62,17 @@ export class StudyStateService {
   }
 
   setPrototypeTestSection(section: PrototypeTestSection) {
-    console.log('StudyStateService: setPrototypeTestSection called with:', section);
-
     const currentSections = this.sections.getValue();
-    console.log('StudyStateService: Current sections:', currentSections);
 
     const index = currentSections.findIndex(s => s.id === section.id);
     if (index !== -1) {
-      console.log('StudyStateService: Updating existing section at index:', index);
       currentSections[index] = section;
       this.sections.next([...currentSections]);
     }
 
     this.prototypeTestSectionSubject.next(section);
-    console.log('StudyStateService: Updated prototype section');
 
     if (this.saveRequested) {
-      console.log('StudyStateService: Triggering autosave');
       this.saveRequested.next();
     }
   }
@@ -96,30 +90,19 @@ export class StudyStateService {
   }
 
   async saveStudy(studyId: string) {
-    console.log('StudyStateService: Iniciando guardado...', { studyId });
     if (this.saving.value) {
-      console.log('StudyStateService: Guardado ya en progreso, saliendo...');
       return;
     }
 
     try {
       this.setSaving(true);
-      console.log('StudyStateService: Obteniendo estudio actual...');
       const study = await firstValueFrom(this.studyService.getCurrentStudy());
-      console.log('StudyStateService: Estudio obtenido:', study);
 
       if (study) {
         // Obtener todas las secciones actuales
         const welcomeSection = this.welcomeSectionSubject.value;
         const sections = this.sections.value;
         const thankYouSection = this.thankYouSectionSubject.value;
-
-        console.log('StudyStateService: Secciones actuales:', {
-          welcomeSection,
-          sections,
-          thankYouSection
-        });
-
         const allSections = [
           ...(welcomeSection ? [welcomeSection] : []),
           ...sections,
@@ -134,21 +117,17 @@ export class StudyStateService {
           updatedAt: new Date()
         });
 
-        console.log('StudyStateService: Guardando estudio con secciones:', cleanedSections.length);
         await this.studyService.updateStudy(studyId, cleanedStudy);
-        console.log('StudyStateService: Guardado completado exitosamente');
 
         this.setLastSaved(new Date());
         this.snackBar.open('Cambios guardados', 'Cerrar', { duration: 2000 });
       } else {
-        console.log('StudyStateService: No se encontró el estudio actual');
         throw new Error('No se encontró el estudio actual');
       }
     } catch (error) {
       console.error('StudyStateService: Error durante el guardado:', error);
       this.snackBar.open('Error al guardar los cambios', 'Cerrar', { duration: 3000 });
     } finally {
-      console.log('StudyStateService: Finalizando guardado...');
       this.setSaving(false);
     }
   }
