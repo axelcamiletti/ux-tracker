@@ -5,15 +5,19 @@
         <mat-icon>arrow_back</mat-icon>
       </button>
 
-      <div *ngIf="project && !loading">
-        <h1 class="text-2xl font-bold">{{ project.name }}</h1>
-        <p class="text-gray-600">{{ studies.length }} estudios en este proyecto</p>
-      </div>
+      @if (project() && !loading()) {
+        <div>
+          <h1 class="text-2xl font-bold">{{ project()?.name }}</h1>
+          <p class="text-gray-600">{{ studies().length }} estudios en este proyecto</p>
+        </div>
+      }
 
-      <div *ngIf="loading" class="animate-pulse">
-        <div class="w-80 h-7 bg-gray-200 rounded-full mb-2"></div>
-        <div class="w-32 h-4 bg-gray-200 rounded-full"></div>
-      </div>
+      @if (loading()) {
+        <div class="animate-pulse">
+          <div class="w-80 h-7 bg-gray-200 rounded-full mb-2"></div>
+          <div class="w-32 h-4 bg-gray-200 rounded-full"></div>
+        </div>
+      }
 
       <button mat-flat-button color="primary" class="!rounded-full ml-auto" (click)="createNewStudy()">
         <mat-icon>add</mat-icon>
@@ -25,92 +29,98 @@
     <div class="studies-section mb-8">
       <h2 class="text-xl font-bold mb-4">Studies</h2>
 
-      <div *ngIf="loading" class="animate-pulse">
-        <div *ngFor="let item of [1,2,3]" class="animate-pulse w-full h-16 mb-4 bg-gray-200 rounded-2xl p-4"></div>
-      </div>
+      @if (loading()) {
+        <div class="animate-pulse">
+          @for (item of [1,2,3]; track $index) {
+            <div class="animate-pulse w-full h-16 mb-4 bg-gray-200 rounded-2xl p-4"></div>
+          }
+        </div>
+      }
 
-      <div *ngIf="project && !loading" class="bg-white rounded-xl shadow-sm overflow-hidden">
-        <table class="w-full">
-          <thead>
-            <tr class="bg-gray-50">
-              <th class="td-header-cell">Study name</th>
-              <th class="td-header-cell">Status</th>
-              <th class="td-header-cell">Answers</th>
-              <th class="td-header-cell">Created by</th>
-              <th class="td-header-cell">Created at</th>
-              <th class="td-header-cell">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let study of studies" 
-                class="border-t border-gray-200 hover:bg-gray-100 cursor-pointer"
-                (click)="navigateToStudy(study)">
-              <!-- NOMBRE DEL ESTUDIO -->
-              <td class="py-4 px-4">
-                <div class="flex items-center gap-3">
-                  <div class="icon w-10 h-10 rounded-xl p-2"
-                       [ngClass]="{
-                        'bg-indigo-100 text-indigo-400': study.status == 'draft',
-                        'bg-yellow-100 text-yellow-500': study.status == 'published',
-                        'bg-green-100 text-green-400': study.status == 'completed',
-                        }">
-                    <mat-icon *ngIf="study.status == 'draft'">build</mat-icon>
-                    <mat-icon *ngIf="study.status == 'published'">groups</mat-icon>
-                    <mat-icon *ngIf="study.status == 'completed'">verified</mat-icon>
-                  </div>
-                  <div>
-                    <p class="font-medium">{{ study.name }}</p>
-                    <p class="text-sm text-gray-500">Última edición {{ study.updatedAt | firebaseDate }}</p>
-                  </div>
-                </div>
-              </td>
-              <!-- ESTADO -->
-              <td class="py-4 px-4">
-                <span class="px-2 py-1 bg-gray-100 rounded text-sm"
-                      [ngClass]="{
-                        'bg-indigo-50 text-indigo-700': study.status == 'draft',
-                        'bg-yellow-50 text-yellow-700': study.status == 'published',
-                        'bg-green-100 text-green-700': study.status == 'completed',
-                        }">{{ study.status }}</span>
-              </td>
-              <!-- RESPUESTAS -->
-              <td class="py-4 px-4">{{ study.stats.totalResponses || 0 }}</td>
-              <!-- CREADO POR -->
-              <td class="py-4 px-4">
-                <img matTooltip="Axel Camiletti" src="https://imgs.search.brave.com/DowMKJ3Yz93ulPZfTzXd2gvYDqcLsZisoVsBpko4feU/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly93YWxs/cGFwZXJzLmNvbS9p/bWFnZXMvaGQvYXZh/dGFyLWZhY2UtY2xv/c2V1cC1wbmctbnl5/LWN2amZ1NW1nbHBo/eW8yeGUucG5n" class="w-8 h-8 rounded-full" alt="Avatar de usuario">
-              </td>
-              <!-- CREADO EL -->
-              <td class="py-4 px-4">{{ study.createdAt | firebaseDate }}</td>
-              <!-- ACCIONES -->
-              <td class="py-4 px-4 flex items-center gap-2" (click)="$event.stopPropagation()">
-                <button class="btn-icon btn-icon-sm" [routerLink]="['/study', study.id, 'creation']" matTooltip="Editar estudio">
-                  <mat-icon>edit</mat-icon>
-                </button>
-                <button class="btn-icon btn-icon-sm" [routerLink]="['/study', study.id, 'analytics']" matTooltip="Ver estadísticas">
-                  <mat-icon>analytics</mat-icon>
-                </button>
-                <button [matMenuTriggerFor]="menuSettings" class="btn-icon btn-icon-sm" matTooltip="See actions"><mat-icon>more_vert</mat-icon></button>
-                <mat-menu #menuSettings="matMenu">
-                  <button mat-menu-item [routerLink]="['/study', study.id, 'creation']"><mat-icon>build</mat-icon> Editar estudio</button>
-                  <button mat-menu-item (click)="editStudyName(study)"><mat-icon>edit</mat-icon> Editar nombre</button>
-                  <button mat-menu-item (click)="confirmDelete(study)" color="warn"><mat-icon>delete</mat-icon> Eliminar estudio</button>
-                </mat-menu>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+      @if (project() && !loading()) {
+        <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+          <table class="w-full">
+            <thead>
+              <tr class="bg-gray-50">
+                <th class="td-header-cell">Study name</th>
+                <th class="td-header-cell">Status</th>
+                <th class="td-header-cell">Answers</th>
+                <th class="td-header-cell">Created by</th>
+                <th class="td-header-cell">Created at</th>
+                <th class="td-header-cell">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (study of studies(); track study.id) {
+                <tr class="border-t border-gray-200 hover:bg-gray-100 cursor-pointer"
+                    (click)="navigateToStudy(study)">
+                  <!-- NOMBRE DEL ESTUDIO -->
+                  <td class="py-4 px-4">
+                    <div class="flex items-center gap-3">
+                      <div class="icon w-10 h-10 rounded-xl p-2"
+                           [ngClass]="{
+                            'bg-indigo-100 text-indigo-400': study.status == 'draft',
+                            'bg-yellow-100 text-yellow-500': study.status == 'published',
+                            'bg-green-100 text-green-400': study.status == 'completed'
+                            }">
+                        <mat-icon *ngIf="study.status == 'draft'">build</mat-icon>
+                        <mat-icon *ngIf="study.status == 'published'">groups</mat-icon>
+                        <mat-icon *ngIf="study.status == 'completed'">verified</mat-icon>
+                      </div>
+                      <div>
+                        <p class="font-medium">{{ study.name }}</p>
+                        <p class="text-sm text-gray-500">Última edición {{ study.updatedAt | firebaseDate }}</p>
+                      </div>
+                    </div>
+                  </td>
+                  <!-- ESTADO -->
+                  <td class="py-4 px-4">
+                    <span class="px-2 py-1 bg-gray-100 rounded text-sm"
+                          [ngClass]="{
+                            'bg-indigo-50 text-indigo-700': study.status == 'draft',
+                            'bg-yellow-50 text-yellow-700': study.status == 'published',
+                            'bg-green-100 text-green-700': study.status == 'completed'
+                            }">{{ study.status }}</span>
+                  </td>
+                  <!-- RESPUESTAS -->
+                  <td class="py-4 px-4">{{ study.stats.totalResponses || 0 }}</td>
+                  <!-- CREADO POR -->
+                  <td class="py-4 px-4">
+                    <img matTooltip="Axel Camiletti" src="https://imgs.search.brave.com/DowMKJ3Yz93ulPZfTzXd2gvYDqcLsZisoVsBpko4feU/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly93YWxs/cGFwZXJzLmNvbS9p/bWFnZXMvaGQvYXZh/dGFyLWZhY2UtY2xv/c2V1cC1wbmctbnl5/LWN2amZ1NW1nbHBo/eW8yeGUucG5n" class="w-8 h-8 rounded-full" alt="Avatar de usuario">
+                  </td>
+                  <!-- CREADO EL -->
+                  <td class="py-4 px-4">{{ study.createdAt | firebaseDate }}</td>
+                  <!-- ACCIONES -->
+                  <td class="py-4 px-4 flex items-center gap-2" (click)="$event.stopPropagation()">
+                    <button class="btn-icon btn-icon-sm" [matMenuTriggerFor]="menu">
+                      <mat-icon>more_vert</mat-icon>
+                    </button>
+                    <mat-menu #menu="matMenu">
+                      <button mat-menu-item (click)="editStudyName(study)">
+                        <mat-icon>edit</mat-icon>
+                        <span>Editar nombre</span>
+                      </button>
+                      <button mat-menu-item (click)="confirmDelete(study)">
+                        <mat-icon>delete</mat-icon>
+                        <span>Eliminar</span>
+                      </button>
+                    </mat-menu>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+
+      <!-- Empty state if no studies -->
+      @if (studies().length === 0 && !loading()) {
+        <div class="empty-screen text-center p-5 bg-white rounded-xl shadow-sm">
+          <img class="w-20 object-contain mx-auto" src="https://app.maze.co/_next/static/media/add-item.6e55b070.png" alt="" />
+          <h3 class="text-lg"><b>No studies yet</b></h3>
+          <p class="text-gray-600">Click on "Nuevo estudio" to create your first study in this project.</p>
+        </div>
+      }
     </div>
-
-    <div *ngIf="!project && !loading" class="empty-screen text-center p-5">
-      <img class="w-20 object-contain mx-auto" src="https://app.maze.co/_next/static/media/add-item.6e55b070.png" alt="" />
-      <h3 class="text-lg"><b>Proyecto no encontrado</b></h3>
-      <p class="text-gray-600">El proyecto que buscas no existe o ha sido eliminado.</p>
-    </div>
-
-    <!-- <div *ngIf="loading" class="loading-container flex flex-col items-center justify-center p-5">
-      <mat-spinner diameter="50"></mat-spinner>
-      <p class="mt-4">Cargando proyecto...</p>
-    </div> -->
   </div>
 </div>

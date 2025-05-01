@@ -4,62 +4,71 @@
 
     <div class="flex justify-between mb-5 mt-10">
       <h1 class="text-2xl font-bold">Projects</h1>
-      <button mat-flat-button color="primary" (click)="openNewProjectModal()" [disabled]="creatingProject">
+      <button mat-flat-button color="primary" (click)="openNewProjectModal()" [disabled]="creatingProject()">
         New project <mat-icon>add</mat-icon>
       </button>
     </div>
 
-    <!-- Loading container -->
-    <div *ngIf="loading" class="flex gap-5 my-4">
-      <div *ngFor="let item of [1,2,3]" class="animate-pulse w-76 bg-gray-50 rounded-2xl p-4">
-        <div class="h-40 bg-gray-200 rounded-xl w-full"></div>
-
-        <ul class="mt-5 space-y-3">
-          <li class="w-3/4 h-4 bg-gray-200 rounded-full"></li>
-          <li class="w-1/4 h-3 bg-gray-200 rounded-full"></li>
-        </ul>
+    <!-- Error message -->
+    @if (error()) {
+      <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4" role="alert">
+        <p>{{ error() }}</p>
       </div>
-    </div>
+    }
 
-    <!-- Projects created -->
-    <div class="flex flex-wrap gap-5 pb-10" *ngIf="!loading">
-      <a [routerLink]="['/projects', project.id]" *ngFor="let project of projects" class="w-76 border border-gray-300 rounded-2xl p-4 hover:border-blue-500 hover:shadow-xl transition duration-300 ease-in-out hover:scale-105 active:scale-95 cursor-pointer bg-gray-50 relative">
-        <div class="image-container h-40">
-          <img class="image-contain w-full h-full rounded-xl" src="{{ project.imageUrl }}" alt="">
-        </div>
-        <div class="flex mt-2">
-          <div class="texts">
-            <h3 class="text-lg font-bold">{{ project.name }}</h3>
-            <p class="text-sm">
-              {{ project.studies.length }}
-              <span *ngIf="project.studies.length === 1"> study</span>
-              <span *ngIf="project.studies.length !== 1"> studies</span>
-            </p>
+    <!-- Loading container -->
+    @if (loading()) {
+      <div class="flex gap-5 my-4">
+        @for (item of [1,2,3]; track $index) {
+          <div class="animate-pulse w-76 bg-gray-50 rounded-2xl p-4">
+            <div class="h-40 bg-gray-200 rounded-xl w-full"></div>
+            <ul class="mt-5 space-y-3">
+              <li class="w-3/4 h-4 bg-gray-200 rounded-full"></li>
+              <li class="w-1/4 h-3 bg-gray-200 rounded-full"></li>
+            </ul>
           </div>
-          <button class="btn-icon btn-icon-sm ml-auto" [matMenuTriggerFor]="menu" (click)="$event.stopPropagation()">
-            <mat-icon>more_horiz</mat-icon>
-          </button>
-        </div>
-        <!-- <div class="actions ml-auto flex gap-2 absolute top-2 right-2">
-          <button class="btn-icon btn-icon-sm" (click)="openEditProjectModal(project, $event)" [disabled]="editingProject">
-            <mat-icon>edit</mat-icon>
-          </button>
-          <button class="btn-icon btn-icon-sm btn-error" (click)="deleteProject(project.id, $event)" [disabled]="deletingProject">
-            <mat-icon>delete</mat-icon>
-          </button>
-        </div> -->
-        <mat-menu #menu="matMenu">
-          <button mat-menu-item (click)="openEditProjectModal(project, $event)" [disabled]="editingProject"><mat-icon>edit</mat-icon> Edit</button>
-          <button mat-menu-item (click)="deleteProject(project.id, $event)" [disabled]="deletingProject"><mat-icon>delete</mat-icon> Delete</button>
-        </mat-menu>
-      </a>
-    </div>
+        }
+      </div>
+    }
 
-    <div *ngIf="projects.length === 0 && !loading" class="empty-screen text-center p-5">
-      <img class="w-20 object-contain mx-auto" src="https://app.maze.co/_next/static/media/add-item.6e55b070.png" alt="" />
-      <h3 class="text-lg"><b>Nothing to show here</b></h3>
-      <p class="text-gray-600">Not working on a project anymore? Archive it to help keep your workspace clear.</p>
-    </div>
+    <!-- Projects container - only show when there are projects -->
+    @if (projects().length > 0 && !loading()) {
+      <div class="flex flex-wrap gap-5 pb-10">
+        @for (project of projects(); track project.id) {
+          <a [routerLink]="['/projects', project.id]" class="w-76 border border-gray-300 rounded-2xl p-4 hover:border-blue-500 hover:shadow-xl transition duration-300 ease-in-out hover:scale-105 active:scale-95 cursor-pointer bg-gray-50 relative">
+            <div class="image-container h-40">
+              <img class="image-contain w-full h-full rounded-xl" src="{{ project.imageUrl }}" alt="">
+            </div>
+            <div class="flex mt-2">
+              <div class="texts">
+                <h3 class="text-lg font-bold">{{ project.name }}</h3>
+                <p class="text-sm">
+                  {{ project.studies.length }}
+                  <span *ngIf="project.studies.length === 1"> study</span>
+                  <span *ngIf="project.studies.length !== 1"> studies</span>
+                </p>
+              </div>
+              <button class="btn-icon btn-icon-sm ml-auto" [matMenuTriggerFor]="menu" (click)="$event.stopPropagation()">
+                <mat-icon>more_horiz</mat-icon>
+              </button>
+            </div>
+            <mat-menu #menu="matMenu">
+              <button mat-menu-item (click)="openEditProjectModal(project, $event)" [disabled]="editingProject()"><mat-icon>edit</mat-icon> Edit</button>
+              <button mat-menu-item (click)="deleteProject(project.id, $event)" [disabled]="deletingProject()"><mat-icon>delete</mat-icon> Delete</button>
+            </mat-menu>
+          </a>
+        }
+      </div>
+    }
+
+    <!-- Empty state - Only show when not loading, no error, and no projects -->
+    @if (projects().length === 0 && !loading() && !error()) {
+      <div class="empty-screen text-center p-5">
+        <img class="w-20 object-contain mx-auto" src="https://app.maze.co/_next/static/media/add-item.6e55b070.png" alt="" />
+        <h3 class="text-lg"><b>Nothing to show here</b></h3>
+        <p class="text-gray-600">Not working on a project anymore? Archive it to help keep your workspace clear.</p>
+      </div>
+    }
 
   </div>
 </div>

@@ -1,11 +1,11 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, signal, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { RouterLink, ActivatedRoute, Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { Subject, takeUntil, finalize } from 'rxjs';
+import { takeUntil, finalize } from 'rxjs';
 import { Study } from '../../../study/models/study.model';
 import { Project } from '../../models/project.model';
 import { ProjectService } from '../../services/project.service';
@@ -16,6 +16,7 @@ import { ConfirmDialogComponent } from '../../../../modals/confirm-dialog/confir
 import { EditStudyNameModalComponent } from '../../../study/modals/edit-study-name-modal/edit-study-name-modal.component';
 import { FirebaseDatePipe } from '../../../../pipes/firebase-date.pipe';
 import { MatMenuModule } from '@angular/material/menu';
+import { Subject } from 'rxjs';
 
 @Component({
   selector: 'app-project-page',
@@ -34,27 +35,38 @@ import { MatMenuModule } from '@angular/material/menu';
   styleUrls: ['./project-page.component.css']
 })
 export class ProjectPageComponent implements OnInit, OnDestroy {
-  project: Project | null = null;
-  studies: Study[] = [];
-  loading = true;
+  // Private signal state
+  private _project = signal<Project | null>(null);
+  private _studies = signal<Study[]>([]);
+  private _loading = signal(true);
+  private _projectId = signal<string>('');
   private destroy$ = new Subject<void>();
-  projectId: string = '';
 
-  constructor(
-    private route: ActivatedRoute,
-    private router: Router,
-    private projectService: ProjectService,
-    private studyService: StudyService,
-    private dialog: MatDialog,
-    private snackBar: MatSnackBar
-  ) {}
+  // Inject dependencies
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
+  private projectService = inject(ProjectService);
+  private studyService = inject(StudyService);
+  private dialog = inject(MatDialog);
+  private snackBar = inject(MatSnackBar);
+
+  // Public readonly signals
+  project = this._project.asReadonly();
+  studies = this._studies.asReadonly();
+  loading = this._loading.asReadonly();
+  projectId = this._projectId.asReadonly();
+
+  // Computed properties
+  studyCount = computed(() => this._studies().length);
 
   ngOnInit() {
-    this.projectId = this.route.snapshot.paramMap.get('id') || '';
-    if (this.projectId) {
+    const id = this.route.snapshot.paramMap.get('id') || '';
+    this._projectId.set(id);
+
+    if (id) {
       this.loadProject();
     } else {
-      this.loading = false;
+      this._loading.set(false);
     }
   }
 
@@ -64,36 +76,38 @@ export class ProjectPageComponent implements OnInit, OnDestroy {
   }
 
   loadProject() {
-    this.loading = true;
+    this._loading.set(true);
     this.projectService.getProjects()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (projects) => {
-          this.project = projects.find(p => p.id === this.projectId) || null;
-          if (this.project) {
+          const project = projects.find(p => p.id === this._projectId()) || null;
+          this._project.set(project);
+
+          if (project) {
             this.loadStudies();
           } else {
-            this.loading = false;
+            this._loading.set(false);
           }
         },
         error: (error) => {
           console.error('Error loading project:', error);
           this.snackBar.open('Error al cargar el proyecto', 'Cerrar', { duration: 3000 });
-          this.loading = false;
+          this._loading.set(false);
         }
       });
   }
 
   loadStudies() {
-    this.studyService.getStudiesByProjectId(this.projectId)
+    this.studyService.getStudiesByProjectId(this._projectId())
       .pipe(
         takeUntil(this.destroy$),
-        finalize(() => this.loading = false)
+        finalize(() => this._loading.set(false))
       )
       .subscribe({
         next: (studies) => {
-          // Asegurarse de que cada estudio tenga stats inicializados
-          this.studies = studies.map(study => ({
+          // Ensure each study has initialized stats
+          this._studies.set(studies.map(study => ({
             ...study,
             stats: study.stats || {
               totalResponses: 0,
@@ -101,7 +115,7 @@ export class ProjectPageComponent implements OnInit, OnDestroy {
               averageCompletionTime: 0,
               lastResponseAt: null
             }
-          }));
+          })));
         },
         error: (error) => {
           console.error('Error loading studies:', error);
@@ -119,11 +133,11 @@ export class ProjectPageComponent implements OnInit, OnDestroy {
   }
 
   createNewStudy() {
-    if (!this.projectId) return;
+    if (!this._projectId()) return;
 
     const newStudy: Omit<Study, 'id'> = {
       name: 'Nuevo estudio',
-      projectId: this.projectId,
+      projectId: this._projectId(),
       description: '',
       status: 'draft',
       sections: [],
@@ -169,7 +183,7 @@ export class ProjectPageComponent implements OnInit, OnDestroy {
         try {
           await this.studyService.deleteStudy(study.id);
           this.snackBar.open('Estudio eliminado correctamente', 'Cerrar', { duration: 3000 });
-          this.studies = this.studies.filter(s => s.id !== study.id);
+          this._studies.update(studies => studies.filter(s => s.id !== study.id));
         } catch (error) {
           console.error('Error deleting study:', error);
           this.snackBar.open('Error al eliminar el estudio', 'Cerrar', { duration: 3000 });
@@ -189,7 +203,7 @@ export class ProjectPageComponent implements OnInit, OnDestroy {
           await this.studyService.updateStudy(study.id, { name: newName });
           this.snackBar.open('Nombre del estudio actualizado correctamente', 'Cerrar', { duration: 3000 });
           const updatedStudy = { ...study, name: newName };
-          this.studies = this.studies.map(s => s.id === study.id ? updatedStudy : s);
+          this._studies.update(studies => studies.map(s => s.id === study.id ? updatedStudy : s));
         } catch (error) {
           console.error('Error updating study name:', error);
           this.snackBar.open('Error al actualizar el nombre del estudio', 'Cerrar', { duration: 3000 });

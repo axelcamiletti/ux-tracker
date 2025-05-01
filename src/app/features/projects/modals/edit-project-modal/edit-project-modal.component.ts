@@ -7,6 +7,11 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { Project } from '../../models/project.model';
+import { signal, computed } from '@angular/core';
+
+interface DialogData {
+  project: Project;
+}
 
 @Component({
   selector: 'app-edit-project-modal',
@@ -58,40 +63,54 @@ import { Project } from '../../models/project.model';
   `]
 })
 export class EditProjectModalComponent {
-  editProjectForm: FormGroup;
-  selectedImage: File | null = null;
-  imagePreviewUrl: string | null = null;
+  // Inject dependencies
   private dialogRef = inject(MatDialogRef<EditProjectModalComponent>);
-  private data: { project: Project } = inject(MAT_DIALOG_DATA);
+  private data = inject<DialogData>(MAT_DIALOG_DATA);
+  private fb = inject(FormBuilder);
 
-  constructor(private fb: FormBuilder) {
-    this.editProjectForm = this.fb.group({
-      name: [this.data.project.name, [Validators.required, Validators.minLength(3)]]
-    });
-    this.imagePreviewUrl = this.data.project.imageUrl || null;
-  }
+  // Signal-based state
+  selectedImage = signal<File | null | undefined>(undefined);
+  imagePreviewUrl = signal<string | null | undefined>(this.data.project.imageUrl);
+  submitting = signal<boolean>(false);
+
+  // Computed properties
+  hasSelectedImage = computed(() => this.selectedImage() !== undefined && this.selectedImage() !== null);
+  showRemoveButton = computed(() => this.imagePreviewUrl() !== null && this.imagePreviewUrl() !== undefined);
+  
+  // Form
+  editProjectForm = this.fb.group({
+    name: [this.data.project.name, [Validators.required, Validators.minLength(3)]]
+  });
 
   onFileSelected(event: Event) {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files[0]) {
       const file = input.files[0];
-      if (file.type.startsWith('image/')) {
-        this.selectedImage = file;
+      if (this.validateImage(file)) {
+        this.selectedImage.set(file);
         const reader = new FileReader();
         reader.onload = () => {
-          this.imagePreviewUrl = reader.result as string;
+          this.imagePreviewUrl.set(reader.result as string);
         };
         reader.readAsDataURL(file);
+      } else {
+        // Reset file input
+        input.value = '';
+        alert('Formato de imagen no válido o tamaño excesivo (máximo 5MB)');
       }
     }
   }
 
   onSubmit() {
     if (this.editProjectForm.valid) {
+      this.submitting.set(true);
       this.dialogRef.close({
         name: this.editProjectForm.get('name')?.value,
-        image: this.selectedImage
+        image: this.selectedImage()
       });
+    } else {
+      // Resaltar errores en el formulario
+      this.editProjectForm.markAllAsTouched();
     }
   }
 
@@ -100,7 +119,23 @@ export class EditProjectModalComponent {
   }
 
   removeImage() {
-    this.selectedImage = null;
-    this.imagePreviewUrl = null;
+    this.selectedImage.set(null);
+    this.imagePreviewUrl.set(null);
+  }
+  
+  // Helper to validate images
+  private validateImage(file: File): boolean {
+    // Check if file is an image
+    if (!file.type.startsWith('image/')) {
+      return false;
+    }
+    
+    // Check file size (limit to 5MB)
+    const maxSizeInBytes = 5 * 1024 * 1024; // 5MB
+    if (file.size > maxSizeInBytes) {
+      return false;
+    }
+    
+    return true;
   }
 }

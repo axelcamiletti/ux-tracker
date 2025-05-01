@@ -1,52 +1,73 @@
-<h2 mat-dialog-title class="text-xl font-bold mb-4">Edit project</h2>
-
-<mat-dialog-content>
-  <form [formGroup]="editProjectForm" (ngSubmit)="onSubmit()">
-    <mat-form-field class="w-full">
+<h2 mat-dialog-title>Edit project</h2>
+<form [formGroup]="editProjectForm" (ngSubmit)="onSubmit()">
+  <mat-dialog-content>
+    <mat-form-field appearance="outline" class="w-full">
       <mat-label>Project name</mat-label>
-      <input matInput formControlName="name" placeholder="Enter project name">
-      <mat-error *ngIf="editProjectForm.get('name')?.hasError('required')">
-        Project name is required
-      </mat-error>
-      <mat-error *ngIf="editProjectForm.get('name')?.hasError('minlength')">
-        Project name must be at least 3 characters
-      </mat-error>
+      <input matInput formControlName="name" placeholder="Enter project name" autofocus>
+      @if (editProjectForm.get('name')?.invalid && (editProjectForm.get('name')?.dirty || editProjectForm.get('name')?.touched)) {
+        <mat-error>
+          @if (editProjectForm.get('name')?.errors?.['required']) {
+            Project name is required
+          }
+          @if (editProjectForm.get('name')?.errors?.['minlength']) {
+            Project name must be at least 3 characters long
+          }
+        </mat-error>
+      }
     </mat-form-field>
 
-    <div class="image-upload-section mt-4">
-      <div class="flex items-center justify-between mb-2">
-        <label class="text-gray-700">Project image</label>
-        @if (selectedImage || imagePreviewUrl) {
-          <button type="button" mat-icon-button color="warn" (click)="removeImage()">
-            <mat-icon>delete</mat-icon>
-          </button>
-        }
-      </div>
+    <div class="image-upload-section">
+      <p class="mb-2 text-gray-700">Project thumbnail (optional)</p>
 
-      @if (!imagePreviewUrl) {
-        <div class="upload-area border-2 border-dashed border-gray-300 rounded-lg p-4 text-center cursor-pointer hover:border-primary-500"
-             (click)="fileInput.click()">
-          <mat-icon class="text-gray-400 text-3xl mb-2">cloud_upload</mat-icon>
-          <p class="text-gray-600">Click to upload an image</p>
-          <p class="text-sm text-gray-500">PNG, JPG up to 5MB</p>
+      @if (!imagePreviewUrl()) {
+        <div
+          class="upload-area border-2 border-dashed border-gray-300 rounded-xl flex flex-col gap-2 items-center justify-center p-8 hover:border-indigo-300 transition-colors cursor-pointer"
+          (click)="fileInput.click()">
+          <mat-icon class="text-gray-400">add_photo_alternate</mat-icon>
+          <p class="text-sm text-gray-500">Click to upload an image</p>
+          <input #fileInput type="file" accept="image/*" class="hidden" (change)="onFileSelected($event)">
         </div>
       } @else {
         <div class="preview-area relative">
-          <img [src]="imagePreviewUrl" class="w-full h-48 object-cover rounded-lg">
-          <div class="overlay absolute inset-0 bg-black bg-opacity-50 rounded-lg opacity-0 hover:opacity-100 flex items-center justify-center transition-opacity">
-            <button type="button" mat-icon-button color="primary" (click)="fileInput.click()">
+          <img [src]="imagePreviewUrl()" alt="Project preview" class="w-full h-40 object-cover rounded-lg">
+          <div class="absolute top-0 right-0 left-0 bottom-0 bg-black bg-opacity-40 opacity-0 hover:opacity-100 flex justify-center items-center gap-2 transition-opacity rounded-lg overlay">
+            <button
+              type="button"
+              mat-mini-fab
+              color="primary"
+              (click)="fileInput.click()"
+              aria-label="Cambiar imagen">
               <mat-icon>edit</mat-icon>
             </button>
+            @if (showRemoveButton()) {
+              <button
+                type="button"
+                mat-mini-fab
+                color="warn"
+                (click)="removeImage()"
+                aria-label="Eliminar imagen">
+                <mat-icon>delete</mat-icon>
+              </button>
+            }
           </div>
+          <input #fileInput type="file" accept="image/*" class="hidden" (change)="onFileSelected($event)">
         </div>
       }
-
-      <input #fileInput type="file" hidden accept="image/*" (change)="onFileSelected($event)">
     </div>
-  </form>
-</mat-dialog-content>
+  </mat-dialog-content>
 
-<mat-dialog-actions align="end">
-  <button mat-button (click)="onCancel()">Cancel</button>
-  <button mat-flat-button color="primary" (click)="onSubmit()" [disabled]="!editProjectForm.valid">Save changes</button>
-</mat-dialog-actions>
+  <mat-dialog-actions align="end">
+    <button type="button" mat-button (click)="onCancel()" [disabled]="submitting()">Cancelar</button>
+    <button
+      type="submit"
+      mat-flat-button
+      color="primary"
+      [disabled]="editProjectForm.invalid || submitting()">
+      @if (submitting()) {
+        <span>Guardando...</span>
+      } @else {
+        <span>Guardar cambios</span>
+      }
+    </button>
+  </mat-dialog-actions>
+</form>
