@@ -1,5 +1,7 @@
 # Estructura del Proyecto UX Tracker
 
+> **IMPORTANTE**: Este documento define la estructura oficial del proyecto. Todos los miembros del equipo deben seguir esta estructura al añadir nuevos componentes, servicios o funcionalidades. No crear carpetas o archivos fuera de esta organización para mantener la coherencia y facilitar el mantenimiento del código.
+
 Este documento detalla la estructura completa del proyecto Angular, describiendo qué contiene cada carpeta y las funcionalidades implementadas en cada componente.
 
 ## Estructura General

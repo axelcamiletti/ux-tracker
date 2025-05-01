@@ -1,9 +1,8 @@
----
-description:
-globs:
-alwaysApply: true
----
-# Angular Development Rules
+# Angular Development Guidelines
+
+> **IMPORTANTE**: Estas directrices deben ser seguidas por todos los miembros del equipo para mantener la consistencia y calidad del código. Por favor, cíñete a estas reglas cuando desarrolles en este proyecto.
+
+# Angular Development guidelines Rules
 
 ## File Structure
 - Each feature should be self-contained in its own directory with the following structure:
