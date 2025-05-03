@@ -27,13 +27,13 @@ src/
     features/              # Módulos de funcionalidad principales organizados por dominio
       home/                # Página de inicio y dashboard
       projects/            # Gestión de proyectos
-        modals/            # Modales específicos de proyectos
+        dialogs/           # Dialogs específicos de proyectos
         models/            # Modelos de datos de proyectos
         pages/             # Páginas relacionadas con proyectos
         services/          # Servicios específicos para proyectos
       study/               # Gestión de estudios UX
         components/        # Componentes específicos de estudios
-        modals/            # Modales específicos de estudios
+        dialogs/           # Dialogs específicos de estudios
         models/            # Modelos de datos de estudios
         pages/             # Páginas relacionadas con estudios
         services/          # Servicios específicos para estudios
@@ -118,60 +118,60 @@ src/
   - Navegación inteligente a estudios según su estado
   - Gestión de estados de estudios (borrador, publicado, completado)
 
-#### Modales (modals/)
+#### Dialogs (dialogs/)
 
-##### new-project-modal
-- **new-project-modal.component.html**:
+##### new-project-dialog
+- **new-project-dialog.component.html**:
   - Título "Crear nuevo proyecto"
   - Formulario con campos para nombre del proyecto
   - Input para subir imagen
   - Botones de cancelar y guardar
 
-- **new-project-modal.component.ts**:
+- **new-project-dialog.component.ts**:
   - Validación de datos del formulario
   - Manejo de subida de imagen (preview)
   - Emisión de eventos para crear el proyecto
   - Control de estados de carga
 
-##### edit-project-modal
-- **edit-project-modal.component.html**:
+##### edit-project-dialog
+- **edit-project-dialog.component.html**:
   - Título "Editar proyecto"
   - Formulario con nombre del proyecto precargado
   - Preview de imagen actual (si existe)
   - Opción para cambiar o eliminar la imagen
   - Botones de cancelar y guardar
 
-- **edit-project-modal.component.ts**:
+- **edit-project-dialog.component.ts**:
   - Recibe datos del proyecto a editar
   - Validación del formulario
   - Manejo de cambio de imagen
   - Manejo de eliminación de imagen
   - Emisión de eventos para actualizar el proyecto
 
-##### edit-study-name-modal
-- **edit-study-name-modal.component.ts** (template inline):
+##### edit-study-name-dialog
+- **edit-study-name-dialog.component.ts** (template inline):
   - Título "Editar nombre del estudio"
   - Campo de formulario para el nombre con etiqueta
   - Botones de cancelar y guardar
   - Diseño responsive con ancho máximo
 
-- **edit-study-name-modal.component.ts** (lógica):
+- **edit-study-name-dialog.component.ts** (lógica):
   - Recepción del nombre actual del estudio vía MAT_DIALOG_DATA
   - Binding bidireccional con ngModel para el nombre
-  - Método para guardar cambios y cerrar el modal
+  - Método para guardar cambios y cerrar el dialog
   - Método para cancelar y cerrar sin guardar
   - Estilo encapsulado en el componente
 
-##### share-study-modal
-- **share-study-modal.component.html**:
+##### share-study-dialog
+- **share-study-dialog.component.html**:
   - Cabecera con imagen y título explicativo
   - Campo de texto con URL del estudio solo lectura
   - Botón para copiar enlace al portapapeles
-  - Botón para cerrar el modal
+  - Botón para cerrar el dialog
   - Sección de "Opciones de estudio" con toggle
   - Pie con botón para guardar y cerrar
 
-- **share-study-modal.component.ts**:
+- **share-study-dialog.component.ts**:
   - Recepción de URL y ID del estudio vía MAT_DIALOG_DATA
   - FormControl para la opción de permitir múltiples respuestas
   - Método para copiar URL al portapapeles
@@ -386,7 +386,7 @@ src/
 - **study-share-page.component.ts**:
   - Definición de opciones de compartir
   - Obtención del ID del estudio desde la ruta
-  - Método para abrir modal con link para compartir
+  - Método para abrir dialog con link para compartir
   - Preparación de URL del estudio con base URL
 
 ##### study-analytics-page
@@ -430,10 +430,10 @@ src/
 - **toolbar.component.ts**:
   - Carga de datos del estudio actual
   - Emisión de eventos para guardar cambios
-  - Apertura de modal para editar nombre del estudio
+  - Apertura de dialog para editar nombre del estudio
   - Navegación al proyecto padre
   - Publicación del estudio con generación de URL pública
-  - Integración con modales para compartir estudio
+  - Integración con dialogs para compartir estudio
 
 ##### study-layout
 - **study-layout.component.html**:
@@ -681,12 +681,12 @@ src/
   - Actualización de modelo con cambios
   - Control de selección única/múltiple
 
-#### Modales (modals/)
+#### Dialogs (dialogs/)
 
-##### edit-study-name-modal
+##### edit-study-name-dialog
 - Formulario para editar nombre de estudio
 
-##### share-study-modal
+##### share-study-dialog
 - Opciones completas para compartir estudios
 - Generación de enlaces y opciones de privacidad
 

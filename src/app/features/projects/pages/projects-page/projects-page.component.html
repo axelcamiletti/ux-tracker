@@ -4,7 +4,7 @@
 
     <div class="flex justify-between mb-5 mt-10">
       <h1 class="text-2xl font-bold">Projects</h1>
-      <button mat-flat-button color="primary" (click)="openNewProjectModal()" [disabled]="creatingProject()">
+      <button mat-flat-button color="primary" (click)="openNewProjectDialog()" [disabled]="creatingProject()">
         New project <mat-icon>add</mat-icon>
       </button>
     </div>
@@ -53,7 +53,7 @@
               </button>
             </div>
             <mat-menu #menu="matMenu">
-              <button mat-menu-item (click)="openEditProjectModal(project, $event)" [disabled]="editingProject()"><mat-icon>edit</mat-icon> Edit</button>
+              <button mat-menu-item (click)="openEditProjectDialog(project, $event)" [disabled]="editingProject()"><mat-icon>edit</mat-icon> Edit</button>
               <button mat-menu-item (click)="deleteProject(project.id, $event)" [disabled]="deletingProject()"><mat-icon>delete</mat-icon> Delete</button>
             </mat-menu>
           </a>

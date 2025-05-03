@@ -9,7 +9,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { inject, signal } from '@angular/core';
 
 @Component({
-  selector: 'app-new-project-modal',
+  selector: 'app-new-project-dialog',
   standalone: true,
   imports: [
     CommonModule,
@@ -20,12 +20,12 @@ import { inject, signal } from '@angular/core';
     MatDialogModule,
     MatIconModule
   ],
-  templateUrl: './new-project-modal.component.html',
-  styleUrls: ['./new-project-modal.component.css']
+  templateUrl: './new-project-dialog.component.html',
+  styleUrls: ['./new-project-dialog.component.css']
 })
-export class NewProjectModalComponent {
+export class NewProjectDialogComponent {
   private fb = inject(FormBuilder);
-  private dialogRef = inject(MatDialogRef<NewProjectModalComponent>);
+  private dialogRef = inject(MatDialogRef<NewProjectDialogComponent>);
 
   newProjectForm: FormGroup;
   selectedImage = signal<File | null>(null);

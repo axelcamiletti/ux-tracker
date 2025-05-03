@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { ShareStudyModalComponent } from '../../modals/share-study-modal/share-study-modal.component';
+import { ShareStudyDialogComponent } from '../../dialogs/share-study-dialog/share-study-dialog.component';
 import { ActivatedRoute } from '@angular/router';
 import { environment } from '../../../../../environments/environment';
 
@@ -20,7 +20,7 @@ export class StudySharePageComponent {
       title: 'Copy study link',
       description: 'Invite testers via your own channels',
       icon: 'https://app.maze.co/_next/static/media/maze-share-url.f064d024.png',
-      action: () => this.openShareModal()
+      action: () => this.openShareDialog()
     },
     {
       title: 'Hire panel participants',
@@ -46,10 +46,10 @@ export class StudySharePageComponent {
     this.studyId = this.route.parent?.snapshot.paramMap.get('id') || '';
   }
 
-  openShareModal() {
+  openShareDialog() {
     const studyUrl = `${environment.baseUrl}/study-public/${this.studyId}`;
-    
-    this.dialog.open(ShareStudyModalComponent, {
+
+    this.dialog.open(ShareStudyDialogComponent, {
       data: { studyUrl },
       width: '500px'
     });

@@ -7,7 +7,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 
 @Component({
-  selector: 'app-edit-study-name-modal',
+  selector: 'app-edit-study-name-dialog',
   standalone: true,
   imports: [
     CommonModule,
@@ -38,11 +38,11 @@ import { MatButtonModule } from '@angular/material/button';
     }
   `]
 })
-export class EditStudyNameModalComponent {
+export class EditStudyNameDialogComponent {
   studyName: string;
 
   constructor(
-    public dialogRef: MatDialogRef<EditStudyNameModalComponent>,
+    public dialogRef: MatDialogRef<EditStudyNameDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: { studyName: string }
   ) {
     this.studyName = data.studyName;
@@ -55,4 +55,4 @@ export class EditStudyNameModalComponent {
   onCancel() {
     this.dialogRef.close();
   }
-} 
+}

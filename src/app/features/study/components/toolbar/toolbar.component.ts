@@ -9,8 +9,8 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { EditStudyNameModalComponent } from '../../modals/edit-study-name-modal/edit-study-name-modal.component';
-import { ShareStudyModalComponent } from '../../modals/share-study-modal/share-study-modal.component';
+import { EditStudyNameDialogComponent } from '../../dialogs/edit-study-name-dialog/edit-study-name-dialog.component';
+import { ShareStudyDialogComponent } from '../../dialogs/share-study-dialog/share-study-dialog.component';
 
 @Component({
   selector: 'app-toolbar',
@@ -60,8 +60,8 @@ export class ToolbarComponent implements OnInit {
     });
   }
 
-  openEditNameModal() {
-    const dialogRef = this.dialog.open(EditStudyNameModalComponent, {
+  openEditNameDialog() {
+    const dialogRef = this.dialog.open(EditStudyNameDialogComponent, {
       data: { studyName: this.studyName }
     });
 
@@ -96,9 +96,9 @@ export class ToolbarComponent implements OnInit {
       // Publicar el estudio y generar la URL pública
       await this.studyService.publishStudy(this.studyId);
 
-      // Abrir el modal de compartir con la URL pública
+      // Abrir el dialog de compartir con la URL pública
       const publicUrl = `${window.location.origin}/study-public/${this.studyId}`;
-      this.dialog.open(ShareStudyModalComponent, {
+      this.dialog.open(ShareStudyDialogComponent, {
         data: { studyUrl: publicUrl },
         width: '500px'
       });

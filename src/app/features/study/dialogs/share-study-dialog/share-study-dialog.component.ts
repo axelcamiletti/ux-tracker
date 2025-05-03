@@ -10,7 +10,7 @@ import { ReactiveFormsModule, FormControl } from '@angular/forms';
 import { StudyService } from '../../services/study.service';
 
 @Component({
-  selector: 'app-share-study-modal',
+  selector: 'app-share-study-dialog',
   standalone: true,
   imports: [
     MatFormFieldModule,
@@ -20,16 +20,16 @@ import { StudyService } from '../../services/study.service';
     MatButtonModule,
     ReactiveFormsModule
   ],
-  templateUrl: './share-study-modal.component.html',
-  styleUrls: ['./share-study-modal.component.css']
+  templateUrl: './share-study-dialog.component.html',
+  styleUrls: ['./share-study-dialog.component.css']
 })
-export class ShareStudyModalComponent {
+export class ShareStudyDialogComponent {
   studyUrl: string;
   allowMultipleResponses = new FormControl(false);
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: { studyUrl: string, studyId: string },
-    private dialogRef: MatDialogRef<ShareStudyModalComponent>,
+    private dialogRef: MatDialogRef<ShareStudyDialogComponent>,
     private snackBar: MatSnackBar,
     private studyService: StudyService
   ) {

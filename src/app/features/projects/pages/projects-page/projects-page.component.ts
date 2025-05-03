@@ -8,8 +8,8 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ProjectService } from '../../services/project.service';
 import { Project } from '../../models/project.model';
-import { NewProjectModalComponent } from '../../modals/new-project-modal/new-project-modal.component';
-import { EditProjectModalComponent } from '../../modals/edit-project-modal/edit-project-modal.component';
+import { NewProjectDialogComponent } from '../../dialogs/new-project-dialog/new-project-dialog.component';
+import { EditProjectDialogComponent } from '../../dialogs/edit-project-dialog/edit-project-dialog.component';
 import { MatMenuModule } from '@angular/material/menu';
 import { inject } from '@angular/core';
 import { signal, computed } from '@angular/core';
@@ -53,8 +53,8 @@ export class ProjectsPageComponent implements OnInit {
     this.projectService.loadProjects();
   }
 
-  openNewProjectModal() {
-    const dialogRef = this.dialog.open(NewProjectModalComponent, {
+  openNewProjectDialog() {
+    const dialogRef = this.dialog.open(NewProjectDialogComponent, {
       width: '500px',
       disableClose: true
     });
@@ -121,11 +121,11 @@ export class ProjectsPageComponent implements OnInit {
     }
   }
 
-  openEditProjectModal(project: Project, event: Event) {
+  openEditProjectDialog(project: Project, event: Event) {
     event.preventDefault();
     event.stopPropagation();
 
-    const dialogRef = this.dialog.open(EditProjectModalComponent, {
+    const dialogRef = this.dialog.open(EditProjectDialogComponent, {
       width: '500px',
       disableClose: true,
       data: { project }

@@ -14,7 +14,7 @@ interface DialogData {
 }
 
 @Component({
-  selector: 'app-edit-project-modal',
+  selector: 'app-edit-project-dialog',
   standalone: true,
   imports: [
     CommonModule,
@@ -25,7 +25,7 @@ interface DialogData {
     MatDialogModule,
     MatIconModule
   ],
-  templateUrl: './edit-project-modal.component.html',
+  templateUrl: './edit-project-dialog.component.html',
   styles: [`
     .image-container {
       width: 48px;
@@ -62,9 +62,9 @@ interface DialogData {
     }
   `]
 })
-export class EditProjectModalComponent {
+export class EditProjectDialogComponent {
   // Inject dependencies
-  private dialogRef = inject(MatDialogRef<EditProjectModalComponent>);
+  private dialogRef = inject(MatDialogRef<EditProjectDialogComponent>);
   private data = inject<DialogData>(MAT_DIALOG_DATA);
   private fb = inject(FormBuilder);
 
@@ -76,7 +76,7 @@ export class EditProjectModalComponent {
   // Computed properties
   hasSelectedImage = computed(() => this.selectedImage() !== undefined && this.selectedImage() !== null);
   showRemoveButton = computed(() => this.imagePreviewUrl() !== null && this.imagePreviewUrl() !== undefined);
-  
+
   // Form
   editProjectForm = this.fb.group({
     name: [this.data.project.name, [Validators.required, Validators.minLength(3)]]
@@ -122,20 +122,20 @@ export class EditProjectModalComponent {
     this.selectedImage.set(null);
     this.imagePreviewUrl.set(null);
   }
-  
+
   // Helper to validate images
   private validateImage(file: File): boolean {
     // Check if file is an image
     if (!file.type.startsWith('image/')) {
       return false;
     }
-    
+
     // Check file size (limit to 5MB)
     const maxSizeInBytes = 5 * 1024 * 1024; // 5MB
     if (file.size > maxSizeInBytes) {
       return false;
     }
-    
+
     return true;
   }
 }

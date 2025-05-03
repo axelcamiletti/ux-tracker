@@ -12,11 +12,11 @@ import { ProjectService } from '../../services/project.service';
 import { StudyService } from '../../../study/services/study.service';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDialog } from '@angular/material/dialog';
-import { ConfirmDialogComponent } from '../../../../modals/confirm-dialog/confirm-dialog.component';
-import { EditStudyNameModalComponent } from '../../../study/modals/edit-study-name-modal/edit-study-name-modal.component';
+import { EditStudyNameDialogComponent } from '../../../study/dialogs/edit-study-name-dialog/edit-study-name-dialog.component';
 import { FirebaseDatePipe } from '../../../../pipes/firebase-date.pipe';
 import { MatMenuModule } from '@angular/material/menu';
 import { Subject } from 'rxjs';
+import { ConfirmDialogComponent } from '../../../../dialogs/confirm-dialog/confirm-dialog.component';
 
 @Component({
   selector: 'app-project-page',
@@ -193,7 +193,7 @@ export class ProjectPageComponent implements OnInit, OnDestroy {
   }
 
   editStudyName(study: Study) {
-    const dialogRef = this.dialog.open(EditStudyNameModalComponent, {
+    const dialogRef = this.dialog.open(EditStudyNameDialogComponent, {
       data: { studyName: study.name }
     });
 
