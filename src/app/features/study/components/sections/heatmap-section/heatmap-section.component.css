@@ -1,0 +1,46 @@
+.heatmap-section {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.prototype-image-container {
+  min-height: 300px;
+  background-color: #f9f9f9;
+}
+
+.prototype-image {
+  max-width: 100%;
+  display: block;
+}
+
+.heatmap-point {
+  box-shadow: 0 0 10px 5px rgba(255, 255, 255, 0.3);
+  transition: all 0.2s ease-in-out;
+}
+
+.heatmap-point:hover {
+  transform: translate(-50%, -50%) scale(1.2);
+  z-index: 10;
+}
+
+.metrics {
+  border-left: 1px solid #eee;
+}
+
+/* Estilos para los botones y controles */
+button {
+  transition: all 0.2s ease;
+}
+
+button:hover {
+  transform: translateY(-1px);
+}
+
+select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23666' viewBox='0 0 24 24'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  padding-right: 24px;
+}

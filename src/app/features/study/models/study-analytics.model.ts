@@ -81,3 +81,13 @@ export interface PrototypeAnalytics {
     timeSpent: number;
   }>;
 }
+
+export interface PrototypeScreenAnalytics {
+  nodeId: string;          // ID del nodo de Figma
+  participants: number;    // Cantidad de participantes que vieron este nodo
+  totalTimeSpent: number;  // Tiempo total (para calcular promedios)
+  avgDuration: number;     // Duración promedio
+  interactionCount: number; // Número total de interacciones
+  misclickCount: number;   // Número de clics erróneos
+  // Métricas adicionales básicas...
+}

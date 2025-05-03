@@ -48,6 +48,14 @@ export interface PrototypeTestSection extends BaseSection {
       name: string;
       imageUrl: string;
     }>;
+    screens?: Array<{
+      nodeId: string;
+      name: string;
+      imageUrl: string;
+      participants?: number;
+      avgDuration?: number;
+      misClick?: number;
+    }>;
   };
 }
 

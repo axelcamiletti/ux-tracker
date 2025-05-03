@@ -37,7 +37,9 @@
         @for (project of projects(); track project.id) {
           <a [routerLink]="['/projects', project.id]" class="w-76 border border-gray-300 rounded-2xl p-4 hover:border-blue-500 hover:shadow-xl transition duration-300 ease-in-out hover:scale-105 active:scale-95 cursor-pointer bg-gray-50 relative">
             <div class="image-container h-40">
-              <img class="image-contain w-full h-full rounded-xl" src="{{ project.imageUrl }}" alt="">
+              <img class="image-contain w-full h-full rounded-xl"
+                   [src]="project.imageUrl || 'assets/illustrations/image-not-found.svg'"
+                   [alt]="project.name">
             </div>
             <div class="flex mt-2">
               <div class="texts">
