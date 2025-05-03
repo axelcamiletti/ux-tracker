@@ -35,10 +35,22 @@ export interface YesNoResponse extends BaseSectionResponse {
 export interface PrototypeTestResponse extends BaseSectionResponse {
   type: 'prototype-test';
   response: {
+    // Eventos de Figma con nuevo formato tipado
     figmaEventLog: Array<{
       timestamp: Date;
-      [key: string]: any; // Permite cualquier propiedad adicional para adaptarse a diferentes formatos de eventos
+      type?: string;
+      [key: string]: any; // Mantener compatibilidad con eventos existentes
     }>;
+    completed?: boolean;
+    timeSpent?: number;     // Tiempo en segundos
+    // Nueva propiedad para guardar analítica procesada
+    analytics?: {
+      visitedNodes: string[];
+      avgTimePerNode?: { [nodeId: string]: number };
+      startNodeId?: string;
+      endNodeId?: string;
+      reachedTarget?: boolean;
+    };
   }
 }
 

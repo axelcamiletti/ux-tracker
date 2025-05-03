@@ -43,18 +43,18 @@ export interface PrototypeTestSection extends BaseSection {
     embedUrl: string;
     startingNodeId?: string;
     selectedTargetNodeId?: string;
+    // Utilizar la referencia a nodos sin datos analíticos
+    nodes?: Array<{
+      id: string;
+      name: string;
+      imageUrl: string;
+      type?: string;
+    }>;
+    // Mantener frames para compatibilidad con código existente
     frames?: Array<{
       id: string;
       name: string;
       imageUrl: string;
-    }>;
-    screens?: Array<{
-      nodeId: string;
-      name: string;
-      imageUrl: string;
-      participants?: number;
-      avgDuration?: number;
-      misClick?: number;
     }>;
   };
 }

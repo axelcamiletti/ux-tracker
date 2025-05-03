@@ -16,9 +16,20 @@ Este documento detalla la estructura completa del proyecto Angular, describiendo
 
 **Nota**: La falta de actualización de este documento se considerará una tarea incompleta y podría generar deuda técnica o dificultar el trabajo del resto del equipo.
 
+================================================================
+## ARQUITECTURA
+================================================================
+
+### MODELOS
+Arquitectura de modelo aplicando el patrón de diseño de segregación de responsabilidades y principios SOLID:
+1. Modelos de Dominio Base
+2. Modelos de Datos Analíticos (Claramente Separados)
+3. 
 
 
+================================================================
 ## Estructura General
+================================================================
 
 ```
 src/
