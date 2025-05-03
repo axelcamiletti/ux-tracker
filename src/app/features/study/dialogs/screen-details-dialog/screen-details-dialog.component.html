@@ -1,1 +1,25 @@
-<p>screen-details-dialog works!</p>
+<div class="screen-details-dialog">
+  <div class="header flex items-center py-4 px-8 border-b border-gray-300">
+    <div class="texts">
+      <div class="text-xl font-bold">[Name_screen]</div>
+      <div class="text-sm text-gray-600 flex items-center"><mat-icon>people</mat-icon> 2 participants</div>
+    </div>
+
+    <div class="tabs mx-auto flex">
+      <button class="btn"><mat-icon>mode_heat</mat-icon> Heatmaps</button>
+      <button class="btn"><mat-icon>http</mat-icon> Clips</button>
+    </div>
+
+    <div class="actions items-center flex gap-1">
+      <button class="btn btn-icon" matTooltip="Previous screen"><mat-icon>chevron_left</mat-icon></button>
+      <button class="btn btn-icon" matTooltip="Next screen"><mat-icon>chevron_right</mat-icon></button>
+      <button class="btn btn-icon" matTooltip="Close"><mat-icon>close</mat-icon></button>
+    </div>
+  </div>
+
+  <div class="content">
+    <app-heatmap-section></app-heatmap-section>
+    <!-- <app-clips-element></app-clips-element> -->
+  </div>
+</div>
+

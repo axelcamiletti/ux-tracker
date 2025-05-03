@@ -7,6 +7,8 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatButtonModule } from '@angular/material/button';
 import { StudyService } from '../../../services/study.service';
 import { Study } from '../../../models/study.model';
+import { MatDialog } from '@angular/material/dialog';
+import { ScreenDetailsDialogComponent } from '../../../dialogs/screen-details-dialog/screen-details-dialog.component';
 
 interface MissionScreen {
   id: string;
@@ -46,7 +48,10 @@ export class PrototypeTestResultComponent implements OnChanges, OnInit {
   // Estado actual de la pestaña
   activeTab: 'success' | 'unfinished' = 'unfinished';
 
-  constructor(private studyService: StudyService) {}
+  constructor(
+    private studyService: StudyService,
+    private dialog: MatDialog
+  ) {}
 
   ngOnInit() {
     console.log('PrototypeTestResultComponent initialized');
@@ -70,8 +75,8 @@ export class PrototypeTestResultComponent implements OnChanges, OnInit {
           id: frame.id,
           title: frame.name,
           image: frame.imageUrl,
-          participants: 0, // Will be updated when processing participant data
-          avgDuration: 0 // Default value for average duration
+          participants: 0,
+          avgDuration: 0
         }));
 
         // Merge with any existing screens or replace if none exist
@@ -348,5 +353,18 @@ export class PrototypeTestResultComponent implements OnChanges, OnInit {
 
     console.log(`Extracted ${this.missionScreens.length} unique mission screens:`, this.missionScreens);
     console.log('=== END MISSION SCREENS EXTRACTION ===');
+  }
+
+  openScreenDetailsDialog(screen: MissionScreen) {
+    console.log('Opening screen details dialog for:', screen);
+    this.dialog.open(ScreenDetailsDialogComponent, {
+      width: '100%',
+      maxWidth: '90vw',
+      data: {
+        screen: screen,
+        section: this.section,
+        participants: this.participants
+      }
+    });
   }
 }

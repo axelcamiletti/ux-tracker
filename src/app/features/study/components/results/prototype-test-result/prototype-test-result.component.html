@@ -79,7 +79,9 @@
       <p class="text-sm text-gray-600">Click on each screen to see how participants interacted with it</p>
 
       <div class="flex flex-wrap gap-4 mt-4">
-        <div class="screen w-48 border border-gray-300 rounded-lg overflow-hidden cursor-pointer hover:border-blue-500" *ngFor="let screen of missionScreens">
+        <div class="screen w-48 border border-gray-300 rounded-lg overflow-hidden cursor-pointer hover:border-blue-500"
+             *ngFor="let screen of missionScreens"
+             (click)="openScreenDetailsDialog(screen)">
           <div class="image-container h-32 overflow-hidden">
             <img class="image-contain" [src]="screen.image" alt="Screen preview">
           </div>
