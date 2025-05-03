@@ -1,0 +1,51 @@
+<div class="prototype-iframe-preview h-full bg-gray-100">
+  <!-- Iframe y spinner de carga -->
+  @if (embedUrl && !missionCompletedState) {
+    <div class="relative h-full">
+      <!-- Iframe con el prototipo -->
+      <iframe
+          width="100%"
+          height="100%"
+          #iframePrototype
+          [src]="embedUrl | safeUrl"
+          title="Figma Prototype Preview"
+          allowfullscreen
+          aria-label="Figma prototype interactive preview"
+      ></iframe>
+    </div>
+  }
+
+  <!-- Estado de misión completada -->
+  @if (missionCompletedState) {
+    <div class="mission-complete-screen text-center flex flex-col items-center justify-center h-full">
+      <div class="success-icon bg-green-500 text-white rounded-full w-24 h-24 flex items-center justify-center mb-6">
+        <span class="text-4xl">✓</span>
+      </div>
+      <h2 class="text-2xl text-gray-800 font-bold mb-2">¡Bien hecho!</h2>
+      <p class="text-lg text-gray-600">Has completado esta misión.</p>
+    </div>
+  }
+
+  <!-- Estado vacío -->
+  @if (!embedUrl && !missionCompletedState) {
+    <div class="empty-screen text-center flex flex-col items-center justify-center h-full w-sm mx-auto">
+      <div class="grid grid-cols-2 gap-1 w-16">
+        <div class="col-span-1">
+          <img src="https://app.maze.co/_next/static/media/figma-logo-icon.f470507a.png" alt="Figma logo">
+        </div>
+        <div class="col-span-1">
+          <img src="https://app.maze.co/_next/static/media/adobe-logo-icon.60a30e2e.png" alt="Adobe logo">
+        </div>
+        <div class="col-span-1">
+          <img src="https://app.maze.co/_next/static/media/marvel-logo-icon.17afcd87.png" alt="Marvel logo">
+        </div>
+        <div class="col-span-1">
+          <img src="https://app.maze.co/_next/static/media/sketch-logo-icon.e2e65df2.png" alt="Sketch logo">
+        </div>
+      </div>
+
+      <h3 class="text-lg text-gray-800 mt-4 mb-2 font-bold">No prototype added</h3>
+      <p class="text-gray-600 text-sm">Add your prototype link to create missions for your users to test across this study</p>
+    </div>
+  }
+</div>

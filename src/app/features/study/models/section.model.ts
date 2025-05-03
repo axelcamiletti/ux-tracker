@@ -39,7 +39,8 @@ export interface YesNoSection extends BaseSection {
 export interface PrototypeTestSection extends BaseSection {
   type: 'prototype-test';
   data: {
-    prototypeUrl: string;
+    originalUrl: string;
+    embedUrl: string;
     startingNodeId?: string;
     selectedTargetNodeId?: string;
     frames?: Array<{

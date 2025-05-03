@@ -36,7 +36,7 @@
         </div>
     </div>
 
-    <div class="content bg-gray-100 w-full h-full p-10">
+    <div class="content bg-gray-100 w-full h-full p-10 overflow-y-auto">
         <!-- Participant view content -->
         <app-participant-result
             *ngIf="activeView === 'participants' && selectedParticipant"
@@ -67,7 +67,8 @@
 
                 <app-prototype-test-result
                     *ngIf="section.type === 'prototype-test' && selectedSection?.id === section.id"
-                    >
+                    [section]="section"
+                    [participants]="participants">
                 </app-prototype-test-result>
             </ng-container>
         </ng-container>

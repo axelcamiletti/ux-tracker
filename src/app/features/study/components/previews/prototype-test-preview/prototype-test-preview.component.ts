@@ -1,106 +1,75 @@
-import { Component, Input, SimpleChanges, OnInit, ViewChild, ElementRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { MatButtonModule } from '@angular/material/button';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
-import { PrototypeTestSection, FigmaUrl } from '../../../models/section.model';
+import { Component, Input, Output, EventEmitter, SimpleChanges, OnInit, OnDestroy } from '@angular/core';
+import { PrototypeTestSection } from '../../../models/section.model';
+import { PrototypeTestResponse } from '../../../models/study-response.model';
 import { StudyStateService } from '../../../services/study-state.service';
-import { StudyPrototypeService } from '../../../services/study-prototype.service';
+import { Subject, takeUntil } from 'rxjs';
 
 @Component({
   selector: 'app-prototype-test-preview',
   standalone: true,
-  imports: [CommonModule, MatButtonModule, MatProgressSpinnerModule],
+  imports: [],
   templateUrl: './prototype-test-preview.component.html',
   styleUrl: './prototype-test-preview.component.css'
 })
-export class PrototypeTestPreviewComponent implements OnInit {
+export class PrototypeTestPreviewComponent {
   @Input() section!: PrototypeTestSection;
-  @Input() responseId!: string;
-  @ViewChild('iframePrototype') iframePrototype!: ElementRef<HTMLIFrameElement>;
+  @Output() responseChange = new EventEmitter<PrototypeTestResponse>();
 
-  private urlRegex = /^https:\/\/www\.figma\.com\/(proto|file)\/([a-zA-Z0-9]+)\/([^?]+)\?.*(?:node-id=([^&]+)).*(?:starting-point-node-id=([^&]+))?/;
-
-  showIframe = true;
-  showPreview = false;
+  response: string = '';
+  private destroy$ = new Subject<void>();
 
   previewData = {
     title: '',
     description: '',
-    prototypeUrl: '' as string | SafeResourceUrl,
-    figmaUrl: null as FigmaUrl | null,
+    required: false
   };
 
-  constructor(
-    private studyState: StudyStateService,
-    private studyPrototype: StudyPrototypeService,
-    private sanitizer: DomSanitizer
-  ) {}
+  constructor(private studyState: StudyStateService) {}
 
   ngOnInit(): void {
-    this.setupFigmaEventListener();
+    this.studyState.prototypeTestSection$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(section => {
+        if (section) {
+          this.updatePreviewData(section);
+        }
+      });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['section'] && this.section) {
       this.updatePreviewData(this.section);
+      this.studyState.setPrototypeTestSection(this.section);
     }
   }
 
   private updatePreviewData(section: PrototypeTestSection) {
-    let figmaUrl: FigmaUrl | null = null;
-    let embedUrl = '';
-
-    if (section.data && section.data.prototypeUrl) {
-      const match = section.data.prototypeUrl.match(this.urlRegex);
-      if (match) {
-        figmaUrl = {
-          fileType: match[1],
-          fileKey: match[2],
-          fileName: decodeURIComponent(match[3]),
-          nodeId: match[4],
-          startingNodeId: match[5] || match[4]
-        };
-
-        embedUrl = `https://embed.figma.com/${figmaUrl.fileType}/${figmaUrl.fileKey}/${figmaUrl.fileName}?node-id=${figmaUrl.startingNodeId}&embed-host=share&footer=false&viewport-controls=false&allow-external-events=true&client-id=fV57d1E9E5FCZ1d1hKVS3e`;
-
-        // Mostrar el iframe cuando hay una URL válida
-        this.showPreview = true;
-      }
-    } else {
-      this.showPreview = false;
-    }
-
     this.previewData = {
-      title: section.title || '',
+      title: section.title || 'No se ha ingresado el título',
       description: section.description || '',
-      prototypeUrl: embedUrl ? this.sanitizer.bypassSecurityTrustResourceUrl(embedUrl) : '',
-      figmaUrl: figmaUrl,
+      required: section.required
     };
   }
 
-  private setupFigmaEventListener(): void {
-    if (this.iframePrototype?.nativeElement) {
-      this.iframePrototype.nativeElement.contentWindow?.addEventListener('message', (event) => {
-        if (event.origin.includes('figma.com')) {
-          this.handleFigmaEvent(event.data);
-        }
-      });
-    }
+  onResponseChange(value: string) {
+    this.response = value;
+    this.emitResponse();
   }
 
-  private async handleFigmaEvent(event: any): Promise<void> {
-    if (this.section && this.responseId) {
-      await this.studyPrototype.getFigmaEvent(event, this.responseId, this.section.id);
-    }
-  }
-
-  onTestComplete(timeSpent: number, interactions?: Array<any>) {
-    // Obtener la respuesta completa desde el servicio, que incluye todos los eventos capturados
-    /* const completeResponse = this.studyPrototype.createSummaryResponse(this.section.id); */
-
-    // También emitir la respuesta para mantener la compatibilidad con el flujo existente
-    /* this.responseChange.emit(completeResponse); */
-
+  private emitResponse() {
+    const response: PrototypeTestResponse = {
+      sectionId: this.section.id,
+      timestamp: new Date(),
+      type: 'prototype-test',
+      response: {
+        figmaEventLog: [],
+      }
+    };
+    this.responseChange.emit(response);
   }
 }

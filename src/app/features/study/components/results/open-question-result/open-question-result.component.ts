@@ -16,18 +16,10 @@ export class OpenQuestionResultComponent {
   @Input() title: string = '';
   @Input() participants: StudyResponse[] = [];
 
-  ngOnChanges() {
-    console.log('OpenQuestionResult: Input changes detectados');
-    console.log('OpenQuestionResult: Section recibida:', this.section);
-    console.log('OpenQuestionResult: Participantes recibidos:', this.participants);
-  }
-
   getResponsesForSection(sectionId: string): StudyResponse[] {
-    console.log('OpenQuestionResult: Buscando respuestas para sección:', sectionId);
     const responses = this.participants.filter(participant =>
       participant.responses?.some(response => response.sectionId === sectionId)
     );
-    console.log('OpenQuestionResult: Respuestas encontradas:', responses.length);
     return responses;
   }
 

@@ -44,7 +44,7 @@
             type="text"
             class="input"
             placeholder="Pega tu link de Figma"
-            [(ngModel)]="formData.fileId"
+            [(ngModel)]="formData.originalUrl"
             (ngModelChange)="onUrlChange($event)">
 
           <button mat-flat-button (click)="importPrototype()" [disabled]="!formData.importEnabled || formData.isLoading">IMPORT</button>

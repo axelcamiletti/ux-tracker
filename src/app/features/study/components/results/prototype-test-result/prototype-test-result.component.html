@@ -1,22 +1,22 @@
 <div class="prototype-test-result">
-  <div class="bg-white rounded-xl p-8">
+  <div class="bg-white rounded-xl p-8" *ngIf="section && !isLoading && !errorMessage">
       <h2 class="text-2xl font-bold text-gray-900 mb-1">{{ section.title }}</h2>
       <p class="text-gray-600 mb-6">{{ section.description }}</p>
 
       <div class="flex gap-4">
-        <div class="w-1/3" matTooltip="% of missions completed succesffully">
+        <div class="w-1/3" matTooltip="% of missions completed successfully">
           <mat-icon>trophy</mat-icon>
-          <h3 class="text-xl">0.0%</h3>
+          <h3 class="text-xl">{{ successRate }}%</h3>
           <p class="text-xs text-gray-600">Success rate</p>
         </div>
         <div class="w-1/3" matTooltip="% of participants who left or finished the mission on the wrong screen">
           <mat-icon>home</mat-icon>
-          <h3 class="text-xl">100%</h3>
+          <h3 class="text-xl">{{ totalDropoffs }}</h3>
           <p class="text-xs text-gray-600">Drop-off</p>
         </div>
         <div class="w-1/3" matTooltip="Avg. % of clicks outside maze hotspots">
           <mat-icon>refresh</mat-icon>
-          <h3 class="text-xl">68.9%</h3>
+          <h3 class="text-xl">{{ misclickRate | number:'1.1-1' }}%</h3>
           <p class="text-xs text-gray-600">Misclick rate</p>
         </div>
       </div>
@@ -26,45 +26,50 @@
       <h2 class="text-xl font-bold text-gray-900">Mission paths</h2>
       <p class="text-sm text-gray-600">Shows the paths testers took and how they completed the mission.</p>
       <div class="tabs-header flex">
-        <div class="tab">Success (0)</div>
-        <div class="tab">Mission unfinished (1)</div>
+        <div class="tab" [class.active]="activeTab === 'success'" (click)="setActiveTab('success')">
+          Success ({{ successCount }})
+        </div>
+        <div class="tab" [class.active]="activeTab === 'unfinished'" (click)="setActiveTab('unfinished')">
+          Mission unfinished ({{ unfinishedCount }})
+        </div>
       </div>
 
       <div class="tab-content">
         <!-- Success -->
-        <div *ngIf="false">
+        <div *ngIf="activeTab === 'success'">
           <p>Testers who completed the mission</p>
-          <div class="empty-screen text-center">
+          <div class="empty-screen text-center" *ngIf="successCount === 0">
             <mat-icon>empty</mat-icon>
             <p class="text-gray-600">No paths to show here</p>
           </div>
+          <!-- Aquí se mostrarían los paths exitosos cuando existan -->
         </div>
 
         <!-- Mission unfinished -->
-        <div *ngIf="true">
+        <div *ngIf="activeTab === 'unfinished'">
           <p>Testers who left or finished the mission on the wrong screen</p>
-          <div class="path" *ngFor="let path of [3]">
+          <!-- <div class="path" *ngFor="let path of unfinishedPaths">
             <div class="header flex gap-4 justify-between items-center">
               <div class="texts">
-                <h3 class="text-xl font-bold">Path 1</h3>
+                <h3 class="text-xl font-bold">Path {{ path.id }}</h3>
                 <div class="flex">
                   <div class="flex" matTooltip="Participants">
                     <mat-icon>people</mat-icon>
-                    <span>1</span>
+                    <span>{{ path.participants }}</span>
                   </div>
                   <div class="flex" matTooltip="Avg. duration">
                     <mat-icon>time</mat-icon>
-                    <span>30.5s</span>
+                    <span>{{ path.avgDuration }}s</span>
                   </div>
                   <div class="flex" matTooltip="Users who misclicked">
                     <mat-icon>target</mat-icon>
-                    <span>46.7%</span>
+                    <span>{{ path.misclickRate }}%</span>
                   </div>
                 </div>
               </div>
               <button mat-flat-button><mat-icon>fire</mat-icon> View heatmaps</button>
             </div>
-          </div>
+          </div> -->
         </div>
       </div>
 
@@ -72,21 +77,30 @@
 
       <h2 class="text-xl font-bold text-gray-900">Mission screens</h2>
       <p class="text-sm text-gray-600">Click on each screen to see how participants interacted with it</p>
-      <div class="flex flex-wrap gap-4">
-        <div class="screen" *ngFor="let screen of missionScreens">
-          <div class="image-container">
-            <img src="" alt="">
+
+      <div class="flex flex-wrap gap-4 mt-4">
+        <div class="screen w-48 border border-gray-300 rounded-lg overflow-hidden cursor-pointer hover:border-blue-500" *ngFor="let screen of missionScreens">
+          <div class="image-container h-32 overflow-hidden">
+            <img class="image-contain" [src]="screen.image" alt="Screen preview">
           </div>
-          <div class="body">
-            <h3>[title_frame]</h3>
-            <div class="flex items-center gap-2 text-gray-600">
-              <div class="flex" matTooltip="Participants"><mat-icon>people</mat-icon> 1</div>
-              <div class="flex" matTooltip="Avg. duration"><mat-icon>time</mat-icon> 2.1s</div>
+          <div class="body p-2 font-medium">
+            <h3 class="text-sm">{{ screen.title }}</h3>
+            <div class="flex items-center text-gray-400 text-xs">
+              <mat-icon class="scale-70" matTooltip="Participants">people</mat-icon>
+              <span>{{ screen.participants }}</span>
+              <span>&nbsp; • &nbsp;</span>
+              <mat-icon class="scale-70" matTooltip="Avg. Duration">query_builder</mat-icon>
+              <span>{{ screen.avgDuration }}s</span>
             </div>
           </div>
         </div>
-      </div>
 
+        <!-- Empty state when no screens are available -->
+        <div class="empty-screen text-center w-full py-8" *ngIf="missionScreens.length === 0">
+          <mat-icon class="text-gray-400 text-3xl">image_not_supported</mat-icon>
+          <p class="text-gray-600 mt-2">No screens found for this mission</p>
+        </div>
+      </div>
 
       <hr class="my-4">
 
@@ -95,5 +109,24 @@
 
       [tabla con los participantes]
 
+  </div>
+
+  <!-- Loading state -->
+  <div *ngIf="isLoading" class="bg-white rounded-xl p-8 text-center">
+    <p class="text-gray-600">Loading section data...</p>
+  </div>
+
+  <!-- Error state -->
+  <div *ngIf="!isLoading && errorMessage" class="bg-white rounded-xl p-8 text-center">
+    <mat-icon class="text-amber-500 text-4xl">warning</mat-icon>
+    <p class="text-gray-800 mt-2 mb-4">{{ errorMessage }}</p>
+    <p class="text-gray-600 text-sm">
+      This could be caused by:
+    </p>
+    <ul class="list-disc text-left mt-2 mx-auto inline-block">
+      <li>The section data not being properly passed to the component</li>
+      <li>No participant data is available for this section</li>
+      <li>An error occurred while loading the data</li>
+    </ul>
   </div>
 </div>

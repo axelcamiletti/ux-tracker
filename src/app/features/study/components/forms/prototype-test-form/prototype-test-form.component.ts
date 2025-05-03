@@ -11,8 +11,10 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { PrototypeTestSection, FigmaUrl } from '../../../models/section.model';
 import { StudyStateService } from '../../../services/study-state.service';
+import { StudyService } from '../../../services/study.service';
 import { Subject, takeUntil } from 'rxjs';
 import { StudyPrototypeService } from '../../../services/study-prototype.service';
+import { Study } from '../../../models/study.model';
 
 @Component({
   selector: 'app-prototype-test-form',
@@ -40,7 +42,7 @@ export class PrototypeTestFormComponent implements OnInit, OnDestroy {
   formData = {
     title: '',
     description: '',
-    fileId: '',
+    originalUrl: '',
     figmaUrl: null as FigmaUrl | null,
     figmaFileName: '',
     exportedImages: [] as { name: string; imageUrl: string }[],
@@ -53,6 +55,7 @@ export class PrototypeTestFormComponent implements OnInit, OnDestroy {
   constructor(
     private studyPrototypeService: StudyPrototypeService,
     private studyState: StudyStateService,
+    private studyService: StudyService,
     private snackBar: MatSnackBar,
   ) {
   }
@@ -86,10 +89,10 @@ export class PrototypeTestFormComponent implements OnInit, OnDestroy {
     if (this.formData.description !== section.description) {
       this.formData.description = section.description || '';
     }
-    if (this.formData.fileId !== section.data.prototypeUrl) {
-      this.formData.fileId = section.data.prototypeUrl || '';
-      if (this.formData.fileId) {
-        this.processUrl(this.formData.fileId);
+    if (this.formData.originalUrl !== section.data.originalUrl) {
+      this.formData.originalUrl = section.data.originalUrl || '';
+      if (this.formData.originalUrl) {
+        this.processUrl(this.formData.originalUrl);
 
         // If there is a prototype URL and saved frames
         if (section.data.frames && section.data.frames.length > 0) {
@@ -145,7 +148,7 @@ export class PrototypeTestFormComponent implements OnInit, OnDestroy {
   }
 
   onUrlChange(url: string) {
-    this.formData.fileId = url;
+    this.formData.originalUrl = url;
     this.processUrl(url);
   }
 
@@ -164,6 +167,19 @@ export class PrototypeTestFormComponent implements OnInit, OnDestroy {
 
         this.formData.figmaFileName = this.formData.figmaUrl.fileName.replace(/-/g, ' ');
         this.formData.importEnabled = true;
+
+        // Generate embed URL for iframe
+        const embedUrl = this.generateEmbedUrl(this.formData.figmaUrl);
+
+        // Update section data with the original URL and embed URL
+        this.section.data = {
+          ...this.section.data,
+          originalUrl: url,
+          embedUrl: embedUrl
+        };
+
+        // Save the updated section to the study state
+        this.studyState.setPrototypeTestSection(this.section);
       } else {
         this.formData.figmaUrl = null;
         this.formData.figmaFileName = '';
@@ -176,6 +192,12 @@ export class PrototypeTestFormComponent implements OnInit, OnDestroy {
     }
   }
 
+  // Generate embed URL for Figma iframe
+  private generateEmbedUrl(figmaUrl: FigmaUrl): string {
+    const startNodeId = figmaUrl.startingNodeId || figmaUrl.nodeId;
+    return `https://embed.figma.com/${figmaUrl.fileType}/${figmaUrl.fileKey}/${figmaUrl.fileName}?node-id=${startNodeId}&embed-host=share&footer=false&viewport-controls=false&allow-external-events=true&client-id=fV57d1E9E5FCZ1d1hKVS3e`;
+  }
+
   importPrototype() {
     if (!this.formData.figmaUrl) {
       return;
@@ -184,10 +206,29 @@ export class PrototypeTestFormComponent implements OnInit, OnDestroy {
     // Update section data with prototype URL
     this.section.data = {
       ...this.section.data,
-      prototypeUrl: this.formData.fileId
+      embedUrl: this.formData.originalUrl
     };
 
-    // Save the change before extracting frames
+    // Save the prototype information to the Study model
+    this.studyService.getCurrentStudy().subscribe(study => {
+      if (study) {
+        // Update the prototype information in the Study model
+        const updatedStudy: Study = {
+          ...study,
+          prototype: {
+            embedUrl: this.formData.originalUrl,
+            originalUrl: this.formData.originalUrl,
+            frames: this.section.data.frames || []
+          }
+        };
+
+        // Update the study
+        this.studyService.updateStudy(study.id, {
+          prototype: updatedStudy.prototype
+        });
+      }
+    });
+
     this.studyState.setPrototypeTestSection(this.section);
 
     // Proceed with frame extraction
@@ -235,18 +276,45 @@ export class PrototypeTestFormComponent implements OnInit, OnDestroy {
               }
             }
 
+            // Prepare frames data with all necessary information
+            const framesData = allFrames.map(frame => ({
+              id: frame.id,
+              name: frame.name,
+              imageUrl: imageResponse.images[frame.id]
+            }));
+
             // Update section with frames and starting node
             this.section.data = {
               ...this.section.data,
               startingNodeId: this.formData.figmaUrl?.nodeId,
-              frames: allFrames.map(frame => ({
-                id: frame.id,
-                name: frame.name,
-                imageUrl: imageResponse.images[frame.id]
-              })),
+              frames: framesData,
             };
 
+            // Save the section to the study state
             this.studyState.setPrototypeTestSection(this.section);
+
+            // Also save the frames to the Study model prototype property
+            this.studyService.getCurrentStudy().subscribe(study => {
+              if (study) {
+                // Update the prototype information in the Study model
+                const updatedStudy: Study = {
+                  ...study,
+                  prototype: {
+                    ...study.prototype,
+                    embedUrl: this.formData.originalUrl,
+                    originalUrl: this.formData.originalUrl,
+                    frames: framesData,
+                    startingNodeId: this.formData.figmaUrl?.nodeId
+                  }
+                };
+
+                // Update the study
+                this.studyService.updateStudy(study.id, {
+                  prototype: updatedStudy.prototype
+                });
+              }
+            });
+
             this.formData.isLoading = false;
           },
           error: (error) => {
@@ -292,4 +360,5 @@ export class PrototypeTestFormComponent implements OnInit, OnDestroy {
 
     return frames;
   }
+
 }

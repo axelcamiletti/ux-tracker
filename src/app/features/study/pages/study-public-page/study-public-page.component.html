@@ -74,33 +74,60 @@
 
       <!-- Navigation Footer -->
       <div class="footer border-t border-gray-300 py-5 mt-auto flex justify-center gap-4 items-center">
+        <!-- Mostrar botón Previous según la lógica actual -->
         <button mat-stroked-button
             *ngIf="currentSectionIndex > 0"
-                        class="mr-auto"
+            class="mr-auto"
             (click)="previousSection()">
             <mat-icon>arrow_back</mat-icon>
             Previous
         </button>
 
-        <button mat-flat-button color="primary"
-            (click)="nextSection()">
+        <!-- Sección del prototipo: Mostrar botón Start separado cuando no está activo -->
+        <ng-container *ngIf="getCurrentSection()?.type === 'prototype-test' && !prototypeStart">
+          <button mat-flat-button color="accent" class="mx-auto px-8" (click)="startPrototype()">
+            <mat-icon>play_arrow</mat-icon>
+            Start Prototype
+          </button>
+        </ng-container>
+
+        <!-- Sección del prototipo: Mostrar botón Detener tarea cuando está activo -->
+        <ng-container *ngIf="getCurrentSection()?.type === 'prototype-test' && prototypeStart && !taskCompleted">
+          <button mat-stroked-button color="warn" class="mr-auto" (click)="stopTask()">
+            <mat-icon>stop</mat-icon>
+            Detener tarea
+          </button>
+        </ng-container>
+
+        <!-- Resto de secciones: Mostrar Next/Finish normalmente -->
+        <ng-container *ngIf="!(getCurrentSection()?.type === 'prototype-test' && !prototypeStart) &&
+                           !(getCurrentSection()?.type === 'prototype-test' && prototypeStart && !taskCompleted)">
+          <button mat-flat-button color="primary" (click)="nextSection()">
             {{currentSectionIndex === sections.length - 1 ? 'Finish' : 'Next'}}
             <mat-icon *ngIf="currentSectionIndex < sections.length - 1">arrow_forward</mat-icon>
-        </button>
+          </button>
+        </ng-container>
       </div>
     </div>
 
-    <div class="bg-gray-100 w-2/3 flex items-center justify-center">
+    <div class="bg-gray-100 w-2/3 flex items-center justify-center" [ngClass]="{'pointer-events-none': !prototypeStart}">
       <!-- Ilustración de bienvenida -->
-      <img *ngIf="getCurrentSection()?.type === 'welcome-screen'"
-           src="assets/illustrations/welcome.svg"
-           alt="Bienvenida"
-           class="w-96 h-96 transition-opacity duration-300 ease-in-out">
+      <img *ngIf="getCurrentSection()?.type === 'welcome-screen'" src="assets/illustrations/welcome.svg" alt="Bienvenida" class="w-96 h-96 transition-opacity duration-300 ease-in-out">
+
+      @if (getCurrentSection()?.type === 'prototype-test') {
+        <app-prototype-iframe-preview
+          #prototypeIframe
+          class="w-full h-full"
+          [ngClass]="{'opacity-30': !prototypeStart}"
+          [embedUrl]="getPrototypeTestSection()?.data?.embedUrl || ''"
+          [targetNodeId]="getPrototypeTestSection()?.data?.selectedTargetNodeId"
+          (missionCompleted)="onMissionCompleted($event)"
+          (figmaEvent)="onFigmaEvent($event)"
+          (eventsHistoryRequested)="onEventsHistoryRequested($event)">
+        </app-prototype-iframe-preview>
+      }
 
       <!-- Ilustración de agradecimiento -->
-      <img *ngIf="getCurrentSection()?.type === 'thank-you'"
-           src="assets/illustrations/thank-you.svg"
-           alt="Gracias"
-           class="w-96 h-96 transition-opacity duration-300 ease-in-out">
+      <img *ngIf="getCurrentSection()?.type === 'thank-you'" src="assets/illustrations/thank-you.svg" alt="Gracias" class="w-96 h-96 transition-opacity duration-300 ease-in-out">
     </div>
   </div>

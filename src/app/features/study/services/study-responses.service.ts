@@ -17,11 +17,9 @@ export class StudyResponsesService {
 
   constructor(@Inject(PLATFORM_ID) platformId: Object) {
     this.isBrowser = isPlatformBrowser(platformId);
-    console.log('StudyResponsesService: Inicializando, isPlatformBrowser:', this.isBrowser);
   }
 
   async createStudyResponse(studyId: string): Promise<string> {
-    console.log('Creando nueva respuesta de estudio para:', studyId);
     if (!this.isBrowser) {
       console.warn('Intento de crear respuesta en el servidor');
       return '';
@@ -38,9 +36,7 @@ export class StudyResponsesService {
         deviceInfo: this.getDeviceInfo()
       };
 
-      console.log('Datos de respuesta inicial:', studyResponse);
       const docRef = await addDoc(collection(this.firestore, 'study-responses'), studyResponse);
-      console.log('Respuesta creada con ID:', docRef.id);
       return docRef.id;
     } catch (error) {
       console.error('Error al crear respuesta de estudio:', error);
@@ -56,11 +52,6 @@ export class StudyResponsesService {
       value: any;
     }
   ): Promise<void> {
-    console.log('Actualizando respuesta de sección:', {
-      responseId,
-      sectionId,
-      response
-    });
 
     if (!this.isBrowser) {
       console.warn('Intento de actualizar respuesta en el servidor');
@@ -88,13 +79,11 @@ export class StudyResponsesService {
       const responses = currentData.responses.filter(r => r.sectionId !== sectionId);
       responses.push(sectionResponse);
 
-      console.log('Actualizando documento con respuestas:', responses);
       await updateDoc(docRef, {
         responses,
         lastInteractionAt: new Date()
       });
 
-      console.log('Respuesta de sección actualizada exitosamente');
     } catch (error) {
       console.error('Error al actualizar respuesta de sección:', error);
       throw error;
@@ -102,7 +91,6 @@ export class StudyResponsesService {
   }
 
   async completeStudy(responseId: string): Promise<void> {
-    console.log('Completando estudio para respuesta:', responseId);
     if (!this.isBrowser) {
       console.warn('Intento de completar estudio en el servidor');
       return;
@@ -118,7 +106,6 @@ export class StudyResponsesService {
       }
 
       const response = responseDoc.data() as StudyResponse;
-      console.log('Datos actuales de la respuesta:', response);
 
       await updateDoc(responseRef, {
         status: 'completed',
@@ -132,7 +119,6 @@ export class StudyResponsesService {
         'stats.completedResponses': increment(1)
       });
 
-      console.log('Estudio completado exitosamente');
     } catch (error) {
       console.error('Error al completar el estudio:', error);
       throw error;
@@ -140,7 +126,6 @@ export class StudyResponsesService {
   }
 
   async getCompletedStudyResponses(studyId: string): Promise<StudyResponse[]> {
-    console.log('StudyResponsesService: Iniciando getCompletedStudyResponses para studyId:', studyId);
 
     try {
       const q = query(
@@ -148,13 +133,10 @@ export class StudyResponsesService {
         where('studyId', '==', studyId),
         where('status', '==', 'completed')
       );
-      console.log('StudyResponsesService: Ejecutando query para respuestas completadas...');
 
       const querySnapshot = await getDocs(q);
-      console.log('StudyResponsesService: Respuestas completadas encontradas:', querySnapshot.size);
 
       const responses = querySnapshot.docs.map(doc => {
-        console.log('StudyResponsesService: Procesando respuesta completada:', doc.id);
         const data = doc.data();
         try {
           // Asegurarse de que los datos base estén presentes
@@ -178,10 +160,6 @@ export class StudyResponsesService {
             })) : []
           };
 
-          console.log('StudyResponsesService: Respuesta completada procesada exitosamente:', {
-            id: doc.id,
-            responsesCount: response.responses.length
-          });
           return response;
         } catch (error) {
           console.error('StudyResponsesService: Error procesando respuesta completada:', doc.id, error);
@@ -190,7 +168,6 @@ export class StudyResponsesService {
       })
       .filter((response): response is StudyResponse => response !== null);
 
-      console.log('StudyResponsesService: Todas las respuestas completadas procesadas:', responses.length);
       return responses;
     } catch (error) {
       console.error('StudyResponsesService: Error en getCompletedStudyResponses:', error);

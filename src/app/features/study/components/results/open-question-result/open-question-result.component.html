@@ -1,5 +1,5 @@
 <div class="open-question-result">
-    <div class="bg-white rounded-xl p-8">
+    <div class="bg-white rounded-xl p-8" *ngIf="section">
         <h2 class="text-2xl font-bold text-gray-900 mb-1">{{ section.title }}</h2>
         <p class="text-gray-600 mb-6">{{ section.description }}</p>
 
@@ -19,5 +19,8 @@
                 </div>
             </div>
         </div>
+    </div>
+    <div *ngIf="!section" class="bg-white rounded-xl p-8 text-center">
+        <p class="text-gray-600">Loading section data...</p>
     </div>
 </div>

@@ -40,6 +40,18 @@ export interface Study {
   publicUrl?: string;
   previewUrl?: string;
 
+  // Prototype information
+  prototype?: {
+    embedUrl?: string;
+    originalUrl?: string;
+    startingNodeId?: string;
+    frames?: Array<{
+      id: string;
+      name: string;
+      imageUrl: string;
+    }>;
+  };
+
   // Statistics - Asegurándonos de que stats sea requerido y tenga valores por defecto
   stats: {
     totalResponses: number;

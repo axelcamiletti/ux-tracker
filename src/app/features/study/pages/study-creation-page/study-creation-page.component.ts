@@ -36,6 +36,7 @@ import { ClipElementComponent } from "../../components/clip-element/clip-element
 import { MultipleChoiceSection, OpenQuestionSection, PrototypeTestSection, Section, ThankYouSection, WelcomeScreenSection, YesNoSection } from '../../models/section.model';
 import { StudyService } from '../../services/study.service';
 import { StudyStateService } from '../../services/study-state.service';
+import { PrototypeIframePreviewComponent } from "../../components/previews/prototype-iframe-preview/prototype-iframe-preview.component";
 
 @Component({
   selector: 'app-study-creation-page',
@@ -61,13 +62,13 @@ import { StudyStateService } from '../../services/study-state.service';
     ThankYouFormComponent,
     // Componentes de previsualización
     OpenQuestionPreviewComponent,
-    PrototypeTestPreviewComponent,
     YesNoPreviewComponent,
     MultipleChoicePreviewComponent,
     WelcomeScreenPreviewComponent,
     ThankYouPreviewComponent,
     // Componentes personalizados
     ClipElementComponent,
+    PrototypeIframePreviewComponent
 ],
   templateUrl: './study-creation-page.component.html',
   styleUrl: './study-creation-page.component.css'
@@ -94,6 +95,11 @@ export class StudyCreationPageComponent implements OnInit, OnDestroy {
       welcomeMessage: 'Has sido invitado a compartir tus opiniones, ideas y puntos de vista',
       imageUrl: undefined
     }
+  };
+
+  // Sección de Prototipo Iframe
+  iframeSection = {
+    prototypeUrl: '',
   };
 
   // Sección de agradecimiento fija

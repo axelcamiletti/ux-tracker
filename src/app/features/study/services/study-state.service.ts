@@ -17,6 +17,9 @@ import { MatSnackBar } from '@angular/material/snack-bar';
   providedIn: 'root'
 })
 export class StudyStateService {
+  getCurrentStudy() {
+    throw new Error('Method not implemented.');
+  }
   private sections = new BehaviorSubject<Section[]>([]);
   private welcomeSectionSubject = new BehaviorSubject<WelcomeScreenSection | null>(null);
   private yesNoSectionSubject = new BehaviorSubject<YesNoSection | null>(null);

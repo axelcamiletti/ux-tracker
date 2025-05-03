@@ -42,24 +42,4 @@ export class StudyPrototypeService {
     console.error('Error in Figma API:', error);
     return throwError(() => error);
   }
-
-  async getFigmaEvent(event: any, responseId: string, sectionId: string): Promise<void> {
-    const enrichedEvent = {
-      ...event,
-      timestamp: new Date(),
-    };
-
-    console.log('Registrando evento de Figma:', enrichedEvent);
-
-    try {
-      await this.studyResponsesService.updateSectionResponse(responseId, sectionId, {
-        type: 'prototype-test',
-        value: {
-          figmaEventLog: [enrichedEvent],
-        },
-      });
-    } catch (error) {
-      console.error('Error saving Figma event:', error);
-    }
-  }
 }

@@ -40,9 +40,7 @@ export class StudyResultsPageComponent implements OnInit {
   private route = inject(ActivatedRoute);
 
   ngOnInit() {
-    console.log('StudyResultsPage: Inicializando componente');
     this.studyId = this.route.parent?.snapshot.paramMap.get('id') || '';
-    console.log('StudyResultsPage: ID del estudio obtenido:', this.studyId);
 
     if (this.studyId) {
       this.loadSections();
@@ -53,11 +51,9 @@ export class StudyResultsPageComponent implements OnInit {
   }
 
   loadSections() {
-    console.log('StudyResultsPage: Cargando secciones...');
     this.studyService.getCurrentStudy().subscribe({
       next: (study) => {
         if (study && study.sections) {
-          console.log('StudyResultsPage: Secciones cargadas:', study.sections);
           this.sections = study.sections;
         } else {
           console.error('StudyResultsPage: No se encontraron secciones en el estudio');
@@ -70,11 +66,9 @@ export class StudyResultsPageComponent implements OnInit {
   }
 
   async loadParticipants() {
-    console.log('StudyResultsPage: Cargando participantes...');
     try {
       // Primero cargar las respuestas completadas
       const responses = await this.studyResponsesService.getCompletedStudyResponses(this.studyId);
-      console.log('StudyResultsPage: Respuestas completadas obtenidas:', responses);
       this.participants = responses;
 
     } catch (error) {
