@@ -1,7 +1,5 @@
 <div class="header border-b border-gray-200 flex items-center gap-3 px-8 py-4">
-  <div class="icon rounded-lg bg-orange-300 text-white flex justify-center items-center h-10 w-10">
-    <mat-icon>map</mat-icon>
-  </div>
+  <app-icon-section [type]="'yes-no'"></app-icon-section>
   <h2 class="text-xl font-bold">Yes/No</h2>
   <mat-icon matTooltip="Use Yes/No to ask testers a closed-ended question. With this question type, you can measure preference between two choices. Testers will select one answer choice." class="opacity-50">info</mat-icon>
   <button mat-icon-button class="ml-auto" [matMenuTriggerFor]="menu">

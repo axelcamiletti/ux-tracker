@@ -1,25 +1,58 @@
 <div class="screen-details-dialog max-h-[90vh]">
   <div class="header flex items-center py-4 px-8 border-b border-gray-300">
-    <div class="texts">
-      <div class="text-xl font-bold">[Name_screen]</div>
-      <div class="text-sm text-gray-600 flex items-center"><mat-icon>people</mat-icon> 2 participants</div>
+    <div class="texts flex-grow">
+      <div class="text-xl font-bold">{{ currentNode.name || 'Screen Details' }}</div>
+      <div class="text-sm text-gray-600 flex items-center">
+        <mat-icon class="mr-1">people</mat-icon> {{ currentAnalytics.totalParticipants || 0 }} participants
+      </div>
     </div>
 
-    <div class="tabs mx-auto flex">
-      <button class="btn"><mat-icon>mode_heat</mat-icon> Heatmaps</button>
-      <button class="btn"><mat-icon>http</mat-icon> Clips</button>
+    <div class="btn-toggle-container mx-auto flex">
+      <button class="btn-toggle" [class.active]="activeTab === 'heatmap'" (click)="setActiveTab('heatmap')">
+        <mat-icon>mode_heat</mat-icon> Heatmaps
+      </button>
+      <button class="btn-toggle" [class.active]="activeTab === 'clips'" (click)="setActiveTab('clips')">
+        <mat-icon>http</mat-icon> Clips
+      </button>
     </div>
 
     <div class="actions items-center flex gap-1">
-      <button class="btn btn-icon" matTooltip="Previous screen"><mat-icon>chevron_left</mat-icon></button>
-      <button class="btn btn-icon" matTooltip="Next screen"><mat-icon>chevron_right</mat-icon></button>
-      <button class="btn btn-icon" matTooltip="Close"><mat-icon>close</mat-icon></button>
+      <button class="btn btn-icon" matTooltip="Close" (click)="closeDialog()">
+        <mat-icon>close</mat-icon>
+      </button>
     </div>
   </div>
 
-  <div class="content">
-    <app-heatmap-section></app-heatmap-section>
-    <!-- <app-clips-element></app-clips-element> -->
+  <!-- Loading state -->
+  <div *ngIf="isLoading" class="content p-8 text-center">
+    <p class="text-gray-600">Loading screen data...</p>
+  </div>
+
+  <!-- Error state -->
+  <div *ngIf="!isLoading && error" class="content p-8 text-center">
+    <mat-icon class="text-amber-500 text-4xl">warning</mat-icon>
+    <p class="text-gray-800 mt-2 mb-4">{{ error }}</p>
+    <p class="text-gray-600 text-sm">
+      Unable to generate heatmap data for this screen
+    </p>
+  </div>
+
+  <!-- Content when data is loaded -->
+  <div *ngIf="!isLoading && !error" class="content h-[75vh] overflow-hidden">
+    @if (activeTab === 'heatmap') {
+      <app-heatmap-section
+        class="block h-full"
+        [node]="currentNode"
+        [nodeAnalytics]="currentAnalytics">
+      </app-heatmap-section>
+    }
+
+    <div *ngIf="activeTab === 'clips'" class="clips-container p-4">
+      <div class="empty-clips text-center p-8">
+        <mat-icon class="text-gray-400 text-3xl">videocam_off</mat-icon>
+        <p class="text-gray-600 mt-2">Video clips are not available yet</p>
+      </div>
+    </div>
   </div>
 </div>
 

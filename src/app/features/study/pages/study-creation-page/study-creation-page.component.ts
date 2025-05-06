@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatButtonModule } from '@angular/material/button';
 import { MatMenuModule } from '@angular/material/menu';
@@ -47,7 +46,6 @@ import { PrototypeIframePreviewComponent } from "../../components/previews/proto
     FormsModule,
     MatIconModule,
     MatFormFieldModule,
-    MatInputModule,
     MatTooltipModule,
     MatButtonModule,
     MatMenuModule,
@@ -245,7 +243,11 @@ export class StudyCreationPageComponent implements OnInit, OnDestroy {
         };
       case 'multiple-choice':
         return {
-          options: [],
+          options: [
+            { id: `option-0`, text: 'Opción 1' },
+            { id: `option-1`, text: 'Opción 2' },
+            { id: `option-2`, text: 'Opción 3' }
+          ],
           allowMultiple: false
         };
       default:

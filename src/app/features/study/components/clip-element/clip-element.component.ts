@@ -4,11 +4,12 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatButtonModule } from '@angular/material/button';
 import { Section } from '../../models/section.model';
+import { IconSectionComponent } from "../icon-section/icon-section.component";
 
 @Component({
   selector: 'app-clip-element',
   standalone: true,
-  imports: [CommonModule, MatIconModule, MatMenuModule, MatButtonModule],
+  imports: [CommonModule, MatIconModule, MatMenuModule, MatButtonModule, IconSectionComponent],
   templateUrl: './clip-element.component.html',
   styleUrl: './clip-element.component.css'
 })

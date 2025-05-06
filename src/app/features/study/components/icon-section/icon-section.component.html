@@ -1,0 +1,21 @@
+<div class="icon-section text-white min-h-10 w-10 h-10 min-w-10 rounded-lg flex items-center justify-center"
+  [ngClass]="{
+    'bg-indigo-300': type === 'open-question',
+    'bg-orange-300': type === 'yes-no',
+    'bg-emerald-400': type === 'multiple-choice',
+    'bg-red-400': type === 'prototype-test',
+    'bg-black': type === 'welcome-screen' || type === 'thank-you'
+  }">
+  <mat-icon>
+    @switch (type) {
+      @case ('welcome-screen') { waving_hand }
+      @case ('open-question') { help }
+      @case ('yes-no') { check_circle }
+      @case ('multiple-choice') { list }
+      @case ('prototype-test') { design_services }
+      @case ('thank-you') { celebration }
+      @default { help_outline }
+    }
+  </mat-icon>
+</div>
+

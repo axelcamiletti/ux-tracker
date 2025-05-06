@@ -1,7 +1,5 @@
 <div class="header border-b border-gray-200 flex items-center gap-3 px-8 py-4 mb-4">
-  <div class="icon rounded-lg bg-green-300 text-white flex justify-center items-center h-10 w-10">
-    <mat-icon>favorite</mat-icon>
-  </div>
+  <app-icon-section [type]="'thank-you'"></app-icon-section>
   <h2 class="text-xl font-bold">Thank you screen</h2>
   <mat-icon matTooltip="This is the last screen of your study. Thank your participants and provide any final information or next steps." class="opacity-50">info</mat-icon>
   <button mat-icon-button class="ml-auto" [matMenuTriggerFor]="menu">

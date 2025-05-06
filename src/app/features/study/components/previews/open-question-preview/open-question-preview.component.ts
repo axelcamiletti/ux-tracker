@@ -1,6 +1,6 @@
-import { Component, Input, Output, EventEmitter, SimpleChanges, OnInit, OnDestroy } from '@angular/core';
-import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { Component, Input, Output, EventEmitter, SimpleChanges, OnInit, OnDestroy, inject, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { OpenQuestionSection } from '../../../models/section.model';
 import { OpenQuestionResponse } from '../../../models/study-response.model';
 import { StudyStateService } from '../../../services/study-state.service';
@@ -20,18 +20,17 @@ export class OpenQuestionPreviewComponent implements OnInit, OnDestroy {
   response: string = '';
   private destroy$ = new Subject<void>();
 
-  previewData = {
+  previewData = signal({
     title: '',
     description: '',
     minLength: undefined as number | undefined,
     maxLength: undefined as number | undefined,
     required: false
-  };
+  });
 
-  constructor(private studyState: StudyStateService) {}
+  private studyState = inject(StudyStateService);
 
   ngOnInit(): void {
-    // Subscribe to open question section changes
     this.studyState.openQuestionSection$
       .pipe(takeUntil(this.destroy$))
       .subscribe(section => {
@@ -54,13 +53,13 @@ export class OpenQuestionPreviewComponent implements OnInit, OnDestroy {
   }
 
   private updatePreviewData(section: OpenQuestionSection) {
-    this.previewData = {
+    this.previewData.set({
       title: section.title || 'No se ha ingresado el título',
       description: section.description || '',
       minLength: section.data.minLength,
       maxLength: section.data.maxLength,
       required: section.required
-    };
+    });
   }
 
   onResponseChange(value: string) {

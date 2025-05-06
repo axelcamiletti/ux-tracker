@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, OnInit, OnDestroy } from '@angular/core';
+import { Component, Input, OnInit, OnDestroy, inject, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { WelcomeScreenSection } from '../../../models/section.model';
 import { StudyStateService } from '../../../services/study-state.service';
@@ -15,25 +15,20 @@ import { Subject, takeUntil } from 'rxjs';
 export class WelcomeScreenPreviewComponent implements OnInit, OnDestroy {
   @Input() section!: WelcomeScreenSection;
 
-  previewData = {
+  previewData = signal({
     title: '¡Hola!',
     description: 'Has sido invitado a compartir tus opiniones, ideas y puntos de vista.',
-  };
+  });
 
   private destroy$ = new Subject<void>();
-
-  constructor(private studyState: StudyStateService) {}
+  private studyState = inject(StudyStateService);
 
   ngOnInit(): void {
-    // Subscribe to welcome section changes for real-time updates
     this.studyState.welcomeSection$
       .pipe(takeUntil(this.destroy$))
       .subscribe(section => {
         if (section) {
-          this.previewData = {
-            title: section.title || '¡Hola!',
-            description: section.description || 'Has sido invitado a compartir tus opiniones, ideas y puntos de vista.',
-          };
+          this.updatePreviewData(section);
         }
       });
   }
@@ -45,10 +40,15 @@ export class WelcomeScreenPreviewComponent implements OnInit, OnDestroy {
 
   ngOnChanges(): void {
     if (this.section) {
-      this.previewData = {
-        title: this.section.title || '¡Hola!',
-        description: this.section.description || 'Has sido invitado a compartir tus opiniones, ideas y puntos de vista.',
-      };
+      this.updatePreviewData(this.section);
+      this.studyState.setWelcomeSection(this.section);
     }
+  }
+
+  private updatePreviewData(section: WelcomeScreenSection): void {
+    this.previewData.set({
+      title: section.title || '¡Hola!',
+      description: section.description || 'Has sido invitado a compartir tus opiniones, ideas y puntos de vista.',
+    });
   }
 }

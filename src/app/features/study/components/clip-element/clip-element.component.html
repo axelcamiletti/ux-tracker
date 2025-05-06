@@ -1,7 +1,7 @@
 <div class="box cursor-pointer flex items-center gap-3 bg-white p-3 border border-gray-300 rounded-xl hover:ring-3 hover:ring-blue-300 transition-all duration-300 ease-out overflow-hidden relative group"
      [ngClass]="{'!border-blue-500 !bg-blue-50':isActive == true}">
 
-  <div class="icon bg-black text-white w-10 h-10 min-w-10 rounded-lg flex items-center justify-center"
+  <!-- <div class="icon bg-black text-white w-10 h-10 min-w-10 rounded-lg flex items-center justify-center"
     [ngClass]="{
       'bg-indigo-300': type == 'open-question',
       'bg-orange-300': type == 'yes-no',
@@ -15,7 +15,9 @@
     <mat-icon *ngIf="type == 'multiple-choice'">list</mat-icon>
     <mat-icon *ngIf="type == 'prototype-test'">design_services</mat-icon>
     <mat-icon *ngIf="type == 'thank-you'">celebration</mat-icon>
-  </div>
+  </div> -->
+
+  <app-icon-section [type]="type"></app-icon-section>
 
   <div class="texts overflow-hidden">
     <p class="text-md font-medium truncate">

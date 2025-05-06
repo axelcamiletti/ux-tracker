@@ -10,6 +10,7 @@ import { CommonModule } from '@angular/common';
 import { ThankYouSection } from '../../../models/section.model';
 import { StudyStateService } from '../../../services/study-state.service';
 import { Subject, takeUntil } from 'rxjs';
+import { IconSectionComponent } from "../../icon-section/icon-section.component";
 
 @Component({
   selector: 'app-thank-you-form',
@@ -22,8 +23,9 @@ import { Subject, takeUntil } from 'rxjs';
     MatFormFieldModule,
     MatMenuModule,
     MatTooltipModule,
-    FormsModule
-  ],
+    FormsModule,
+    IconSectionComponent
+],
   templateUrl: './thank-you-form.component.html',
   styleUrl: './thank-you-form.component.css'
 })

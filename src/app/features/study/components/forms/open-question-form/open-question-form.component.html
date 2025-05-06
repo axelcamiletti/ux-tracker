@@ -1,7 +1,5 @@
 <div class="header border-b border-gray-200 flex items-center gap-3 px-8 py-4">
-  <div class="icon rounded-lg bg-indigo-300 text-white flex justify-center items-center h-10 w-10">
-    <mat-icon>help</mat-icon>
-  </div>
+  <app-icon-section [type]="'open-question'"></app-icon-section>
   <h2 class="text-xl font-bold">Open Question</h2>
   <mat-icon matTooltip="Ask exploratory questions, enable AI Follow-Ups for in-depth feedback and make sense of it all by using AI to perform sentiment and theme analysis." class="opacity-50">info</mat-icon>
   <button mat-icon-button class="ml-auto" [matMenuTriggerFor]="menu">
@@ -17,7 +15,7 @@
       type="text"
       class="input"
       placeholder="Type your question here"
-      [ngModel]="formData.title"
+      [ngModel]="formData().title"
       (ngModelChange)="onTitleChange($event)">
       <div class="input-error">A question is required to create this block.</div>
   </div>
@@ -28,7 +26,7 @@
       type="text"
       class="textarea"
       placeholder="Type extra details here. This is optional"
-      [ngModel]="formData.description"
+      [ngModel]="formData().description"
       (ngModelChange)="onSubtitleChange($event)"></textarea>
   </div>
 
@@ -38,7 +36,7 @@
       <input
         type="number"
         class="input"
-        [ngModel]="formData.minLength"
+        [ngModel]="formData().minLength"
         (ngModelChange)="onMinLengthChange($event)">
     </div>
 
@@ -47,7 +45,7 @@
       <input
         type="number"
         class="input"
-        [ngModel]="formData.maxLength"
+        [ngModel]="formData().maxLength"
         (ngModelChange)="onMaxLengthChange($event)">
     </div>
   </div>

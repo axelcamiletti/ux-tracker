@@ -20,10 +20,7 @@ export interface FigmaNode {
   name: string;         // Nombre del nodo
   imageUrl: string;     // URL de la imagen exportada
   type: FigmaNodeType;  // Tipo de nodo en Figma
-  parentId?: string;    // Referencia al nodo padre (si existe)
   children?: string[];  // IDs de nodos hijos
-  thumbnailUrl?: string; // URL opcional de miniatura
-  order?: number;       // Orden del nodo en la jerarquía
   properties?: {        // Propiedades específicas del nodo
     [key: string]: any;
   };
@@ -37,6 +34,7 @@ export interface FigmaNodeAnalytics {
   totalParticipants: number;    // Total de participantes que interactuaron con este nodo
   visitCount: number;           // Número total de vistas
   totalTimeSpent: number;       // Tiempo total acumulado en milisegundos
+  avgDuration: number;          // Tiempo promedio en milisegundos
   interactionCount: number;     // Número total de interacciones con este nodo
   clickCount: number;           // Número total de clics
   misclickCount: number;        // Número de clics erróneos
@@ -51,6 +49,18 @@ export interface FigmaNodeAnalytics {
     y: number;
     count: number;
     isMisclick: boolean;
+    participantId?: string;     // ID del participante que hizo el clic
+  }>;
+
+  // Eventos procesados relacionados con este nodo
+  events?: Array<{              // Eventos procesados para este nodo
+    type: string;
+    nodeId?: string;
+    x?: number;
+    y?: number;
+    timestamp?: number;
+    participantId?: string;
+    [key: string]: any;         // Propiedades adicionales de los eventos
   }>;
 
   // Estado de la analítica

@@ -1,3 +1,5 @@
+import { FigmaNode } from './figma-node.model';
+
 export interface BaseSection {
   id: string;
   title: string;
@@ -43,19 +45,7 @@ export interface PrototypeTestSection extends BaseSection {
     embedUrl: string;
     startingNodeId?: string;
     selectedTargetNodeId?: string;
-    // Utilizar la referencia a nodos sin datos analíticos
-    nodes?: Array<{
-      id: string;
-      name: string;
-      imageUrl: string;
-      type?: string;
-    }>;
-    // Mantener frames para compatibilidad con código existente
-    frames?: Array<{
-      id: string;
-      name: string;
-      imageUrl: string;
-    }>;
+    nodes?: FigmaNode[];
   };
 }
 

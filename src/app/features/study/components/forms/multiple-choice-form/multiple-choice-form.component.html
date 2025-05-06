@@ -1,7 +1,5 @@
 <div class="header border-b border-gray-200 flex items-center gap-3 px-8 py-4">
-  <div class="icon rounded-lg bg-orange-300 text-white flex justify-center items-center h-10 w-10">
-    <mat-icon>list</mat-icon>
-  </div>
+  <app-icon-section [type]="'multiple-choice'"></app-icon-section>
   <h2 class="text-xl font-bold">Multiple Choice</h2>
   <mat-icon matTooltip="A Multiple Choice allows you to create a closed-ended question with multiple answer choices. Ask testers to select a single or multiple choices from a list of options." class="opacity-50">info</mat-icon>
   <button mat-icon-button class="ml-auto" [matMenuTriggerFor]="menu">
@@ -18,7 +16,7 @@
       type="text"
       class="input"
       placeholder="Type your question here"
-      [ngModel]="section.title"
+      [ngModel]="formData().title"
       (ngModelChange)="onTitleChange($event)">
       <div class="input-error">A question is required to create this block.</div>
   </div>
@@ -30,12 +28,12 @@
       type="text"
       class="input"
       placeholder="Type extra details here. This is optional."
-      [ngModel]="section.description"
+      [ngModel]="formData().description"
       (ngModelChange)="onDescriptionChange($event)"></textarea>
   </div>
 
   <label class="label">Selection Type</label>
-  <mat-radio-group aria-label="Select an option" [(ngModel)]="section.data.allowMultiple" (change)="updateAllowMultiple($event.value)" class="flex gap-4">
+  <mat-radio-group aria-label="Select an option" [(ngModel)]="formData().allowMultiple" (change)="updateAllowMultiple($event.value)" class="flex gap-4">
     <mat-radio-button [value]="false" class="w-full block border border-gray-200 rounded-xl">Single selection</mat-radio-button>
     <mat-radio-button [value]="true" class="w-full block border border-gray-200 rounded-xl">Multiple selections</mat-radio-button>
   </mat-radio-group>
@@ -43,15 +41,21 @@
   <div>
     <label class="label">Choices *</label>
 
-    <div class="input-container flex gap-4 items-center mb-3" *ngFor="let option of section.data.options">
-      <input
-        type="text"
-        class="input"
-        placeholder="Enter choice"
-        [ngModel]="option.text"
-        (ngModelChange)="updateOptionText(option.id, $event)">
-        <button class="btn-icon btn-icon-sm" matTooltip="Remove option" (click)="removeOption(option.id)" *ngIf="section.data.options.length > 1"><mat-icon>delete</mat-icon></button>
-    </div>
+    @for (option of formData().options; track option.id) {
+      <div class="input-container flex gap-4 items-center mb-3">
+        <input
+          type="text"
+          class="input"
+          placeholder="Enter choice"
+          [ngModel]="option.text"
+          (ngModelChange)="updateOptionText(option.id, $event)">
+          @if (formData().options.length > 1) {
+            <button class="btn-icon btn-icon-sm" matTooltip="Remove option" (click)="removeOption(option.id)">
+              <mat-icon>delete</mat-icon>
+            </button>
+          }
+      </div>
+    }
   </div>
 
   <button mat-stroked-button color="secondary" (click)="addOption()">

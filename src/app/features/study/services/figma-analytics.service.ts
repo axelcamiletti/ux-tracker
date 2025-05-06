@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { FigmaEvent, convertToTypedEvent, PresentedNodeChangedEvent, MousePressOrReleaseEvent, NewStateEvent } from '../models/figma-event.model';
-import { FigmaNode, FigmaNodeAnalytics, FigmaSessionAnalytics } from '../models/figma-node.model';
+import { FigmaNodeAnalytics, FigmaSessionAnalytics } from '../models/figma-node.model';
 
 @Injectable({
   providedIn: 'root'
@@ -166,6 +166,7 @@ export class FigmaAnalyticsService {
       totalParticipants: 0,
       visitCount: 0,
       totalTimeSpent: 0,
+      avgDuration: 0,
       interactionCount: 0,
       clickCount: 0,
       misclickCount: 0,
@@ -554,6 +555,7 @@ export class FigmaAnalyticsService {
       totalParticipants: 0,
       visitCount: 0,
       totalTimeSpent: 0,
+      avgDuration: 0,         // Adding the missing property
       interactionCount: 0,
       clickCount: 0,
       misclickCount: 0,

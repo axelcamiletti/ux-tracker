@@ -27,6 +27,7 @@ export class StudyStateService {
   private multipleChoiceSectionSubject = new BehaviorSubject<MultipleChoiceSection | null>(null);
   private prototypeTestSectionSubject = new BehaviorSubject<PrototypeTestSection | null>(null);
   private thankYouSectionSubject = new BehaviorSubject<ThankYouSection | null>(null);
+
   private saveRequested = new Subject<void>();
   private saving = new BehaviorSubject<boolean>(false);
   private lastSaved = new BehaviorSubject<Date | null>(null);

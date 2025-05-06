@@ -41,7 +41,7 @@ export interface Study {
   previewUrl?: string;
 
   // Prototype information
-  prototype?: {
+  /* prototype?: {
     embedUrl?: string;
     originalUrl?: string;
     startingNodeId?: string;
@@ -50,7 +50,7 @@ export interface Study {
       name: string;
       imageUrl: string;
     }>;
-  };
+  }; */
 
   // Statistics - Asegurándonos de que stats sea requerido y tenga valores por defecto
   stats: {

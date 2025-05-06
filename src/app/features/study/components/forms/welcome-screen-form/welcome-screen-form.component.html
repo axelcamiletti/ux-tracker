@@ -1,7 +1,5 @@
 <div class="header border-b border-gray-200 flex items-center gap-3 px-8 py-4 mb-4">
-  <div class="icon rounded-lg bg-black text-white flex justify-center items-center h-10 w-10">
-    <mat-icon>sunny</mat-icon>
-  </div>
+  <app-icon-section [type]="'welcome-screen'"></app-icon-section>
   <h2 class="text-xl font-bold">Welcome screen</h2>
   <mat-icon matTooltip="This is the first screen of your maze—your time to shine! Set a title, write a welcome message, and upload your logo. Note: custom messages will not be translated into other languages." class="opacity-50">info</mat-icon>
   <button mat-icon-button class="ml-auto" [matMenuTriggerFor]="menu">
@@ -17,7 +15,7 @@
       type="text"
       class="input"
       placeholder="Type your title here"
-      [ngModel]="formData.title"
+      [ngModel]="formData().title"
       (ngModelChange)="onTitleChange($event)">
     <div class="input-error">A title is required to create this block.</div>
   </div>
@@ -28,7 +26,7 @@
       type="text"
       class="textarea"
       placeholder="Type your welcome message here. This is optional."
-      [ngModel]="formData.description"
+      [ngModel]="formData().description"
       (ngModelChange)="onDescriptionChange($event)"></textarea>
   </div>
 </div>

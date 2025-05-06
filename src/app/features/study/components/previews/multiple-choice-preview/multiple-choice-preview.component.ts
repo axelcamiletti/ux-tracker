@@ -1,5 +1,5 @@
-import { Component, Input, Output, EventEmitter, SimpleChanges, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Component, Input, Output, EventEmitter, SimpleChanges, OnInit, OnDestroy, inject, signal } from '@angular/core';
 import { MultipleChoiceSection } from '../../../models/section.model';
 import { MultipleChoiceResponse } from '../../../models/study-response.model';
 import { StudyStateService } from '../../../services/study-state.service';
@@ -19,18 +19,17 @@ export class MultipleChoicePreviewComponent implements OnInit, OnDestroy {
   selectedOptions: string[] = [];
   private destroy$ = new Subject<void>();
 
-  previewData = {
+  previewData = signal({
     title: '',
     description: '',
     required: false,
     allowMultiple: false,
     options: [] as { id: string; text: string }[]
-  };
+  });
 
-  constructor(private studyState: StudyStateService) {}
+  private studyState = inject(StudyStateService);
 
   ngOnInit(): void {
-    // Subscribe to multiple choice section changes
     this.studyState.multipleChoiceSection$
       .pipe(takeUntil(this.destroy$))
       .subscribe(section => {
@@ -53,13 +52,13 @@ export class MultipleChoicePreviewComponent implements OnInit, OnDestroy {
   }
 
   private updatePreviewData(section: MultipleChoiceSection) {
-    this.previewData = {
+    this.previewData.set({
       title: section.title || '',
       description: section.description || '',
       required: section.required,
       allowMultiple: section.data.allowMultiple || false,
       options: section.data.options || []
-    };
+    });
   }
 
   isSelected(optionId: string): boolean {
@@ -67,7 +66,7 @@ export class MultipleChoicePreviewComponent implements OnInit, OnDestroy {
   }
 
   toggleOption(optionId: string): void {
-    if (this.previewData.allowMultiple) {
+    if (this.previewData().allowMultiple) {
       const index = this.selectedOptions.indexOf(optionId);
       if (index === -1) {
         this.selectedOptions.push(optionId);

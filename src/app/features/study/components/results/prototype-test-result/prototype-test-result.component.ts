@@ -1,193 +1,315 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input, OnChanges, OnInit } from '@angular/core';
-import { Section } from '../../../models/section.model';
+import { Section, PrototypeTestSection } from '../../../models/section.model';
 import { PrototypeTestResponse, StudyResponse } from '../../../models/study-response.model';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatButtonModule } from '@angular/material/button';
-import { StudyService } from '../../../services/study.service';
-import { Study } from '../../../models/study.model';
 import { MatDialog } from '@angular/material/dialog';
 import { ScreenDetailsDialogComponent } from '../../../dialogs/screen-details-dialog/screen-details-dialog.component';
+import { StudyPrototypeService } from '../../../services/study-prototype.service';
+import { StudyService } from '../../../services/study.service';
+import { firstValueFrom } from 'rxjs';
+import { FigmaNode, FigmaNodeAnalytics, FigmaSessionAnalytics } from '../../../models/figma-node.model';
+import { FigmaAnalyticsService } from '../../../services/figma-analytics.service';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatCardModule } from '@angular/material/card';
+import { MatTabsModule } from '@angular/material/tabs';
+import { MatTableModule } from '@angular/material/table';
+import { MatChipsModule } from '@angular/material/chips';
 
-interface MissionScreen {
-  id: string;
-  title: string;
-  image: string;
-  participants?: number;
+// Interface to combine node and analytics data
+interface MissionScreenData extends FigmaNode {
+  totalParticipants?: number;
   avgDuration?: number;
 }
 
 @Component({
   selector: 'app-prototype-test-result',
-  imports: [CommonModule, MatIconModule, MatTooltipModule, MatButtonModule],
+  imports: [
+    CommonModule,
+    MatIconModule,
+    MatTooltipModule,
+    MatButtonModule,
+    MatProgressBarModule,
+    MatCardModule,
+    MatTabsModule,
+    MatTableModule,
+    MatChipsModule
+  ],
   templateUrl: './prototype-test-result.component.html',
   styleUrl: './prototype-test-result.component.css'
 })
-export class PrototypeTestResultComponent implements OnChanges, OnInit {
+export class PrototypeTestResultComponent {
   @Input() section!: Section;
   @Input() title: string = '';
   @Input() participants: StudyResponse[] = [];
 
-  missionScreens: MissionScreen[] = [];
+  missionScreens: MissionScreenData[] = [];
   isLoading: boolean = true;
   errorMessage: string | null = null;
 
-  // Métricas de la misión
+  // Analytics data
+  figmaEvents: any[] = [];
+  nodeAnalytics: { [nodeId: string]: FigmaNodeAnalytics } = {};
+  sessionAnalytics: FigmaSessionAnalytics[] = [];
+  painPoints: Array<{nodeId: string, issues: string[], score: number}> = [];
+  navigationPaths: any = { paths: [], common: [] };
+
+  // Aggregate metrics
   successRate: number = 0;
   dropoffRate: number = 0;
-  misclickRate: number = 68.9; // Valor por defecto, actualizar según cálculo real
-
-  // Métrica adicional
+  misclickRate: number = 0;
   totalDropoffs: number = 0;
+  avgCompletionTime: number = 0;
+  fastestCompletionTime: number = 0;
+  slowestCompletionTime: number = 0;
 
-  // Contadores para las pestañas
+  // Tab counters
   successCount: number = 0;
   unfinishedCount: number = 0;
 
-  // Estado actual de la pestaña
-  activeTab: 'success' | 'unfinished' = 'unfinished';
+  // Current tab state
+  activeTab: 'success' | 'unfinished' = 'success';
+
+  // For heatmap data
+  heatmapData: { [nodeId: string]: any } = {};
+Object: any;
 
   constructor(
+    private dialog: MatDialog,
+    private studyPrototypeService: StudyPrototypeService,
     private studyService: StudyService,
-    private dialog: MatDialog
+    private figmaAnalyticsService: FigmaAnalyticsService
   ) {}
 
   ngOnInit() {
-    console.log('PrototypeTestResultComponent initialized');
-    this.loadStudyData();
-    this.checkData();
+    this.extractMissionScreens();
+    this.processParticipantData();
+
+    // Mostrar todos los eventos de Figma en la consola al inicializar el componente
     this.logPrototypeEvents();
-    this.calculateTotalDropoffs();
   }
 
-  ngOnChanges() {
-    this.checkData();
-  }
-
-  loadStudyData() {
-    this.studyService.getCurrentStudy().subscribe((study: Study | null) => {
-      if (study && study.prototype && study.prototype.frames && study.prototype.frames.length > 0) {
-        console.log('Found prototype frames in study:', study.prototype.frames.length);
-
-        // Create mission screens from the prototype frames
-        const prototypeScreens = study.prototype.frames.map(frame => ({
-          id: frame.id,
-          title: frame.name,
-          image: frame.imageUrl,
-          participants: 0,
-          avgDuration: 0
-        }));
-
-        // Merge with any existing screens or replace if none exist
-        if (this.missionScreens.length === 0) {
-          this.missionScreens = prototypeScreens;
-        } else {
-          // Merge by updating existing screens and adding new ones
-          for (const protoScreen of prototypeScreens) {
-            const existingScreen = this.missionScreens.find(screen => screen.id === protoScreen.id);
-            if (existingScreen) {
-              // Keep participant count if it exists
-              protoScreen.participants = existingScreen.participants || 0;
-              protoScreen.avgDuration = existingScreen.avgDuration || 0;
-            }
-            // Add if not already in the array
-            if (!existingScreen) {
-              this.missionScreens.push(protoScreen);
-            }
-          }
-        }
-
-        console.log('Updated mission screens from study prototype data:', this.missionScreens);
-      } else {
-        console.log('No prototype frames found in study or study is null');
-      }
-    });
-  }
-
-  checkData() {
+  async extractMissionScreens() {
+    const prototypeSection = this.section as PrototypeTestSection;
     this.isLoading = true;
-    this.errorMessage = null;
 
-    if (!this.section) {
-      console.warn('Section data is missing');
-      this.errorMessage = 'Section data is missing. Please check if it was correctly passed to the component.';
-    } else if (!this.participants || this.participants.length === 0) {
-      console.warn('Participants data is missing or empty');
-      this.errorMessage = 'No participant data available for this section.';
-    } else {
-      this.calculateSuccessRate();
-      this.extractMissionScreens();
+    try {
+      // Obtener el estudio actual desde el servicio
+      const study = await firstValueFrom(this.studyService.getCurrentStudy());
+
+      if (!study) {
+        this.errorMessage = 'No se pudo obtener información del estudio actual';
+        this.isLoading = false;
+        return;
+      }
+
+      // Llamar al servicio para obtener las imágenes del prototipo
+      this.studyPrototypeService.getPrototypeImages(study, prototypeSection)
+        .subscribe({
+          next: (result) => {
+            console.log('Imágenes del prototipo:', result);
+            this.isLoading = false;
+
+            if (result.nodes && result.nodes.length > 0) {
+              // Almacenar los nodos y añadir datos de analytics
+              this.missionScreens = result.nodes.map(node => {
+                // Crear un objeto MissionScreenData con los datos básicos del nodo
+                const screenData: MissionScreenData = { ...node };
+
+                // Calcular datos de analytics para este nodo basado en los participantes
+                const nodeAnalytics = this.calculateNodeAnalytics(node.id);
+
+                // Añadir datos de analytics
+                screenData.totalParticipants = nodeAnalytics.totalParticipants;
+                screenData.avgDuration = nodeAnalytics.avgDuration;
+
+                return screenData;
+              });
+            } else {
+              this.errorMessage = 'No se encontraron pantallas en este prototipo';
+            }
+          },
+          error: (error) => {
+            console.error('Error al obtener imágenes del prototipo:', error);
+            this.isLoading = false;
+            this.errorMessage = 'Error al cargar las pantallas del prototipo';
+          }
+        });
+    } catch (error) {
+      console.error('Error al obtener el estudio actual:', error);
+      this.isLoading = false;
+      this.errorMessage = 'Error al obtener información del estudio';
     }
 
-    this.isLoading = false;
+    console.log('Pantallas de la misión:', this.missionScreens);
   }
 
-  calculateSuccessRate(): number {
-    if (!this.section || !this.participants || this.participants.length === 0) {
-      this.successRate = 0;
-      return 0;
+  processParticipantData() {
+    if (!this.participants || this.participants.length === 0) {
+      return;
     }
 
-    // Cast section to PrototypeTestSection to access target node id
-    const prototypeSection = this.section as any;
-    const targetNodeId = prototypeSection.data?.selectedTargetNodeId;
+    const prototypeSection = this.section as PrototypeTestSection;
+    this.figmaEvents = [];
 
-    // If no target node is set, we can't calculate success
-    if (!targetNodeId) {
-      console.warn('No target node set for prototype test section');
-      this.successRate = 0;
-      return 0;
-    }
-
-    let successfulParticipants = 0;
-    let totalParticipantsAttempted = 0;
-
-    // Iterate through participants to find those who completed the task
-    for (const participant of this.participants) {
-      // Find the response for this section
+    // Extract all Figma events from participants
+    this.participants.forEach(participant => {
       const sectionResponse = participant.responses.find(
         response => response.sectionId === this.section.id
       ) as PrototypeTestResponse | undefined;
 
       if (sectionResponse && sectionResponse.type === 'prototype-test') {
-        totalParticipantsAttempted++;
+        const events = sectionResponse.response.figmaEventLog || [];
 
-        // Check if participant reached the target node
-        const reachedTarget = sectionResponse.response.figmaEventLog.some(
-          event => event['nodeId'] === targetNodeId || event['destination'] === targetNodeId
+        // Process raw events
+        const processedEvents = this.figmaAnalyticsService.processRawEvents(events);
+
+        // Add participant ID to each event
+        const eventsWithParticipant = processedEvents.map(event => ({
+          ...event,
+          participantId: participant.id
+        }));
+
+        this.figmaEvents.push(...eventsWithParticipant);
+
+        // Create session analytics for this participant
+        const targetNodeId = prototypeSection.data.selectedTargetNodeId; // Using the correct property path
+        const sessionAnalytic = this.figmaAnalyticsService.createSessionAnalytics(
+          participant.id,
+          eventsWithParticipant,
+          targetNodeId
         );
 
-        if (reachedTarget) {
-          successfulParticipants++;
-          this.successCount++;
-        } else {
-          this.unfinishedCount++;
-        }
+        this.sessionAnalytics.push(sessionAnalytic);
       }
-    }
+    });
 
-    // Calculate success rate as a percentage
-    this.successRate = totalParticipantsAttempted > 0
-      ? (successfulParticipants / totalParticipantsAttempted) * 100
-      : 0;
+    // Calculate analytics for each screen
+    this.calculateScreenAnalytics();
 
-    // Round to one decimal place
-    this.successRate = Math.round(this.successRate * 10) / 10;
+    // Calculate navigation paths
+    this.navigationPaths = this.figmaAnalyticsService.analyzeNavigationPaths(this.figmaEvents);
 
-    return this.successRate;
+    // Calculate pain points
+    this.painPoints = this.figmaAnalyticsService.identifyPainPoints(this.nodeAnalytics);
+
+    // Calculate aggregate metrics
+    this.calculateAggregateMetrics();
   }
 
-  calculateTotalDropoffs(): number {
-    if (!this.participants || this.participants.length === 0) {
-      console.log('No hay participantes para calcular drop-offs');
-      this.totalDropoffs = 0;
-      return 0;
+  calculateScreenAnalytics() {
+    // Make sure mission screens are loaded
+    if (this.missionScreens.length === 0) {
+      return;
     }
 
-    let totalDropoffCount = 0;
+    // Calculate analytics for each screen
+    this.missionScreens.forEach(screen => {
+      const analytics = this.figmaAnalyticsService.calculateNodeMetrics(screen.id, this.figmaEvents);
+      this.nodeAnalytics[screen.id] = analytics;
 
-    this.participants.forEach((participant) => {
+      // Update screen data with analytics
+      screen.totalParticipants = analytics.totalParticipants;
+      screen.avgDuration = analytics.avgDuration;
+
+      // Generate heatmap data
+      this.heatmapData[screen.id] = this.figmaAnalyticsService.generateHeatmapData(
+        screen.id,
+        this.figmaEvents
+      );
+    });
+  }
+
+  calculateAggregateMetrics() {
+    if (this.sessionAnalytics.length === 0) {
+      return;
+    }
+
+    // Calculate success rate
+    const completedSessions = this.sessionAnalytics.filter(session => session.missionCompleted);
+    this.successCount = completedSessions.length;
+    this.successRate = this.sessionAnalytics.length > 0
+      ? (completedSessions.length / this.sessionAnalytics.length) * 100
+      : 0;
+
+    // Calculate drop-off rate and count
+    this.unfinishedCount = this.sessionAnalytics.length - this.successCount;
+    this.dropoffRate = this.sessionAnalytics.length > 0
+      ? (this.unfinishedCount / this.sessionAnalytics.length) * 100
+      : 0;
+
+    // Calculate total dropoffs
+    this.totalDropoffs = this.unfinishedCount;
+
+    // Calculate average completion time (only for completed sessions)
+    if (completedSessions.length > 0) {
+      const totalCompletionTime = completedSessions.reduce(
+        (total, session) => total + (session.totalDuration || 0),
+        0
+      );
+      this.avgCompletionTime = totalCompletionTime / completedSessions.length;
+
+      // Calculate fastest and slowest completion times
+      this.fastestCompletionTime = completedSessions.reduce(
+        (min, session) => Math.min(min, session.totalDuration || Number.MAX_VALUE),
+        Number.MAX_VALUE
+      );
+
+      if (this.fastestCompletionTime === Number.MAX_VALUE) {
+        this.fastestCompletionTime = 0;
+      }
+
+      this.slowestCompletionTime = completedSessions.reduce(
+        (max, session) => Math.max(max, session.totalDuration || 0),
+        0
+      );
+    }
+
+    // Calculate misclick rate from all nodes
+    let totalClicks = 0;
+    let totalMisclicks = 0;
+
+    Object.values(this.nodeAnalytics).forEach(analytics => {
+      totalClicks += analytics.clickCount;
+      totalMisclicks += analytics.misclickCount;
+    });
+
+    this.misclickRate = totalClicks + totalMisclicks > 0
+      ? (totalMisclicks / (totalClicks + totalMisclicks)) * 100
+      : 0;
+  }
+
+  setActiveTab(tab: 'success' | 'unfinished') {
+    this.activeTab = tab;
+  }
+
+  formatTime(ms: number): string {
+    const seconds = Math.floor(ms / 1000);
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+
+    if (minutes > 0) {
+      return `${minutes}m ${remainingSeconds}s`;
+    }
+    return `${seconds}s`;
+  }
+
+  getFastestCompletionTime(): string {
+    return this.formatTime(this.fastestCompletionTime);
+  }
+
+  getSlowestCompletionTime(): string {
+    return this.formatTime(this.slowestCompletionTime);
+  }
+
+  calculateNodeAnalytics(nodeId: string): { totalParticipants: number, avgDuration: number } {
+    let participantCount = 0;
+    let totalDuration = 0;
+
+    // Iterar sobre todos los participantes
+    this.participants.forEach(participant => {
       // Encontrar respuesta para esta sección
       const sectionResponse = participant.responses.find(
         response => response.sectionId === this.section.id
@@ -197,31 +319,56 @@ export class PrototypeTestResultComponent implements OnChanges, OnInit {
         return;
       }
 
-      const events = sectionResponse.response.figmaEventLog;
+      const events = sectionResponse.response.figmaEventLog || [];
 
-      if (!events || events.length === 0) {
-        return;
+      // Encontrar eventos relacionados con este nodo
+      const nodeEvents = events.filter(event =>
+        event['node_id'] === nodeId ||
+        (event.type === 'NAVIGATE' && event['node_id'] === nodeId)
+      );
+
+      if (nodeEvents.length > 0) {
+        participantCount++;
+
+        // Si hay analytics en la respuesta, usar esos datos
+        if (sectionResponse.response.analytics?.avgTimePerNode?.[nodeId]) {
+          totalDuration += sectionResponse.response.analytics.avgTimePerNode[nodeId];
+        } else {
+          // Si no hay datos procesados, añadir un valor por defecto
+          totalDuration += 5; // 5 segundos por defecto
+        }
       }
-
-      // Contar eventos PROTOTYPE_STOP
-      const dropoffCount = events.filter(event =>
-        event['type'] === 'PROTOTYPE_STOP' ||
-        event['eventType'] === 'PROTOTYPE_STOP'
-      ).length;
-
-      totalDropoffCount += dropoffCount;
-
-      console.log(`Participante ${participant.id}: ${dropoffCount} drop-offs`);
     });
 
-    console.log(`Total de drop-offs en todos los participantes: ${totalDropoffCount}`);
-    this.totalDropoffs = totalDropoffCount;
+    // Calcular promedio de duración
+    const avgDuration = participantCount > 0 ? Math.round(totalDuration / participantCount) : 0;
 
-    return totalDropoffCount;
+    return {
+      totalParticipants: participantCount,
+      avgDuration: avgDuration
+    };
   }
 
-  setActiveTab(tab: 'success' | 'unfinished') {
-    this.activeTab = tab;
+  openScreenDetailsDialog(nodeId: string) {
+    // Buscamos el nodo seleccionado en nuestro array de nodos
+    console.log(this.missionScreens);
+
+    const selectedNode = this.missionScreens.find(node => node.id === nodeId);
+
+    if (!selectedNode) {
+      console.error('Nodo no encontrado:', nodeId);
+      return;
+    }
+
+    this.dialog.open(ScreenDetailsDialogComponent, {
+      width: '100%',
+      maxWidth: '90vw',
+      data: {
+        screen: selectedNode,
+        section: this.section,
+        participants: this.participants
+      }
+    });
   }
 
   logPrototypeEvents() {
@@ -264,107 +411,43 @@ export class PrototypeTestResultComponent implements OnChanges, OnInit {
     console.log('=== FIN DE EVENTOS ===');
   }
 
-  extractMissionScreens() {
-    if (!this.section) {
-      console.warn('Cannot extract mission screens: missing section data');
-      return;
-    }
-
-    console.log('=== EXTRACTING MISSION SCREENS ===');
-    console.log('Section:', this.section);
-
-    // First load the frames from the study model if we haven't already
-    if (this.missionScreens.length === 0) {
-      this.loadStudyData();
-    }
-
-    // If we have no participants, we still want to show the frames from the study
-    if (!this.participants || this.participants.length === 0) {
-      console.log('No participants data, but showing prototype frames from Study model');
-      return;
-    }
-
-    console.log('Number of participants:', this.participants.length);
-
-    // Map to track screens from participant data
-    const screenMap = new Map<string, MissionScreen>();
-
-    // First add any screens we already have from the Study model
-    this.missionScreens.forEach(screen => {
-      screenMap.set(screen.id, {...screen, participants: 0}); // Reset participant count for recalculation
-    });
-
-    // Now process participant data to update or add screens
-    this.participants.forEach((participant, index) => {
-      console.log(`Analyzing participant ${index + 1} (ID: ${participant.id})`);
-
-      // Find the response for this section
-      const sectionResponse = participant.responses.find(
-        response => response.sectionId === this.section.id
-      ) as PrototypeTestResponse | undefined;
-
-      if (!sectionResponse) {
-        console.log(`  No response found for section ${this.section.id}`);
-        return;
-      }
-
-      if (sectionResponse.type !== 'prototype-test') {
-        console.log(`  Response type is not prototype-test, it's: ${sectionResponse.type}`);
-        return;
-      }
-
-      const events = sectionResponse.response.figmaEventLog || [];
-
-      // Process events to extract screens and update participant counts
-      events.forEach(event => {
-        if (
-          (event['type'] === 'FRAME_RENDER' ||
-           event['eventType'] === 'FRAME_RENDER' ||
-           event['type'] === 'NODE_INTERACTION')
-        ) {
-          const nodeId = event['nodeId'] || event['source'] || '';
-          const nodeName = event['nodeName'] || event['name'] || `Screen ${nodeId.substring(0, 6)}`;
-          const imageUrl = event['imageUrl'] || event['thumbnailUrl'] || '';
-
-          if (nodeId) {
-            if (screenMap.has(nodeId)) {
-              // Increment participant count if the screen already exists
-              const existingScreen = screenMap.get(nodeId);
-              if (existingScreen) {
-                existingScreen.participants = (existingScreen.participants || 0) + 1;
-              }
-            } else if (imageUrl) {
-              // Only add new screens from participant data if they have an image URL
-              screenMap.set(nodeId, {
-                id: nodeId,
-                title: nodeName,
-                image: imageUrl,
-                participants: 1
-              });
-            }
-          }
-        }
-      });
-    });
-
-    // Convert the map to an array and sort by participants count (descending)
-    this.missionScreens = Array.from(screenMap.values())
-      .sort((a, b) => (b.participants || 0) - (a.participants || 0));
-
-    console.log(`Extracted ${this.missionScreens.length} unique mission screens:`, this.missionScreens);
-    console.log('=== END MISSION SCREENS EXTRACTION ===');
+  /**
+   * Get helper methods for display purposes
+   */
+  getScreenName(nodeId: string): string {
+    // Find the screen with this node ID
+    const screen = this.missionScreens.find(s => s.id === nodeId);
+    return screen ? screen.name : nodeId.split(':').pop() || 'Unknown';
   }
 
-  openScreenDetailsDialog(screen: MissionScreen) {
-    console.log('Opening screen details dialog for:', screen);
-    this.dialog.open(ScreenDetailsDialogComponent, {
-      width: '100%',
-      maxWidth: '90vw',
-      data: {
-        screen: screen,
-        section: this.section,
-        participants: this.participants
-      }
-    });
+  /**
+   * Gets the top N nodes by time spent from a node time spent object
+   */
+  getTopTimeSpentNodes(nodeTimeSpent: {[nodeId: string]: number}, limit: number): Array<{nodeId: string, time: number}> {
+    // Convert object to array of entries
+    const entries = Object.entries(nodeTimeSpent).map(([nodeId, time]) => ({
+      nodeId,
+      time
+    }));
+
+    // Sort by time spent (descending)
+    const sorted = entries.sort((a, b) => b.time - a.time);
+
+    // Return top N entries
+    return sorted.slice(0, limit);
+  }
+
+  // Adding methods to filter the sessions
+  getCompletedSessions(): FigmaSessionAnalytics[] {
+    return this.sessionAnalytics.filter(s => s.missionCompleted);
+  }
+
+  getUnfinishedSessions(): FigmaSessionAnalytics[] {
+    return this.sessionAnalytics.filter(s => !s.missionCompleted);
+  }
+
+  // Helper methods for templates
+  hasNodeTimeSpent(session: FigmaSessionAnalytics): boolean {
+    return !!session.nodeTimeSpent && Object.keys(session.nodeTimeSpent).length > 0;
   }
 }

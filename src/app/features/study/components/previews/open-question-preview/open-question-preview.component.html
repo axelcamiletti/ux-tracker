@@ -1,18 +1,28 @@
 <div class="open-question-preview">
-    <h1 class="text-2xl mt-4 mb-2 font-bold">{{ previewData.title }}</h1>
-    <p *ngIf="previewData.description" class="text-md text-gray-600">{{ previewData.description }}</p>
+    <h1 class="text-2xl mt-4 mb-2 font-bold">{{ previewData().title }}</h1>
+    @if (previewData().description) {
+        <p class="text-md text-gray-600">{{ previewData().description }}</p>
+    }
 
     <div class="mt-6">
         <textarea
             [(ngModel)]="response"
             (ngModelChange)="onResponseChange($event)"
             placeholder="Write your answer here..."
-            [required]="previewData.required">
+            [required]="previewData().required">
         </textarea>
-        <div *ngIf="previewData.minLength || previewData.maxLength" class="text-sm text-gray-500 mt-2">
-            <span *ngIf="previewData.minLength">Min: {{previewData.minLength}} characters</span>
-            <span *ngIf="previewData.minLength && previewData.maxLength"> | </span>
-            <span *ngIf="previewData.maxLength">Max: {{previewData.maxLength}} characters</span>
-        </div>
+        @if (previewData().minLength || previewData().maxLength) {
+            <div class="text-sm text-gray-500 mt-2">
+                @if (previewData().minLength) {
+                    <span>Min: {{previewData().minLength}} characters</span>
+                }
+                @if (previewData().minLength && previewData().maxLength) {
+                    <span> | </span>
+                }
+                @if (previewData().maxLength) {
+                    <span>Max: {{previewData().maxLength}} characters</span>
+                }
+            </div>
+        }
     </div>
 </div>

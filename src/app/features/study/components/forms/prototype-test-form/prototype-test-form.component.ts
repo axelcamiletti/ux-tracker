@@ -15,6 +15,7 @@ import { StudyService } from '../../../services/study.service';
 import { Subject, takeUntil } from 'rxjs';
 import { StudyPrototypeService } from '../../../services/study-prototype.service';
 import { Study } from '../../../models/study.model';
+import { IconSectionComponent } from "../../icon-section/icon-section.component";
 
 @Component({
   selector: 'app-prototype-test-form',
@@ -28,8 +29,9 @@ import { Study } from '../../../models/study.model';
     MatRadioModule,
     FormsModule,
     MatMenuModule,
-    MatProgressBarModule
-  ],
+    MatProgressBarModule,
+    IconSectionComponent
+],
   templateUrl: './prototype-test-form.component.html',
   styleUrl: './prototype-test-form.component.css'
 })
@@ -37,7 +39,6 @@ export class PrototypeTestFormComponent implements OnInit, OnDestroy {
   @Input() section!: PrototypeTestSection;
 
   private destroy$ = new Subject<void>();
-  private urlRegex = /^https:\/\/www\.figma\.com\/(proto|file)\/([a-zA-Z0-9]+)\/([^?]+)\?.*(?:node-id=([^&]+)).*(?:starting-point-node-id=([^&]+))?/;
 
   formData = {
     title: '',
@@ -94,42 +95,42 @@ export class PrototypeTestFormComponent implements OnInit, OnDestroy {
       if (this.formData.originalUrl) {
         this.processUrl(this.formData.originalUrl);
 
-        // If there is a prototype URL and saved frames
-        if (section.data.frames && section.data.frames.length > 0) {
-          // Load saved frames into exportedImages
-          this.formData.exportedImages = section.data.frames.map(frame => ({
-            name: frame.name,
-            imageUrl: frame.imageUrl
+        // If there is a prototype URL and saved nodes
+        if (section.data.nodes && section.data.nodes.length > 0) {
+          // Load saved nodes into exportedImages
+          this.formData.exportedImages = section.data.nodes.map(node => ({
+            name: node.name,
+            imageUrl: node.imageUrl
           }));
 
           // Restore the start screen
           if (section.data.startingNodeId) {
-            const startFrame = section.data.frames.find(
-              frame => frame.id.replace(':', '%3A') === section.data.startingNodeId
+            const startNode = section.data.nodes.find(
+              node => node.id.replace(':', '%3A') === section.data.startingNodeId
             );
-            if (startFrame) {
+            if (startNode) {
               this.formData.startScreenImage = {
-                name: startFrame.name,
-                imageUrl: startFrame.imageUrl
+                name: startNode.name,
+                imageUrl: startNode.imageUrl
               };
             }
           }
 
           // Restore the selected target screen
           if (section.data.selectedTargetNodeId) {
-            const targetFrame = section.data.frames.find(
-              frame => frame.id === section.data.selectedTargetNodeId
+            const targetNode = section.data.nodes.find(
+              node => node.id === section.data.selectedTargetNodeId
             );
-            if (targetFrame) {
+            if (targetNode) {
               this.formData.selectedImage = {
-                name: targetFrame.name,
-                imageUrl: targetFrame.imageUrl
+                name: targetNode.name,
+                imageUrl: targetNode.imageUrl
               };
             }
           }
         } else if (this.formData.figmaUrl) {
-          // If there is a URL but no frames, load them automatically
-          this.extractFramesAsImages();
+          // If there is a URL but no nodes, load them automatically
+          this.extractNodesAsImages();
         }
       }
     }
@@ -153,49 +154,25 @@ export class PrototypeTestFormComponent implements OnInit, OnDestroy {
   }
 
   processUrl(url: string) {
-    try {
-      const match = url.match(this.urlRegex);
+    const result = this.studyPrototypeService.processUrl(url);
 
-      if (match) {
-        this.formData.figmaUrl = {
-          fileType: match[1],
-          fileKey: match[2],
-          fileName: decodeURIComponent(match[3]),
-          nodeId: match[4],
-          startingNodeId: match[5]
-        };
+    // Actualizar el estado local con el resultado
+    this.formData.figmaUrl = result.figmaUrl;
+    this.formData.figmaFileName = result.figmaFileName;
+    this.formData.importEnabled = result.importEnabled;
 
-        this.formData.figmaFileName = this.formData.figmaUrl.fileName.replace(/-/g, ' ');
-        this.formData.importEnabled = true;
+    // Si la URL es válida, actualizar los datos de la sección
+    if (result.figmaUrl && result.embedUrl) {
+      // Update section data with the original URL and embed URL
+      this.section.data = {
+        ...this.section.data,
+        originalUrl: url,
+        embedUrl: result.embedUrl
+      };
 
-        // Generate embed URL for iframe
-        const embedUrl = this.generateEmbedUrl(this.formData.figmaUrl);
-
-        // Update section data with the original URL and embed URL
-        this.section.data = {
-          ...this.section.data,
-          originalUrl: url,
-          embedUrl: embedUrl
-        };
-
-        // Save the updated section to the study state
-        this.studyState.setPrototypeTestSection(this.section);
-      } else {
-        this.formData.figmaUrl = null;
-        this.formData.figmaFileName = '';
-        this.formData.importEnabled = false;
-      }
-    } catch (error) {
-      this.formData.figmaUrl = null;
-      this.formData.figmaFileName = '';
-      this.formData.importEnabled = false;
+      // Save the updated section to the study state
+      this.studyState.setPrototypeTestSection(this.section);
     }
-  }
-
-  // Generate embed URL for Figma iframe
-  private generateEmbedUrl(figmaUrl: FigmaUrl): string {
-    const startNodeId = figmaUrl.startingNodeId || figmaUrl.nodeId;
-    return `https://embed.figma.com/${figmaUrl.fileType}/${figmaUrl.fileKey}/${figmaUrl.fileName}?node-id=${startNodeId}&embed-host=share&footer=false&viewport-controls=false&allow-external-events=true&client-id=fV57d1E9E5FCZ1d1hKVS3e`;
   }
 
   importPrototype() {
@@ -206,121 +183,58 @@ export class PrototypeTestFormComponent implements OnInit, OnDestroy {
     // Update section data with prototype URL
     this.section.data = {
       ...this.section.data,
-      embedUrl: this.formData.originalUrl
+      embedUrl: this.formData.originalUrl,
+      originalUrl: this.formData.originalUrl
     };
 
-    // Save the prototype information to the Study model
-    this.studyService.getCurrentStudy().subscribe(study => {
-      if (study) {
-        // Update the prototype information in the Study model
-        const updatedStudy: Study = {
-          ...study,
-          prototype: {
-            embedUrl: this.formData.originalUrl,
-            originalUrl: this.formData.originalUrl,
-            frames: this.section.data.frames || []
-          }
-        };
-
-        // Update the study
-        this.studyService.updateStudy(study.id, {
-          prototype: updatedStudy.prototype
-        });
-      }
-    });
-
+    // Guardar la sección actualizada en el estado del estudio
     this.studyState.setPrototypeTestSection(this.section);
 
-    // Proceed with frame extraction
-    this.extractFramesAsImages();
+    // Proceed with nodes extraction
+    this.extractNodesAsImages();
   }
 
-  extractFramesAsImages() {
+  extractNodesAsImages() {
     if (!this.formData.figmaUrl) {
       return;
     }
 
     this.formData.isLoading = true;
 
-    this.studyState.setPrototypeTestSection(this.section);
+    // Usar el método del servicio para extraer los nodes
+    this.studyPrototypeService.extractNodesAsImages(this.formData.figmaUrl).subscribe({
+      next: (result) => {
+        // Actualizar la UI con los nodes extraídos
+        this.formData.exportedImages = result.nodes.map(node => ({
+          name: node.name,
+          imageUrl: node.imageUrl
+        }));
 
-    this.studyPrototypeService.getFile(this.formData.figmaUrl.fileKey).subscribe({
-      next: (fileResponse) => {
-        const pages = fileResponse.document.children;
-        const allFrames: any[] = [];
+        // Establecer la pantalla inicial basada en startingNodeId
+        if (this.formData.figmaUrl?.nodeId) {
+          const startNode = result.nodes.find(node =>
+            node.id.replace(':', '%3A') === this.formData.figmaUrl?.nodeId
+          );
 
-        for (const page of pages) {
-          const topLevelFrames = this.findTopLevelFrames(page);
-          allFrames.push(...topLevelFrames);
+          if (startNode) {
+            this.formData.startScreenImage = {
+              name: startNode.name,
+              imageUrl: startNode.imageUrl
+            };
+          }
         }
 
-        const frameIds = allFrames.map(frame => frame.id);
+        // Actualizar la sección con los nodes y el nodo inicial
+        this.section.data = {
+          ...this.section.data,
+          startingNodeId: this.formData.figmaUrl?.nodeId,
+          nodes: result.nodes
+        };
 
-        if (!this.formData.figmaUrl) return;
+        // Guardar la sección en el estado del estudio
+        this.studyState.setPrototypeTestSection(this.section);
 
-        this.studyPrototypeService.getImages(this.formData.figmaUrl.fileKey, frameIds).subscribe({
-          next: (imageResponse) => {
-            this.formData.exportedImages = allFrames.map(frame => ({
-              name: frame.name,
-              imageUrl: imageResponse.images[frame.id]
-            }));
-
-            // Find and set the start screen based on nodeId
-            if (this.formData.figmaUrl?.nodeId) {
-              const startFrame = allFrames.find(frame => frame.id.replace(':', '%3A') === this.formData.figmaUrl?.nodeId);
-              if (startFrame) {
-                this.formData.startScreenImage = {
-                  name: startFrame.name,
-                  imageUrl: imageResponse.images[startFrame.id]
-                };
-              }
-            }
-
-            // Prepare frames data with all necessary information
-            const framesData = allFrames.map(frame => ({
-              id: frame.id,
-              name: frame.name,
-              imageUrl: imageResponse.images[frame.id]
-            }));
-
-            // Update section with frames and starting node
-            this.section.data = {
-              ...this.section.data,
-              startingNodeId: this.formData.figmaUrl?.nodeId,
-              frames: framesData,
-            };
-
-            // Save the section to the study state
-            this.studyState.setPrototypeTestSection(this.section);
-
-            // Also save the frames to the Study model prototype property
-            this.studyService.getCurrentStudy().subscribe(study => {
-              if (study) {
-                // Update the prototype information in the Study model
-                const updatedStudy: Study = {
-                  ...study,
-                  prototype: {
-                    ...study.prototype,
-                    embedUrl: this.formData.originalUrl,
-                    originalUrl: this.formData.originalUrl,
-                    frames: framesData,
-                    startingNodeId: this.formData.figmaUrl?.nodeId
-                  }
-                };
-
-                // Update the study
-                this.studyService.updateStudy(study.id, {
-                  prototype: updatedStudy.prototype
-                });
-              }
-            });
-
-            this.formData.isLoading = false;
-          },
-          error: (error) => {
-            this.handleFigmaError(error);
-          }
-        });
+        this.formData.isLoading = false;
       },
       error: (error) => {
         this.handleFigmaError(error);
@@ -336,29 +250,15 @@ export class PrototypeTestFormComponent implements OnInit, OnDestroy {
   selectImage(image: { name: string, imageUrl: string }) {
     this.formData.selectedImage = image;
 
-    // Find the ID of the selected frame
-    const selectedFrame = this.section.data.frames?.find(f => f.imageUrl === image.imageUrl);
-    if (selectedFrame) {
+    // Find the ID of the selected nodes
+    const selectedNode = this.section.data.nodes?.find(n => n.imageUrl === image.imageUrl);
+    if (selectedNode) {
       this.section.data = {
         ...this.section.data,
-        selectedTargetNodeId: selectedFrame.id
+        selectedTargetNodeId: selectedNode.id
       };
       this.studyState.setPrototypeTestSection(this.section);
     }
-  }
-
-  private findTopLevelFrames(node: any): any[] {
-    let frames: any[] = [];
-
-    if (node.type === 'DOCUMENT' || node.type === 'CANVAS') {
-      for (const child of node.children || []) {
-        if (child.type === 'FRAME') {
-          frames.push(child);
-        }
-      }
-    }
-
-    return frames;
   }
 
 }

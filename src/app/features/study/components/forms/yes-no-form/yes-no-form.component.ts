@@ -10,6 +10,7 @@ import { CommonModule } from '@angular/common';
 import { YesNoSection } from '../../../models/section.model';
 import { StudyStateService } from '../../../services/study-state.service';
 import { Subject, takeUntil } from 'rxjs';
+import { IconSectionComponent } from "../../icon-section/icon-section.component";
 
 type ButtonStyle = 'default' | 'emoji' | 'thumbs';
 
@@ -24,8 +25,9 @@ type ButtonStyle = 'default' | 'emoji' | 'thumbs';
     MatFormFieldModule,
     MatMenuModule,
     MatTooltipModule,
-    FormsModule
-  ],
+    FormsModule,
+    IconSectionComponent
+],
   templateUrl: './yes-no-form.component.html',
   styleUrl: './yes-no-form.component.css'
 })

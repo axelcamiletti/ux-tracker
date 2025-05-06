@@ -51,7 +51,7 @@ export class StudySharePageComponent {
 
     this.dialog.open(ShareStudyDialogComponent, {
       data: { studyUrl },
-      width: '500px'
+      width: '1000px'
     });
   }
 }
