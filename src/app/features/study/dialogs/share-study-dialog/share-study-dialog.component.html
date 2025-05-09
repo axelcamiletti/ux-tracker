@@ -1,29 +1,22 @@
 <div class="share-study-dialog">
-    <div class="header bg-blue-900 text-white p-10">
+    <div class="header bg-blue-900 p-10 pt-8">
         <div class="flex gap-8 items-center">
             <img class="w-20 object-contain" src="https://app.maze.co/_next/static/media/maze-share-url.f064d024.png" alt="">
-            <div class="texts">
+            <div class="texts text-white">
                 <h2 class="text-2xl font-bold">Your study lives in this link</h2>
                 <p>Invite testers via your own channels</p>
             </div>
         </div>
 
-        <div class="flex gap-2 mt-4">
-            <mat-form-field class="w-full">
-                <input matInput [value]="studyUrl" readonly type="text" #urlInput>
-                <button matSuffix mat-flat-button color="primary" (click)="copyToClipboard(urlInput)">
-                    <mat-icon>content_copy</mat-icon>
-                    Copy link
-                </button>
-            </mat-form-field>
+        <div class="flex gap-2 mt-6">
+          <input class="input" [value]="studyUrl" readonly type="text" #urlInput>
+          <button class="btn-icon white" matTooltip="Copy" (click)="copyToClipboard(urlInput)"><mat-icon>content_copy</mat-icon></button>
         </div>
 
-        <button class="absolute! top-2 right-2 text-white!" mat-icon-button (click)="close()">
-            <mat-icon>close</mat-icon>
-        </button>
+        <button class="btn-icon white absolute! top-2 right-3" (click)="close()" matTooltip="Close"><mat-icon>close</mat-icon></button>
     </div>
 
-    <div class="content p-10">
+    <!-- <div class="content p-10">
         <p class="text-sm font-bold mb-5">OPCIONES DE ESTUDIO</p>
         <mat-slide-toggle [formControl]="allowMultipleResponses">
             <div class="flex items-center gap-2">
@@ -32,11 +25,11 @@
             </div>
         </mat-slide-toggle>
         <p class="mt-2 text-gray-600">Permite que un mismo usuario pueda enviar múltiples respuestas.</p>
-    </div>
+    </div> -->
 
-    <div class="footer border-t border-gray-200 p-6 flex justify-end">
+    <!-- <div class="footer border-t border-gray-200 p-6 flex justify-end">
         <button mat-flat-button color="primary" (click)="saveAndClose()">
             Guardar y cerrar
         </button>
-    </div>
+    </div> -->
 </div>

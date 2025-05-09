@@ -8,17 +8,16 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ReactiveFormsModule, FormControl } from '@angular/forms';
 import { StudyService } from '../../services/study.service';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 @Component({
   selector: 'app-share-study-dialog',
   standalone: true,
   imports: [
-    MatFormFieldModule,
-    MatInputModule,
     MatIconModule,
     MatSlideToggleModule,
-    MatButtonModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    MatTooltipModule
   ],
   templateUrl: './share-study-dialog.component.html',
   styleUrls: ['./share-study-dialog.component.css']

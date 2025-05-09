@@ -1,10 +1,10 @@
 <div class="header border-b border-gray-200 flex items-center gap-3 px-8 py-4 mb-4">
   <app-icon-section [type]="'welcome-screen'"></app-icon-section>
-  <h2 class="text-xl font-bold">Welcome screen</h2>
-  <mat-icon matTooltip="This is the first screen of your maze—your time to shine! Set a title, write a welcome message, and upload your logo. Note: custom messages will not be translated into other languages." class="opacity-50">info</mat-icon>
-  <button mat-icon-button class="ml-auto" [matMenuTriggerFor]="menu">
+  <h2 class="text-xl font-bold mr-auto">Welcome screen</h2>
+  <mat-icon class="tooltip-icon" matTooltipClass="tooltip-md" matTooltip="This is the first screen of your maze—your time to shine! Set a title, write a welcome message, and upload your logo. Note: custom messages will not be translated into other languages.">info</mat-icon>
+  <!-- <button mat-icon-button class="ml-auto" [matMenuTriggerFor]="menu">
     <mat-icon>more_horiz</mat-icon>
-  </button>
+  </button> -->
 </div>
 
 <div class="form p-8 flex flex-col gap-6">
@@ -31,6 +31,6 @@
   </div>
 </div>
 
-<mat-menu #menu="matMenu">
+<!-- <mat-menu #menu="matMenu">
   <button mat-menu-item>Add comment</button>
-</mat-menu>
+</mat-menu> -->

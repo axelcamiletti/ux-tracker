@@ -1,5 +1,5 @@
 <div class="main-sidebar w-68 min-w-68 bg-white border-r border-gray-300 h-full flex flex-col transition-all ease-out duration-300" [ngClass]="{'w-16! min-w-16!': isCollapsed}">
-    
+
     <button class="btn-link h-16" matTooltip="Switch team" matTooltipPosition="right" [matTooltipDisabled]="!isCollapsed">
         <div class="icon bg-black w-9 h-9 flex justify-center items-center text-white rounded-lg text-md font-bold">AC</div>
         <div *ngIf="!isCollapsed" class="texts text-left whitespace-nowrap text-ellipsis overflow-hidden">
@@ -8,21 +8,36 @@
         </div>
     </button>
 
-    <a  [routerLink]="[link.path]"
-        routerLinkActive="btn-link-active" 
-        *ngFor="let link of sidebarLinks" 
-        matTooltip="{{ link.label }}"
+    <a  [routerLink]="['/']"
+        routerLinkActive="btn-link-active"
+        matTooltip="Home"
         matTooltipPosition="right"
         [matTooltipDisabled]="!isCollapsed"
         class="btn-link">
-        <mat-icon>{{link.icon}}</mat-icon>
-        <span *ngIf="!isCollapsed">{{ link.label }}</span>
+        <mat-icon>home</mat-icon>
+        @if (!isCollapsed) { <span>Home</span> }
     </a>
+
+    <p class="text-xs text-gray-400 uppercase font-medium px-4 my-2 tracking-wide">WORKSPACES</p>
+
+    @for (workspace of workspaces(); track workspace.id) {
+      <a  [routerLink]="['/projects', workspace.id]"
+          routerLinkActive="btn-link-active"
+          matTooltip="{{ workspace.name }}"
+          matTooltipPosition="right"
+          [matTooltipDisabled]="!isCollapsed"
+          class="btn-link">
+          <div class="image-container rounded-full overflow-hidden w-9 h-9 min-w-9 min-h-9 flex">
+            <img class="object-cover" src="{{workspace.imageUrl}}" alt="{{ workspace.name }}" />
+          </div>
+          @if (!isCollapsed) { <span>{{ workspace.name }}</span> }
+      </a>
+    }
 
     <mat-divider class="mt-auto! border-gray-300! mb-2!"></mat-divider>
 
     <a  [routerLink]="['/settings']"
-        routerLinkActive="btn-link-active" 
+        routerLinkActive="btn-link-active"
         matTooltip="Support"
         matTooltipPosition="right"
         [matTooltipDisabled]="!isCollapsed"
@@ -32,7 +47,7 @@
     </a>
 
     <a  [routerLink]="['/settings']"
-        routerLinkActive="btn-link-active" 
+        routerLinkActive="btn-link-active"
         matTooltip="Settings"
         matTooltipPosition="right"
         [matTooltipDisabled]="!isCollapsed"
